@@ -1,0 +1,87 @@
+# Render Blueprint — the SoulSync AI API (Express + Socket.IO).
+# Deploy: Render dashboard → New → Blueprint → point at this repo.
+# The frontend goes to Vercel (see vercel.json and docs/DEPLOYMENT.md).
+#
+# Values marked `sync: false` are prompted for on first deploy and are never stored in git.
+
+services:
+  - type: web
+    name: soulsync-api
+    runtime: node
+    rootDir: backend
+    plan: starter           # WebSockets need an always-on instance; free plans sleep and drop connections
+    region: oregon
+    # devDependencies (TypeScript) are needed to compile, so install them explicitly.
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health/ready   # 503 while MongoDB is unreachable → Render stops routing here
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      - key: TRUST_PROXY
+        value: "1"            # one proxy (Render's) in front of the app
+      - key: LOG_LEVEL
+        value: info
+      - key: JOBS_ENABLED
+        value: "true"
+      - key: PAYMENT_PROVIDER
+        value: stripe         # or razorpay / none — `mock` is refused in production
+      - key: EMAIL_PROVIDER
+        value: brevo          # Brevo → Resend → SendGrid fallback chain (needs BREVO_API_KEY); or smtp
+      # ---- secrets & deployment-specific URLs (prompted) ----
+      - key: EMAIL_FROM
+        sync: false           # REQUIRED: "SoulSync AI <the sender you verified in Brevo>" — no default, no fallback sender exists
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true   # 256-bit random, generated once by Render
+      - key: CLIENT_URL
+        sync: false           # https://your-app.vercel.app  (must be https)
+      - key: CLIENT_ORIGINS
+        sync: false           # optional: extra allowed origins (custom domain, staging)
+      - key: API_PUBLIC_URL
+        sync: false           # https://soulsync-api.onrender.com/api
+      - key: ADMIN_EMAILS
+        sync: false
+      - key: METRICS_TOKEN
+        generateValue: true
+      - key: CRON_SECRET
+        generateValue: true
+      - key: SENTRY_DSN
+        sync: false
+      - key: BREVO_API_KEY
+        sync: false           # primary email provider — an API key (xkeysib-…), or an SMTP key (xsmtpsib-…) together with SMTP_USER
+      - key: SMTP_USER
+        sync: false           # only when BREVO_API_KEY is an SMTP key: the Brevo SMTP login (SMTP & API → SMTP tab)
+      - key: EMAIL_REPLY_TO
+        sync: false           # optional: a mailbox you read, so replies aren't lost behind a no-reply sender
+      - key: RESEND_API_KEY
+        sync: false           # optional fallback email provider
+      - key: GROQ_API_KEY
+        sync: false           # primary AI provider
+      - key: GEMINI_API_KEY
+        sync: false           # AI fallback when Groq fails
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: STRIPE_PRICE_PREMIUM_MONTHLY
+        sync: false
+      - key: STRIPE_PRICE_PREMIUM_YEARLY
+        sync: false
+      - key: STRIPE_PRICE_PLUS_MONTHLY
+        sync: false
+      - key: STRIPE_PRICE_PLUS_YEARLY
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      # AI provider keys are optional — without them the built-in engine is used.
+      - key: ANTHROPIC_API_KEY
+        sync: false
