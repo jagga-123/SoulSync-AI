@@ -72,7 +72,7 @@ export function ModerationView() {
         <div className="glass flex flex-col items-center gap-2 rounded-3xl py-16 text-center">
           <ShieldCheck className="size-8 text-emerald-300" />
           <p className="font-medium text-white">{tab === "open" ? "The queue is clear" : "Nothing here"}</p>
-          <p className="text-sm text-white/45">{tab === "open" ? "No reports are waiting for review." : "No reports with this status."}</p>
+          <p className="text-sm text-white/60">{tab === "open" ? "No reports are waiting for review." : "No reports with this status."}</p>
         </div>
       ) : (
         <ul className="space-y-3">
@@ -103,12 +103,12 @@ function ReportRow({ report, onOpen }: { report: AdminReport; onOpen: () => void
               </Chip>
             )}
           </p>
-          <p className="mt-1 truncate text-xs text-white/45">
+          <p className="mt-1 truncate text-xs text-white/60">
             Reported by {report.reporter?.fullName ?? "a former member"}
             {report.details ? ` — “${report.details}”` : ""}
           </p>
         </div>
-        <span className="text-xs text-white/35">{formatDateTime(report.createdAt)}</span>
+        <span className="text-xs text-white/60">{formatDateTime(report.createdAt)}</span>
       </button>
     </li>
   );
@@ -178,13 +178,13 @@ function ReportDialog({ reportId, onClose, onChanged }: { reportId: string | nul
 
             {d.messages.length > 0 && (
               <div className="mt-5">
-                <p className="text-xs font-medium uppercase tracking-wider text-white/40">Their recent messages in the reported chat</p>
+                <p className="text-xs font-medium uppercase tracking-wider text-white/60">Their recent messages in the reported chat</p>
                 <ul data-lenis-prevent className="mt-2 max-h-48 space-y-2 overflow-y-auto">
                   {d.messages.map((m) => (
                     <li key={m.id} className={cn("rounded-xl border p-3 text-sm", m.isReported ? "border-primary/50 bg-primary/10 text-white" : "border-white/8 bg-white/[0.02] text-white/70")}>
-                      {m.isReported && <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-primary">Reported message</span>}
-                      {m.isHidden ? <em className="text-white/40">Hidden by moderators</em> : m.content}
-                      <span className="mt-1 block text-[11px] text-white/35">{formatDateTime(m.createdAt)}</span>
+                      {m.isReported && <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-primary">Reported message</span>}
+                      {m.isHidden ? <em className="text-white/60">Hidden by moderators</em> : m.content}
+                      <span className="mt-1 block text-xs text-white/60">{formatDateTime(m.createdAt)}</span>
                     </li>
                   ))}
                 </ul>
@@ -204,13 +204,13 @@ function ReportDialog({ reportId, onClose, onChanged }: { reportId: string | nul
                   </Button>
                 )}
                 <fieldset className="space-y-2">
-                  <legend className="mb-2 text-xs font-medium uppercase tracking-wider text-white/40">Resolve</legend>
+                  <legend className="mb-2 text-xs font-medium uppercase tracking-wider text-white/60">Resolve</legend>
                   {ACTIONS.filter((a) => a.value !== "hide_message" || hasMessage).map((a) => (
                     <label key={a.value} className={cn("flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition-colors", action === a.value ? "border-primary/60 bg-primary/10" : "border-white/10 hover:bg-white/5")}>
                       <input type="radio" name="resolve-action" checked={action === a.value} onChange={() => setAction(a.value)} className="mt-1 accent-[var(--primary)]" />
                       <span>
                         <span className={cn("block text-sm font-medium", a.danger ? "text-red-300" : "text-white")}>{a.label}</span>
-                        <span className="block text-xs text-white/45">{a.help}</span>
+                        <span className="block text-xs text-white/60">{a.help}</span>
                       </span>
                     </label>
                   ))}

@@ -84,7 +84,7 @@ export function CompatibilityRing({
         <span className="font-display text-4xl font-semibold text-white">
           {display}%
         </span>
-        <span className="mt-1 text-xs font-medium uppercase tracking-wider text-white/45">
+        <span className="mt-1 text-xs font-medium uppercase tracking-wider text-white/60">
           {label}
         </span>
       </div>

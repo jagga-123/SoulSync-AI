@@ -15,28 +15,43 @@ export function categoryLabel(category: string): string {
   return capitalize(category.replace(/_/g, " "));
 }
 
+/**
+ * How a match is described to people. The engine's four tiers (backend/src/ai/compatibility.ts:
+ * 85+ / 70+ / 55+ / below) get human labels — the reasons matter more than the number.
+ */
 export const TIER_LABELS: Record<CompatibilityTier, string> = {
-  exceptional: "Exceptional match",
-  strong: "Strong match",
-  promising: "Promising match",
-  exploring: "Worth exploring",
+  exceptional: "You two click",
+  strong: "On the same wavelength",
+  promising: "Real common ground",
+  exploring: "Different, in an interesting way",
 };
 
-/** Tailwind classes for the score pill, per tier. */
+/** One line under the label that says what the tier means. */
+export const TIER_SUBLINES: Record<CompatibilityTier, string> = {
+  exceptional: "You share what matters most.",
+  strong: "Plenty in common — and it shows.",
+  promising: "A good place to start a conversation.",
+  exploring: "Less alike on paper — could be a good surprise.",
+};
+
+/**
+ * Tailwind classes for the match label, per tier. The text is always white on a dark backing so it stays
+ * readable over any photo (the tier shows in the border colour and the heart, never in text colour alone).
+ */
 export const TIER_STYLES: Record<CompatibilityTier, string> = {
-  exceptional: "border-accent/40 bg-accent/15 text-accent",
-  strong: "border-secondary/40 bg-secondary/15 text-secondary",
-  promising: "border-primary/40 bg-primary/15 text-white",
-  exploring: "border-white/15 bg-white/8 text-white/70",
+  exceptional: "border-primary/70 bg-background/80 text-white",
+  strong: "border-secondary/70 bg-background/80 text-white",
+  promising: "border-accent/60 bg-background/80 text-white",
+  exploring: "border-white/25 bg-background/80 text-white/90",
 };
 
 export const DIMENSION_LABELS: Record<CompatibilityDimension, string> = {
-  values: "Values",
-  interests: "Interests",
-  communication: "Communication",
-  lifestyle: "Lifestyle",
-  relationshipGoals: "Relationship goals",
-  personality: "Personality",
+  values: "What matters to you",
+  interests: "What you enjoy",
+  communication: "How you talk",
+  lifestyle: "How you live",
+  relationshipGoals: "What you want",
+  personality: "Who you are",
 };
 
 // Mirrors the backend's archetype blurbs (backend/src/ai/archetypes.ts).

@@ -47,7 +47,7 @@ export function NotificationRow({ notification, onOpen, onDelete, compact = fals
             {notification.title}
           </p>
           {count > 1 && (
-            <span className="shrink-0 rounded-full bg-white/10 px-1.5 py-0.5 text-[10px] font-semibold text-white/70">×{count}</span>
+            <span className="shrink-0 rounded-full bg-white/10 px-1.5 py-0.5 text-xs font-semibold text-white/70">×{count}</span>
           )}
         </div>
         <p className={cn("mt-0.5 text-xs leading-relaxed text-white/55", compact ? "line-clamp-2" : "line-clamp-3")}>
@@ -56,14 +56,14 @@ export function NotificationRow({ notification, onOpen, onDelete, compact = fals
       </Link>
 
       <div className="flex shrink-0 flex-col items-end gap-1.5">
-        <span className="text-[11px] tabular-nums text-white/35">{formatRelativeTime(notification.updatedAt)}</span>
+        <span className="text-xs tabular-nums text-white/60">{formatRelativeTime(notification.updatedAt)}</span>
         {!notification.isRead && <span aria-label="Unread" className="size-2 rounded-full bg-accent" />}
         {onDelete && (
           <button
             type="button"
             aria-label="Delete notification"
             onClick={() => onDelete(notification)}
-            className="flex size-6 items-center justify-center rounded-full text-white/30 opacity-0 transition hover:bg-white/10 hover:text-white focus-visible:opacity-100 group-hover:opacity-100"
+            className="flex size-6 items-center justify-center rounded-full text-white/60 opacity-0 transition hover:bg-white/10 hover:text-white focus-visible:opacity-100 group-hover:opacity-100"
           >
             <Trash2 className="size-3.5" />
           </button>

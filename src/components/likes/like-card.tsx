@@ -76,7 +76,7 @@ export function LikeCard({ entry, mode, onAccept, onReject, isProcessing }: Like
             onClick={onAccept}
             disabled={isProcessing}
             aria-label="Accept like"
-            className="size-9 rounded-full bg-gradient-brand text-white shadow-lg shadow-primary/25 hover:opacity-90"
+            className="size-11 rounded-full bg-gradient-brand text-white shadow-lg shadow-primary/25 hover:opacity-90"
           >
             {isProcessing ? (
               <Loader2 className="size-4 animate-spin" />
@@ -90,7 +90,7 @@ export function LikeCard({ entry, mode, onAccept, onReject, isProcessing }: Like
             onClick={onReject}
             disabled={isProcessing}
             aria-label="Reject like"
-            className="size-9 rounded-full border-white/15 bg-white/[0.03] text-white hover:bg-white/[0.08]"
+            className="size-11 rounded-full border-white/15 bg-white/[0.03] text-white hover:bg-white/[0.08]"
           >
             <X className="size-4" />
           </Button>

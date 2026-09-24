@@ -19,7 +19,7 @@ export function FormField({ label, htmlFor, error, hint, children }: FormFieldPr
       {error ? (
         <p className="text-xs text-destructive">{error}</p>
       ) : hint ? (
-        <p className="text-xs text-white/40">{hint}</p>
+        <p className="text-xs text-white/60">{hint}</p>
       ) : null}
     </div>
   );

@@ -3,16 +3,17 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useInView } from "framer-motion";
-import { ChevronDown, Loader2, MapPin, MessageCircle, Sparkles } from "lucide-react";
+import { ChevronDown, Heart, Loader2, MapPin, MessageCircle, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CompatibilityRing } from "@/components/effects/compatibility-ring";
+import { AIMatchPill } from "@/components/ai/ai-match-pill";
 import { MatchAIInsights } from "@/components/ai/match-ai-insights";
 import { ProfileMedia } from "@/components/shared/profile-media";
 import { SafetyMenu } from "@/components/platform/safety-menu";
 import { recordProfileView } from "@/lib/api/platform";
 import { useAICompatibility } from "@/hooks/use-ai-compatibility";
+import { TIER_SUBLINES } from "@/lib/ai-format";
 import { getInitials, RELATIONSHIP_GOAL_LABELS } from "@/lib/format";
 import { startConversation } from "@/lib/api/conversations";
 import { ApiClientError } from "@/lib/api-client";
@@ -31,7 +32,6 @@ export function MatchCard({ match, onBlocked }: { match: MatchEntry; onBlocked?:
   const cardRef = useRef<HTMLDivElement>(null);
   const inView = useInView(cardRef, { once: true, amount: 0.2 });
   const { state: aiState, retry: retryAI } = useAICompatibility(user.id, inView);
-  const aiScore = aiState.status === "ready" ? aiState.data.score : null;
 
   async function handleStartConversation() {
     setIsStartingChat(true);
@@ -72,17 +72,23 @@ export function MatchCard({ match, onBlocked }: { match: MatchEntry; onBlocked?:
             <MapPin className="size-3.5" />
             {user.city}
           </p>
-          <p className="mt-1 text-xs uppercase tracking-wide text-white/40">
+          <p className="mt-1 text-xs uppercase tracking-wide text-white/60">
             {RELATIONSHIP_GOAL_LABELS[user.relationshipGoal] ?? user.relationshipGoal}
           </p>
         </div>
 
-        <CompatibilityRing
-          value={aiScore ?? match.compatibilityScore}
-          size={104}
-          strokeWidth={8}
-          label={aiScore !== null ? "AI Match" : "Match"}
-        />
+        {/* The label and a line about what it means come first; the percentage lives in the tooltip. */}
+        {aiState.status === "ready" ? (
+          <div className="flex shrink-0 flex-col items-center gap-1.5 sm:max-w-[13rem] sm:items-end sm:text-right">
+            <AIMatchPill score={aiState.data.score} tier={aiState.data.tier} />
+            <p className="text-xs leading-snug text-white/70">{TIER_SUBLINES[aiState.data.tier]}</p>
+          </div>
+        ) : (
+          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/20 bg-background/80 px-3 py-1 text-xs font-semibold text-white">
+            <Heart className="size-3.5 fill-primary text-primary" aria-hidden />
+            It&apos;s a match
+          </span>
+        )}
       </div>
 
       <MatchAIInsights state={aiState} firstName={user.fullName.split(" ")[0] ?? user.fullName} onRetry={retryAI} />
@@ -109,7 +115,7 @@ export function MatchCard({ match, onBlocked }: { match: MatchEntry; onBlocked?:
 
       {match.sharedInterests.length > 0 && (
         <div className="border-t border-white/10 px-6 py-4">
-          <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-white/40">
+          <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-white/60">
             <Sparkles className="size-3.5 text-accent" />
             Shared interests
           </p>
@@ -154,7 +160,7 @@ export function MatchCard({ match, onBlocked }: { match: MatchEntry; onBlocked?:
               {user.bio && <p className="text-sm leading-relaxed text-white/60">{user.bio}</p>}
               {user.interests.length > 0 && (
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wider text-white/40">
+                  <p className="text-xs font-medium uppercase tracking-wider text-white/60">
                     All interests
                   </p>
                   <div className="mt-2 flex flex-wrap gap-1.5">

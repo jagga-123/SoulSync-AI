@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { BarChart3, Brain, Check, Crown, Filter, Heart, Loader2, Lock, Rocket, Timer, TrendingUp } from "lucide-react";
+import { BarChart3, Check, Crown, Filter, Heart, HeartHandshake, Loader2, Lock, Rocket, Timer, TrendingUp } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ const PERKS: Array<{ key: PerkKey; label: string; description: string; icon: typ
   { key: "advanced_filters", label: "Advanced filters", description: "Filter Discover by age, gender and interests.", icon: Filter },
   { key: "priority_recommendations", label: "Priority recommendations", description: "See far more of your top AI matches.", icon: TrendingUp },
   { key: "profile_boost", label: "Profile boost", description: "Be shown first in others' AI recommendations.", icon: Rocket },
-  { key: "ai_deep_analysis", label: "AI deep analysis", description: "An in-depth read on your ideal partner.", icon: Brain },
+  { key: "ai_deep_analysis", label: "AI deep analysis", description: "An in-depth read on your ideal partner.", icon: HeartHandshake },
   { key: "read_receipts_insights", label: "Read receipts insights", description: "See when and how fast your messages are read.", icon: BarChart3 },
 ];
 
@@ -40,7 +40,7 @@ function Premium() {
 
   if (!features) {
     return (
-      <div className="flex justify-center py-20 text-white/40">
+      <div className="flex justify-center py-20 text-white/60">
         <Loader2 className="size-6 animate-spin" />
       </div>
     );
@@ -54,7 +54,7 @@ function Premium() {
         <Section className="lg:col-span-2">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-medium uppercase tracking-wider text-white/40">Your plan</p>
+              <p className="text-xs font-medium uppercase tracking-wider text-white/60">Your plan</p>
               <p className="mt-1 flex items-center gap-2 font-display text-2xl font-semibold text-white">
                 {features.plan !== "free" && <Crown className="size-5 text-primary" />}
                 {PLAN_NAMES[features.plan]}
@@ -71,16 +71,16 @@ function Premium() {
               const state = perk.available ? "on" : !perk.enabled ? "soon" : "locked";
               return (
                 <li key={key} className={cn("flex items-start gap-3 rounded-2xl border p-3.5", state === "on" ? "border-accent/30 bg-accent/[0.05]" : "border-white/8 bg-white/[0.02]")}>
-                  <span className={cn("flex size-9 shrink-0 items-center justify-center rounded-xl", state === "on" ? "bg-accent/20 text-accent" : "bg-white/5 text-white/40")}>
+                  <span className={cn("flex size-9 shrink-0 items-center justify-center rounded-xl", state === "on" ? "bg-accent/20 text-accent" : "bg-white/5 text-white/60")}>
                     <Icon className="size-4" />
                   </span>
                   <div className="min-w-0">
                     <p className="flex items-center gap-1.5 text-sm font-medium text-white">
                       {label}
                       {state === "on" && <Check className="size-3.5 text-accent" />}
-                      {state === "locked" && <Lock className="size-3 text-white/35" />}
+                      {state === "locked" && <Lock className="size-3 text-white/60" />}
                     </p>
-                    <p className="mt-0.5 text-xs text-white/45">{state === "soon" ? "Coming soon" : state === "locked" ? `${description} · Upgrade to unlock` : description}</p>
+                    <p className="mt-0.5 text-xs text-white/60">{state === "soon" ? "Coming soon" : state === "locked" ? `${description} · Upgrade to unlock` : description}</p>
                   </div>
                 </li>
               );
@@ -100,7 +100,7 @@ function Premium() {
             <>
               <p className="font-display text-4xl font-semibold text-white">
                 {allowance.remaining}
-                <span className="text-lg text-white/40"> / {allowance.limit}</span>
+                <span className="text-lg text-white/60"> / {allowance.limit}</span>
               </p>
               <p className="mt-1 text-sm text-white/50">likes left today</p>
               <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
@@ -166,7 +166,7 @@ function BoostCard() {
       )}
       {gate && <UpgradeNotice gate={gate} className="mb-4" />}
       {!boost ? (
-        <Loader2 className="size-5 animate-spin text-white/40" />
+        <Loader2 className="size-5 animate-spin text-white/60" />
       ) : !boost.featureEnabled ? (
         <p className="text-sm text-white/50">Profile boost is coming soon.</p>
       ) : !boost.included ? (
@@ -219,7 +219,7 @@ function ReadReceipts() {
       ) : error ? (
         <p className="text-sm text-destructive">{error}</p>
       ) : !data ? (
-        <Loader2 className="size-5 animate-spin text-white/40" />
+        <Loader2 className="size-5 animate-spin text-white/60" />
       ) : data.sampleSize === 0 ? (
         <p className="text-sm text-white/50">Send a few messages and your insights will appear here.</p>
       ) : (
@@ -233,7 +233,7 @@ function ReadReceipts() {
           {data.partners.length > 0 && (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[28rem] text-left text-sm">
-                <thead className="text-xs uppercase tracking-wider text-white/35">
+                <thead className="text-xs uppercase tracking-wider text-white/60">
                   <tr>
                     <th className="pb-2 font-medium">Conversation</th>
                     <th className="pb-2 text-right font-medium">Sent</th>
@@ -264,7 +264,7 @@ function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl border border-white/8 bg-white/[0.02] p-4">
       <p className="font-display text-2xl font-semibold text-white">{value}</p>
-      <p className="mt-0.5 text-xs text-white/45">{label}</p>
+      <p className="mt-0.5 text-xs text-white/60">{label}</p>
     </div>
   );
 }

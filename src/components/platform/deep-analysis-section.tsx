@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Brain, Loader2, MessageSquareQuote, RefreshCw, Sparkles, TriangleAlert } from "lucide-react";
+import { HeartHandshake, Loader2, MessageSquareQuote, RefreshCw, Sparkles, TriangleAlert } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -62,7 +62,7 @@ export function DeepAnalysisSection() {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-start gap-3">
             <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-brand text-white">
-              <Brain className="size-5" />
+              <HeartHandshake className="size-5" />
             </span>
             <div>
               <h2 id="deep-analysis-heading" className="font-display text-xl font-semibold text-white">
@@ -87,7 +87,7 @@ export function DeepAnalysisSection() {
           )}
 
           {isLoading ? (
-            <div className="flex justify-center py-8 text-white/40">
+            <div className="flex justify-center py-8 text-white/60">
               <Loader2 className="size-5 animate-spin" />
             </div>
           ) : gate ? (
@@ -115,7 +115,7 @@ export function DeepAnalysisSection() {
                 <p className="text-sm leading-relaxed text-white/70">{analysis.idealPartner.summary}</p>
                 <TagList items={analysis.idealPartner.qualities} />
                 {analysis.idealPartner.complementaryTraits.length > 0 && (
-                  <p className="mt-3 text-xs text-white/45">Traits that complement yours: {analysis.idealPartner.complementaryTraits.join(" · ")}</p>
+                  <p className="mt-3 text-xs text-white/60">Traits that complement yours: {analysis.idealPartner.complementaryTraits.join(" · ")}</p>
                 )}
               </Block>
 
@@ -145,7 +145,7 @@ export function DeepAnalysisSection() {
                 <p className="text-sm leading-relaxed text-white/70">{analysis.datingStrategy}</p>
               </Block>
 
-              <p className="text-xs text-white/30">
+              <p className="text-xs text-white/60">
                 {analysis.source === "llm" ? "Written by AI" : "Generated from your interview"} · {new Date(analysis.generatedAt).toLocaleDateString()}
               </p>
             </>
@@ -159,7 +159,7 @@ export function DeepAnalysisSection() {
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="rounded-2xl border border-white/8 bg-white/[0.02] p-5">
-      <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/45">{title}</h3>
+      <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/60">{title}</h3>
       {children}
     </div>
   );

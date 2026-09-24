@@ -40,7 +40,7 @@ export function UsersView() {
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <div className="relative min-w-[14rem] flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-white/40" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-white/60" />
           <Input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Search name or email" aria-label="Search users" className="pl-9" />
         </div>
         <FilterSelect label="Status" value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }}>
@@ -87,14 +87,14 @@ export function UsersView() {
               ))}
               {list.data?.users.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-10 text-center text-white/45">
+                  <td colSpan={5} className="px-4 py-10 text-center text-white/60">
                     No members match these filters.
                   </td>
                 </tr>
               )}
             </tbody>
           </DataTable>
-          <p className="mt-2 text-xs text-white/35">{list.data?.pagination.total ?? 0} member{list.data?.pagination.total === 1 ? "" : "s"}</p>
+          <p className="mt-2 text-xs text-white/60">{list.data?.pagination.total ?? 0} member{list.data?.pagination.total === 1 ? "" : "s"}</p>
           <Pagination page={page} totalPages={list.data?.pagination.totalPages ?? 1} onChange={setPage} />
         </>
       )}
@@ -111,7 +111,7 @@ function UserRow({ user, onOpen }: { user: AdminUserRow; onOpen: () => void }) {
         <button type="button" onClick={onOpen} className="text-left outline-none focus-visible:underline">
           <span className="font-medium text-white">{user.fullName}</span>
           {user.role === "admin" && <span className="ml-2"><Chip tone="brand">Admin</Chip></span>}
-          <span className="block text-xs text-white/40">{user.email}</span>
+          <span className="block text-xs text-white/60">{user.email}</span>
         </button>
       </Td>
       <Td>{PLAN_NAMES[user.plan]}</Td>
@@ -201,7 +201,7 @@ function UserDialog({ userId, onClose, onChanged }: { userId: string | null; onC
               ].map(([label, value]) => (
                 <div key={label as string} className="rounded-xl border border-white/8 bg-white/[0.02] p-3">
                   <dd className="text-xl font-semibold text-white">{value}</dd>
-                  <dt className="text-xs text-white/45">{label}</dt>
+                  <dt className="text-xs text-white/60">{label}</dt>
                 </div>
               ))}
             </dl>
@@ -215,7 +215,7 @@ function UserDialog({ userId, onClose, onChanged }: { userId: string | null; onC
 
             {d.payments.length > 0 && (
               <div className="mt-4">
-                <p className="text-xs font-medium uppercase tracking-wider text-white/40">Recent payments</p>
+                <p className="text-xs font-medium uppercase tracking-wider text-white/60">Recent payments</p>
                 <ul className="mt-1.5 text-sm text-white/65">
                   {d.payments.map((p) => (
                     <li key={p.id}>{formatDay(p.paidAt ?? p.createdAt)} — {p.description} — {formatMoney(p.amount, p.currency)} ({p.status})</li>
@@ -272,7 +272,7 @@ function UserDialog({ userId, onClose, onChanged }: { userId: string | null; onC
                       <option value="premium_plus">Premium Plus</option>
                     </FilterSelect>
                     <Input type="number" min={1} max={730} value={days} onChange={(e) => setDays(e.target.value)} aria-label="Days" className="w-28" />
-                    <span className="self-center text-sm text-white/45">days</span>
+                    <span className="self-center text-sm text-white/60">days</span>
                   </div>
                   <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason (optional, e.g. Beta tester)" aria-label="Reason" maxLength={200} />
                   <ActionButtons busy={busy} disabled={!(Number(days) >= 1)} label="Grant plan" onCancel={() => setAction(null)} />

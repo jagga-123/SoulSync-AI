@@ -21,6 +21,7 @@
   --color-popover-foreground: var(--popover-foreground);
 
   --color-primary: var(--primary);
+  --color-primary-solid: var(--primary-solid);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -60,7 +61,6 @@
   --animate-node-pulse: node-pulse 3.2s ease-in-out infinite;
   --animate-line-flow: line-flow 5s linear infinite;
   --animate-caret-blink: caret-blink 1s step-end infinite;
-  --animate-brain-pulse: brain-pulse 5s ease-in-out infinite;
 }
 
 :root {
@@ -76,6 +76,9 @@
 
   --primary: #ff4d8d;
   --primary-foreground: #ffffff;
+  /* Filled-button pink: white text on it is 5.66:1 (white on --primary is only 3.14:1, below WCAG AA).
+     Use --primary for accents, glows and text on dark surfaces; use this wherever white text sits on pink. */
+  --primary-solid: #c2255c;
   --secondary: #7c3aed;
   --secondary-foreground: #ffffff;
   --accent: #22d3ee;
@@ -188,7 +191,7 @@
   }
 
   .bg-gradient-brand {
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    background: linear-gradient(135deg, var(--primary-solid), var(--secondary));
   }
 
   .bg-size-200 {
@@ -287,11 +290,6 @@
 @keyframes caret-blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
-}
-
-@keyframes brain-pulse {
-  0%, 100% { opacity: 0.5; transform: scale(1); }
-  50% { opacity: 0.85; transform: scale(1.05); }
 }
 
 @media (prefers-reduced-motion: reduce) {

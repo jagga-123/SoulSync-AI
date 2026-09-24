@@ -38,20 +38,20 @@ export function ConversationListItem({ item }: { item: ConversationListItemType 
             >
               {item.user.fullName}
             </p>
-            <span className="shrink-0 text-xs text-white/40">
+            <span className="shrink-0 text-xs text-white/60">
               {formatRelativeTime(item.lastMessageAt)}
             </span>
           </div>
           <div className="mt-1 flex items-center justify-between gap-2">
             <p
               className={`truncate text-sm ${
-                hasUnread ? "font-medium text-white/80" : "text-white/45"
+                hasUnread ? "font-medium text-white/80" : "text-white/60"
               }`}
             >
               {item.lastMessage || "Say hello — start the conversation."}
             </p>
             {hasUnread && (
-              <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-gradient-brand text-[11px] font-semibold text-white">
+              <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-gradient-brand text-xs font-semibold text-white">
                 {item.unreadCount > 9 ? "9+" : item.unreadCount}
               </span>
             )}

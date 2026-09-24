@@ -107,8 +107,7 @@ export function LikesView() {
             </span>
             <p className="text-sm text-white">
               It&apos;s a match with{" "}
-              <span className="font-semibold">{justMatched.user.fullName}</span> —{" "}
-              {justMatched.compatibilityScore}% compatible.
+              <span className="font-semibold">{justMatched.user.fullName}</span> — say hello!
             </p>
           </motion.div>
         )}
@@ -149,7 +148,7 @@ export function LikesView() {
       <div className="mt-8 space-y-4">
         {isLoading ? (
           <div className="flex justify-center py-20">
-            <Loader2 className="size-6 animate-spin text-white/40" />
+            <Loader2 className="size-6 animate-spin text-white/60" />
           </div>
         ) : items.length === 0 ? (
           <EmptyState

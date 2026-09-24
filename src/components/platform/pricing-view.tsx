@@ -64,7 +64,7 @@ export function PricingView() {
   if (!catalog && !error) {
     return (
       <div className="flex min-h-svh items-center justify-center">
-        <Loader2 className="size-6 animate-spin text-white/40" />
+        <Loader2 className="size-6 animate-spin text-white/60" />
       </div>
     );
   }
@@ -137,9 +137,9 @@ export function PricingView() {
 
               <p className="mt-5 flex items-baseline gap-1">
                 <span className="font-display text-4xl font-semibold text-white">{paid ? formatMoney(price, currency) : formatMoney(0, currency)}</span>
-                <span className="text-sm text-white/45">{paid ? "/ month" : "forever"}</span>
+                <span className="text-sm text-white/60">{paid ? "/ month" : "forever"}</span>
               </p>
-              <p className="mt-1 h-5 text-xs text-white/40">
+              <p className="mt-1 h-5 text-xs text-white/60">
                 {paid && interval === "yearly" ? `Billed ${formatMoney(plan.prices.yearly, currency)} per year` : ""}
               </p>
 
@@ -191,7 +191,7 @@ export function PricingView() {
         })}
       </div>
 
-      <p className="mx-auto mt-10 max-w-xl text-center text-xs text-white/35">
+      <p className="mx-auto mt-10 max-w-xl text-center text-xs text-white/60">
         Cancel any time from Billing — you keep your plan until the end of the period you paid for. Prices in {currency.toUpperCase()}.
       </p>
     </div>
@@ -200,11 +200,11 @@ export function PricingView() {
 
 function Feature({ children, muted, soon }: { children: React.ReactNode; muted?: boolean; soon?: boolean }) {
   return (
-    <li className={cn("flex items-start gap-2.5 text-sm", muted ? "text-white/30" : "text-white/75")}>
+    <li className={cn("flex items-start gap-2.5 text-sm", muted ? "text-white/50" : "text-white/75")}>
       {muted ? <Minus className="mt-0.5 size-4 shrink-0" /> : <Check className="mt-0.5 size-4 shrink-0 text-accent" />}
       <span>
         {children}
-        {soon && <span className="ml-2 rounded-full bg-white/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-white/50">soon</span>}
+        {soon && <span className="ml-2 rounded-full bg-white/10 px-1.5 py-0.5 text-xs font-medium uppercase tracking-wide text-white/50">soon</span>}
       </span>
     </li>
   );

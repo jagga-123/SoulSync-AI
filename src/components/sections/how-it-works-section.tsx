@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Sparkles } from "lucide-react";
+import { Heart } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { RevealText, FadeIn } from "@/components/effects/reveal-text";
@@ -68,7 +68,7 @@ export function HowItWorksSection() {
         <div className="mx-auto max-w-2xl text-center">
           <FadeIn className="flex justify-center">
             <Badge className="glass gap-1.5 rounded-full border-white/15 px-4 py-1.5 text-xs font-medium text-white/80">
-              <Sparkles className="size-3.5 text-accent" />
+              <Heart className="size-3.5 fill-primary text-primary" />
               Simple by design
             </Badge>
           </FadeIn>
@@ -82,7 +82,7 @@ export function HowItWorksSection() {
 
           <FadeIn delay={0.2}>
             <p className="mt-5 text-pretty leading-relaxed text-white/60">
-              Three steps stand between you and someone worth knowing.
+              Three steps. No forms, no quizzes.
             </p>
           </FadeIn>
         </div>
@@ -101,7 +101,7 @@ export function HowItWorksSection() {
                   <step.icon className="size-7 text-white" />
                 </div>
                 <div className="glass rounded-2xl p-6">
-                  <span className="font-display text-sm font-semibold text-white/30">
+                  <span className="font-display text-sm font-semibold text-white/60">
                     {step.index}
                   </span>
                   <h3 className="mt-2 font-display text-xl font-semibold text-white">

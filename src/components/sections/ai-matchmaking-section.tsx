@@ -1,46 +1,54 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Heart, Sparkles } from "lucide-react";
+import { Check, Heart } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { AvatarOrb } from "@/components/ui/avatar-orb";
-import { CompatibilityRing } from "@/components/effects/compatibility-ring";
 import { RevealText, FadeIn } from "@/components/effects/reveal-text";
 import { ScrollZoom } from "@/components/effects/scroll-zoom";
-import { PERSONALITY_TRAITS } from "@/lib/data";
+import { MATCH_AREAS } from "@/lib/data";
+import { TIER_LABELS, TIER_SUBLINES } from "@/lib/ai-format";
 
-function TraitBar({
+/** The heaviest area counts for 25 % — bars are scaled to it so the biggest fills the track. */
+const MAX_WEIGHT = Math.max(...MATCH_AREAS.map((area) => area.weight));
+
+const EXAMPLE_REASONS = [
+  "You both value honesty and personal growth",
+  "You both enjoy hiking, cooking and travel",
+  "Your communication styles complement each other",
+];
+
+function AreaBar({
   label,
-  value,
+  weight,
   description,
   index,
 }: {
   label: string;
-  value: number;
+  weight: number;
   description: string;
   index: number;
 }) {
   return (
-    <FadeIn delay={index * 0.1} className="group">
+    <FadeIn delay={index * 0.08} className="group">
       <div className="flex items-baseline justify-between">
         <p className="text-sm font-medium text-white">{label}</p>
-        <span className="font-display text-sm font-semibold text-accent">
-          {value}%
+        <span className="text-sm font-semibold tabular-nums text-accent">
+          {weight}%
+          <span className="sr-only"> of the overall read</span>
         </span>
       </div>
       <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/8">
         <motion.div
           className="h-full rounded-full bg-gradient-to-r from-primary via-secondary to-accent"
           initial={{ width: 0 }}
-          whileInView={{ width: `${value}%` }}
+          whileInView={{ width: `${(weight / MAX_WEIGHT) * 100}%` }}
           viewport={{ once: true, amount: 0.8 }}
-          transition={{ duration: 1.1, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 1.1, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
         />
       </div>
-      <p className="mt-1.5 text-xs leading-relaxed text-white/45">
-        {description}
-      </p>
+      <p className="mt-1.5 text-xs leading-relaxed text-white/60">{description}</p>
     </FadeIn>
   );
 }
@@ -53,32 +61,37 @@ export function AIMatchmakingSection() {
           <div>
             <FadeIn>
               <Badge className="glass gap-1.5 rounded-full border-white/15 px-4 py-1.5 text-xs font-medium text-white/80">
-                <Sparkles className="size-3.5 text-accent" />
-                AI Matchmaking
+                <Heart className="size-3.5 fill-primary text-primary" />
+                How we match
               </Badge>
             </FadeIn>
 
             <RevealText
               as="h2"
-              text="Matched by conversation, not chance"
+              text="Not a score. A reason."
               className="mt-5 text-balance font-display text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl"
               stagger={0.04}
             />
 
             <FadeIn delay={0.2}>
-              <p className="mt-5 max-w-lg text-pretty leading-relaxed text-white/60">
-                Our AI doesn&apos;t just read a bio. It listens to how you
-                talk about your life, your values, and what you&apos;re
-                looking for, then maps you across dimensions that actually
-                predict compatibility.
+              <p className="mt-5 max-w-lg text-pretty leading-relaxed text-white/70">
+                Most apps give you a number and expect you to trust it. We compare six things about you and
+                the person you&apos;re looking at — then tell you, in plain words, what you actually have in
+                common.
               </p>
             </FadeIn>
 
-            <div className="mt-10 space-y-7">
-              {PERSONALITY_TRAITS.map((trait, index) => (
-                <TraitBar key={trait.label} index={index} {...trait} />
+            <p className="mt-8 text-sm font-medium text-white/80">
+              The six things we compare — and how much each one counts
+            </p>
+            <div className="mt-5 space-y-6">
+              {MATCH_AREAS.map((area, index) => (
+                <AreaBar key={area.label} index={index} {...area} />
               ))}
             </div>
+            <p className="mt-6 max-w-lg text-xs leading-relaxed text-white/60">
+              Values count the most, personality the least. The AI can be wrong — you decide who to talk to.
+            </p>
           </div>
 
           <ScrollZoom className="relative" from={0.82} to={1}>
@@ -109,22 +122,24 @@ export function AIMatchmakingSection() {
                 />
               </div>
 
-              <div className="relative mt-10 flex justify-center">
-                <CompatibilityRing value={94} size={188} strokeWidth={11} />
+              <div className="relative mt-9 flex flex-col items-center gap-2 text-center">
+                <span className="inline-flex items-center gap-2 rounded-full border border-primary/70 bg-background/80 px-4 py-1.5 text-sm font-semibold text-white">
+                  <Heart className="size-4 fill-primary text-primary" aria-hidden />
+                  {TIER_LABELS.exceptional}
+                </span>
+                <p className="text-sm text-white/70">{TIER_SUBLINES.exceptional}</p>
               </div>
 
-              <div className="relative mt-8 flex flex-wrap justify-center gap-2">
-                {["Shared humor", "Same love language", "Aligned ambitions"].map(
-                  (tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/70"
-                    >
-                      {tag}
-                    </span>
-                  ),
-                )}
-              </div>
+              <ul className="relative mt-6 space-y-2.5 text-left">
+                {EXAMPLE_REASONS.map((reason) => (
+                  <li key={reason} className="flex items-start gap-2.5 text-sm text-white/80">
+                    <Check className="mt-0.5 size-4 shrink-0 text-accent" aria-hidden />
+                    {reason}
+                  </li>
+                ))}
+              </ul>
+
+              <p className="relative mt-7 text-center text-xs text-white/60">Example — not real members.</p>
             </div>
           </ScrollZoom>
         </div>

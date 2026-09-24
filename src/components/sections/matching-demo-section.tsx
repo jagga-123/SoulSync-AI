@@ -5,19 +5,26 @@ import {
   AnimatePresence,
   motion,
   useMotionValue,
-  useMotionValueEvent,
   useTransform,
   type MotionValue,
 } from "framer-motion";
-import { Brain, Sparkles } from "lucide-react";
+import { Check, Heart } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import { Badge } from "@/components/ui/badge";
 import { AvatarOrb } from "@/components/ui/avatar-orb";
+import { HeartPulse } from "@/components/brand/heart-pulse";
 import { OrbitParticles } from "@/components/effects/orbit-particles";
 import { FadeIn } from "@/components/effects/reveal-text";
-import { DEMO_INPUTS, DEMO_TRAITS, DEMO_MATCH, MATCHING_STAGES } from "@/lib/data";
+import {
+  DEMO_INPUTS,
+  DEMO_MATCH,
+  DEMO_NOTICED,
+  MATCHING_STAGES,
+  MATCH_AREAS,
+} from "@/lib/data";
+import { TIER_SUBLINES } from "@/lib/ai-format";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -30,10 +37,10 @@ const STAGE_RANGES: [number, number][] = [
 
 const STAGE_TRANSITION = { duration: 0.55, ease: [0.16, 1, 0.3, 1] as const };
 
-function StageThinking() {
+function StageListening() {
   return (
     <motion.div
-      key="thinking"
+      key="listening"
       initial={{ opacity: 0, scale: 0.85, filter: "blur(10px)" }}
       animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
       exit={{ opacity: 0, scale: 1.1, filter: "blur(10px)" }}
@@ -41,155 +48,104 @@ function StageThinking() {
       className="flex flex-col items-center gap-6"
     >
       <div className="relative flex size-32 items-center justify-center">
-        <span className="absolute inset-0 rounded-full bg-primary/30 animate-pulse-ring" />
-        <span className="absolute inset-3 rounded-full bg-secondary/30 animate-pulse-ring [animation-delay:0.6s]" />
+        <span className="absolute inset-0 rounded-full bg-primary/25 animate-pulse-ring" />
+        <span className="absolute inset-3 rounded-full bg-secondary/25 animate-pulse-ring [animation-delay:0.6s]" />
         <OrbitParticles size={180} count={5} duration={10} colorClassName="bg-accent text-accent" />
-        <span className="relative flex size-20 items-center justify-center rounded-full bg-gradient-brand animate-brain-pulse">
-          <Brain className="size-9 text-white" />
-        </span>
+        <HeartPulse className="relative size-16" />
       </div>
-      <p className="text-sm font-medium text-white/70">
-        Reading your answers
-        <span className="animate-caret-blink">&hellip;</span>
+      <p className="text-sm font-medium text-white/80">
+        {MATCHING_STAGES[0].caption}
       </p>
     </motion.div>
   );
 }
 
-function DemoTraitBar({
-  trait,
+/** One thing the demo "notices" — it fades in as the scroll moves through the stage. */
+function NoticedLine({
+  text,
   index,
   stageProgress,
 }: {
-  trait: { label: string; value: number; description: string };
+  text: string;
   index: number;
   stageProgress: MotionValue<number>;
 }) {
-  const start = index * 0.18;
-  const width = useTransform(stageProgress, (v) => {
-    const local = Math.min(1, Math.max(0, (v - start) / (1 - start)));
-    return `${local * trait.value}%`;
-  });
+  const start = index * 0.25;
+  const opacity = useTransform(stageProgress, [start, start + 0.2], [0, 1]);
+  const x = useTransform(stageProgress, [start, start + 0.2], [-12, 0]);
 
   return (
-    <div>
-      <div className="flex items-baseline justify-between">
-        <p className="text-sm font-medium text-white">{trait.label}</p>
-        <span className="font-display text-sm font-semibold text-accent">
-          {trait.value}%
-        </span>
-      </div>
-      <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/8">
-        <motion.div
-          className="h-full rounded-full bg-gradient-to-r from-primary via-secondary to-accent"
-          style={{ width }}
-        />
-      </div>
-    </div>
+    <motion.li style={{ opacity, x }} className="flex items-start gap-2.5 text-sm text-white/85">
+      <Heart className="mt-0.5 size-4 shrink-0 fill-primary text-primary" aria-hidden />
+      <span>
+        <span className="text-white/60">Someone who </span>
+        {text.charAt(0).toLowerCase() + text.slice(1)}
+      </span>
+    </motion.li>
   );
 }
 
-function StageAnalysis({ stageProgress }: { stageProgress: MotionValue<number> }) {
+function StageNoticing({ stageProgress }: { stageProgress: MotionValue<number> }) {
   return (
     <motion.div
-      key="analysis"
+      key="noticing"
       initial={{ opacity: 0, scale: 0.92, filter: "blur(10px)" }}
       animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
       exit={{ opacity: 0, scale: 1.05, filter: "blur(10px)" }}
       transition={STAGE_TRANSITION}
       className="w-full max-w-sm space-y-5"
     >
-      <p className="text-center text-sm font-medium text-white/70">
-        Mapping your personality&hellip;
-      </p>
-      {DEMO_TRAITS.map((trait, i) => (
-        <DemoTraitBar key={trait.label} trait={trait} index={i} stageProgress={stageProgress} />
-      ))}
+      <p className="text-center text-sm font-medium text-white/80">{MATCHING_STAGES[1].caption}</p>
+      <ul className="space-y-3">
+        {DEMO_NOTICED.map((text, i) => (
+          <NoticedLine key={text} text={text} index={i} stageProgress={stageProgress} />
+        ))}
+      </ul>
     </motion.div>
   );
 }
 
-function DemoCompatibilityRing({
+/** One of the six areas being compared; it lights up as the scroll passes its turn. */
+function AreaChip({
+  label,
+  index,
   stageProgress,
-  value = 94,
 }: {
+  label: string;
+  index: number;
   stageProgress: MotionValue<number>;
-  value?: number;
 }) {
-  const size = 176;
-  const strokeWidth = 10;
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-
-  const dashoffset = useTransform(
-    stageProgress,
-    (v) => circumference - Math.min(1, v) * (value / 100) * circumference,
-  );
-  const [display, setDisplay] = useState(0);
-
-  useMotionValueEvent(stageProgress, "change", (v) => {
-    setDisplay(Math.round(Math.min(1, v) * value));
-  });
+  const start = index / MATCH_AREAS.length;
+  const opacity = useTransform(stageProgress, [start, start + 0.12], [0.35, 1]);
+  const scale = useTransform(stageProgress, [start, start + 0.12], [0.94, 1]);
 
   return (
-    <div
-      className="relative inline-flex items-center justify-center"
-      style={{ width: size, height: size }}
+    <motion.li
+      style={{ opacity, scale }}
+      className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-medium text-white"
     >
-      <svg width={size} height={size} className="-rotate-90">
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={strokeWidth}
-          className="text-white/8"
-        />
-        <defs>
-          <linearGradient id="demo-ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="var(--primary)" />
-            <stop offset="55%" stopColor="var(--secondary)" />
-            <stop offset="100%" stopColor="var(--accent)" />
-          </linearGradient>
-        </defs>
-        <motion.circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke="url(#demo-ring-gradient)"
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          style={{ strokeDashoffset: dashoffset }}
-        />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="font-display text-3xl font-semibold text-white">{display}%</span>
-        <span className="mt-1 text-[10px] font-medium uppercase tracking-wider text-white/45">
-          Compatibility
-        </span>
-      </div>
-    </div>
+      <Check className="size-3.5 text-accent" aria-hidden />
+      {label}
+    </motion.li>
   );
 }
 
-function StageCalculation({ stageProgress }: { stageProgress: MotionValue<number> }) {
+function StageComparing({ stageProgress }: { stageProgress: MotionValue<number> }) {
   return (
     <motion.div
-      key="calculation"
+      key="comparing"
       initial={{ opacity: 0, scale: 0.92, filter: "blur(10px)" }}
       animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
       exit={{ opacity: 0, scale: 1.05, filter: "blur(10px)" }}
       transition={STAGE_TRANSITION}
-      className="flex flex-col items-center gap-6"
+      className="flex w-full max-w-md flex-col items-center gap-6"
     >
-      <div className="relative overflow-hidden rounded-full">
-        <div className="pointer-events-none absolute inset-x-0 h-8 bg-gradient-to-b from-transparent via-accent/50 to-transparent animate-scan-line" />
-        <DemoCompatibilityRing stageProgress={stageProgress} value={DEMO_MATCH.match} />
-      </div>
-      <p className="text-sm font-medium text-white/70">Scanning for alignment&hellip;</p>
+      <p className="text-sm font-medium text-white/80">{MATCHING_STAGES[2].caption}</p>
+      <ul className="flex flex-wrap justify-center gap-2">
+        {MATCH_AREAS.map((area, i) => (
+          <AreaChip key={area.label} label={area.label} index={i} stageProgress={stageProgress} />
+        ))}
+      </ul>
     </motion.div>
   );
 }
@@ -197,7 +153,7 @@ function StageCalculation({ stageProgress }: { stageProgress: MotionValue<number
 function StageMatch() {
   return (
     <motion.div
-      key="match"
+      key="introducing"
       initial={{ opacity: 0, scale: 0.8, filter: "blur(12px)" }}
       animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
       exit={{ opacity: 0, scale: 0.9, filter: "blur(8px)" }}
@@ -214,10 +170,13 @@ function StageMatch() {
       <p className="mt-4 font-display text-xl font-semibold text-white">
         {DEMO_MATCH.name}, {DEMO_MATCH.age}
       </p>
-      <p className="text-sm text-white/50">{DEMO_MATCH.role}</p>
-      <p className="mt-3 font-display text-3xl font-semibold text-accent">
-        {DEMO_MATCH.match}% Match
-      </p>
+      <p className="text-sm text-white/60">{DEMO_MATCH.role}</p>
+
+      <span className="mt-4 inline-flex items-center gap-2 rounded-full border border-primary/70 bg-background/80 px-4 py-1.5 text-sm font-semibold text-white">
+        <Heart className="size-4 fill-primary text-primary" aria-hidden />
+        {DEMO_MATCH.label}
+      </span>
+      <p className="mt-2 text-sm text-white/70">{TIER_SUBLINES.exceptional}</p>
 
       <ul className="mt-5 space-y-2 text-left">
         {DEMO_MATCH.reasons.map((reason, i) => (
@@ -226,13 +185,15 @@ function StageMatch() {
             initial={{ opacity: 0, x: -12 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 + i * 0.12, duration: 0.4 }}
-            className="flex items-start gap-2 text-sm text-white/70"
+            className="flex items-start gap-2 text-sm text-white/80"
           >
-            <Sparkles className="mt-0.5 size-3.5 shrink-0 text-accent" />
+            <Check className="mt-0.5 size-4 shrink-0 text-accent" aria-hidden />
             {reason}
           </motion.li>
         ))}
       </ul>
+
+      <p className="mt-5 text-xs text-white/60">Example — not a real member.</p>
     </motion.div>
   );
 }
@@ -277,28 +238,28 @@ export function MatchingDemoSection() {
         <div className="mx-auto max-w-xl text-center">
           <FadeIn className="flex justify-center">
             <Badge className="glass gap-1.5 rounded-full border-white/15 px-4 py-1.5 text-xs font-medium text-white/80">
-              <Sparkles className="size-3.5 text-accent" />
-              Live demo
+              <Heart className="size-3.5 fill-primary text-primary" />
+              Example
             </Badge>
           </FadeIn>
           <FadeIn delay={0.1}>
             <h2 className="mt-4 text-balance font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">
-              See AI matching in action
+              See how a match happens
             </h2>
           </FadeIn>
           <FadeIn delay={0.2}>
-            <p className="mt-3 text-pretty text-sm leading-relaxed text-white/55 sm:text-base">
-              Keep scrolling. Watch three honest answers turn into a real
-              match, step by step.
+            <p className="mt-3 text-pretty text-sm leading-relaxed text-white/70 sm:text-base">
+              Keep scrolling. Watch three example answers turn into an introduction, step by step.
             </p>
           </FadeIn>
         </div>
 
         <FadeIn delay={0.3} className="flex flex-wrap items-center justify-center gap-2">
+          <span className="text-xs text-white/60">Example answers:</span>
           {DEMO_INPUTS.map((input) => (
             <span
               key={input}
-              className="glass rounded-full px-4 py-1.5 text-xs font-medium text-white/80"
+              className="glass rounded-full px-4 py-1.5 text-xs font-medium text-white/85"
             >
               {input}
             </span>
@@ -307,15 +268,15 @@ export function MatchingDemoSection() {
 
         <div className="flex min-h-[300px] w-full items-center justify-center">
           <AnimatePresence mode="wait">
-            {stageIndex === 0 && <StageThinking />}
-            {stageIndex === 1 && <StageAnalysis stageProgress={stageProgress} />}
-            {stageIndex === 2 && <StageCalculation stageProgress={stageProgress} />}
+            {stageIndex === 0 && <StageListening />}
+            {stageIndex === 1 && <StageNoticing stageProgress={stageProgress} />}
+            {stageIndex === 2 && <StageComparing stageProgress={stageProgress} />}
             {stageIndex === 3 && <StageMatch />}
           </AnimatePresence>
         </div>
 
         <div className="flex flex-col items-center gap-3">
-          <p className="text-xs uppercase tracking-[0.25em] text-white/40">
+          <p className="text-xs uppercase tracking-[0.25em] text-white/60">
             {MATCHING_STAGES[stageIndex].label}
           </p>
           <div className="flex items-center gap-2">

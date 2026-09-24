@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
-  Brain,
+  HeartHandshake,
   CalendarDays,
   Check,
   Compass,
@@ -95,7 +95,7 @@ function ChipGroup({
     <div className="glass h-full rounded-3xl p-6">
       <CardTitle icon={icon}>{title}</CardTitle>
       {items.length === 0 ? (
-        <p className="mt-4 text-sm text-white/40">{empty}</p>
+        <p className="mt-4 text-sm text-white/60">{empty}</p>
       ) : (
         <ul className="mt-4 flex flex-wrap gap-2">
           {items.map((item) => (
@@ -119,7 +119,7 @@ function TraitBar({ traitKey, value, index }: { traitKey: keyof TraitScores; val
       <div className="flex items-baseline justify-between gap-3">
         <div>
           <span className="text-sm font-medium text-white">{meta.label}</span>
-          <span className="ml-2 hidden text-xs text-white/40 sm:inline">{meta.blurb}</span>
+          <span className="ml-2 hidden text-xs text-white/60 sm:inline">{meta.blurb}</span>
         </div>
         <span className="shrink-0 text-xs text-white/55">
           {describeTrait(traitKey, value)} · <span className="tabular-nums">{value}</span>
@@ -141,7 +141,7 @@ function TraitBar({ traitKey, value, index }: { traitKey: keyof TraitScores; val
           transition={{ duration: 1.1, delay: 0.15 + index * 0.08, ease: EASE }}
         />
       </div>
-      <div className="mt-1 flex justify-between text-[10px] uppercase tracking-wide text-white/30">
+      <div className="mt-1 flex justify-between text-xs uppercase tracking-wide text-white/60">
         <span>{meta.low}</span>
         <span>{meta.high}</span>
       </div>
@@ -200,7 +200,7 @@ export function PersonalityReportView() {
     return (
       <div className="mx-auto max-w-2xl px-4 py-28 sm:px-6">
         <EmptyState
-          icon={Brain}
+          icon={HeartHandshake}
           title="Your report is waiting"
           description="Chat with SoulSync AI for a few minutes and it will build your personality report — strengths, values, communication style and more."
           actionLabel="Start the AI interview"
@@ -242,7 +242,7 @@ export function PersonalityReportView() {
           <Sparkles className="size-3.5 text-accent" aria-hidden />
           AI Personality Report
         </span>
-        <span className="inline-flex items-center gap-1.5 text-xs text-white/40">
+        <span className="inline-flex items-center gap-1.5 text-xs text-white/60">
           <CalendarDays className="size-3.5" aria-hidden />
           Updated {updated}
         </span>
@@ -288,7 +288,7 @@ export function PersonalityReportView() {
           </div>
           <div className="flex flex-col items-center gap-2">
             <CompatibilityRing value={profile.confidenceScore} size={150} strokeWidth={10} label="Confidence" />
-            <p className="max-w-[10rem] text-center text-[11px] leading-snug text-white/40">
+            <p className="max-w-[10rem] text-center text-xs leading-snug text-white/60">
               How much your {profile.interviewAnswerCount} answers gave us to go on
             </p>
           </div>
@@ -337,7 +337,7 @@ export function PersonalityReportView() {
       {/* Personality dimensions */}
       <Section className="mt-6">
         <div className="glass rounded-3xl p-6 sm:p-8">
-          <CardTitle icon={Brain}>Personality dimensions</CardTitle>
+          <CardTitle icon={HeartHandshake}>Personality dimensions</CardTitle>
           <div className="mt-6 space-y-6">
             {traitKeys.map((key, index) => (
               <TraitBar key={key} traitKey={key} value={profile.traitScores[key]} index={index} />
@@ -426,7 +426,7 @@ export function PersonalityReportView() {
             </Button>
           </div>
         </div>
-        <p className="mt-5 text-center text-xs text-white/35">
+        <p className="mt-5 text-center text-xs text-white/60">
           {analysisSourceLabel(profile.analysisSource, profile.provider)} · Only you can see this report;
           matches see just what you have in common.
         </p>

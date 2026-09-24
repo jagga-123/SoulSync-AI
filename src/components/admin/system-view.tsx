@@ -87,12 +87,12 @@ export function SystemView() {
             ["Error tracking", s.providers.errorTracking],
           ].map(([label, value]) => (
             <div key={label}>
-              <dt className="text-xs text-white/40">{label}</dt>
+              <dt className="text-xs text-white/60">{label}</dt>
               <dd className="mt-0.5 font-medium capitalize text-white">{value}</dd>
             </div>
           ))}
         </dl>
-        <p className="mt-4 text-xs text-white/35">
+        <p className="mt-4 text-xs text-white/60">
           {s.flagsEnabled} of {s.flagsTotal} feature flags are on.
         </p>
       </section>
@@ -171,12 +171,12 @@ function AuditLog() {
               <Td>{e.actorEmail}</Td>
               <Td className="font-mono text-xs text-white">{e.action}</Td>
               <Td className="text-white/55">{e.targetType}{e.targetId ? ` · ${e.targetId.slice(-6)}` : ""}</Td>
-              <Td className="max-w-[16rem] truncate font-mono text-[11px] text-white/40" >{Object.keys(e.metadata ?? {}).length ? JSON.stringify(e.metadata) : ""}</Td>
+              <Td className="max-w-[16rem] truncate font-mono text-xs text-white/60" >{Object.keys(e.metadata ?? {}).length ? JSON.stringify(e.metadata) : ""}</Td>
             </tr>
           ))}
           {log.data.entries.length === 0 && (
             <tr>
-              <td colSpan={5} className="px-4 py-8 text-center text-white/45">No admin actions yet.</td>
+              <td colSpan={5} className="px-4 py-8 text-center text-white/60">No admin actions yet.</td>
             </tr>
           )}
         </tbody>
@@ -227,7 +227,7 @@ function EmailLog() {
               ))}
               {log.data.entries.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-white/45">No emails yet.</td>
+                  <td colSpan={5} className="px-4 py-8 text-center text-white/60">No emails yet.</td>
                 </tr>
               )}
             </tbody>

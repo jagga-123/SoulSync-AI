@@ -49,7 +49,7 @@ export function WaitlistView() {
           <p className="text-sm text-white/65">
             {result.alreadyOnList ? "You're already on the waitlist." : "Thanks for your interest."} We&apos;ll email you the moment your invite is ready.
           </p>
-          <p className="text-xs text-white/40">Know someone who&apos;s already a member? Ask for their invite link to skip the line.</p>
+          <p className="text-xs text-white/60">Know someone who&apos;s already a member? Ask for their invite link to skip the line.</p>
         </div>
       </AuthCard>
     );

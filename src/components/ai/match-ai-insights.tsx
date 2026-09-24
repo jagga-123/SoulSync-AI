@@ -3,12 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDown, RotateCw, Sparkles } from "lucide-react";
+import { ChevronDown, Heart, RotateCw } from "lucide-react";
 
 import { AIReasons } from "@/components/ai/ai-match-pill";
 import { StreamingText } from "@/components/ai/streaming-text";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DIMENSION_LABELS, TIER_LABELS, TIER_STYLES } from "@/lib/ai-format";
+import { DIMENSION_LABELS } from "@/lib/ai-format";
 import type { AICompatibilityState } from "@/hooks/use-ai-compatibility";
 import type { CompatibilityDimension } from "@/types/api";
 
@@ -40,8 +40,8 @@ export function MatchAIInsights({ state, firstName, onRetry }: MatchAIInsightsPr
     return (
       <InsightShell>
         <div className="flex items-center gap-2 text-xs text-white/50" role="status" aria-live="polite">
-          <Sparkles className="size-3.5 animate-pulse text-accent" aria-hidden />
-          SoulSync AI is analysing your match…
+          <Heart className="size-3.5 animate-pulse fill-primary text-primary" aria-hidden />
+          Looking at what you two share…
         </div>
         <Skeleton className="mt-3 h-3 w-full rounded-full" />
         <Skeleton className="mt-2 h-3 w-4/5 rounded-full" />
@@ -53,17 +53,17 @@ export function MatchAIInsights({ state, firstName, onRetry }: MatchAIInsightsPr
     return (
       <InsightShell>
         <p className="flex items-start gap-2 text-xs leading-relaxed text-white/55">
-          <Sparkles className="mt-0.5 size-3.5 shrink-0 text-accent" aria-hidden />
+          <Heart className="mt-0.5 size-3.5 shrink-0 fill-primary text-primary" aria-hidden />
           {state.reason === "viewer_not_ready" ? (
             <span>
               Take the{" "}
               <Link href="/ai-interview" className="font-medium text-accent underline-offset-2 hover:underline">
                 AI interview
               </Link>{" "}
-              to see how compatible you are with {firstName}.
+              to see why you and {firstName} might click.
             </span>
           ) : (
-            <span>AI insights unlock once {firstName} completes their AI interview.</span>
+            <span>You&apos;ll see why you two might click once {firstName} has finished their interview too.</span>
           )}
         </p>
       </InsightShell>
@@ -95,11 +95,11 @@ export function MatchAIInsights({ state, firstName, onRetry }: MatchAIInsightsPr
     <InsightShell>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-white/50">
-          <Sparkles className="size-3.5 text-accent" aria-hidden />
-          AI insights
+          <Heart className="size-3.5 fill-primary text-primary" aria-hidden />
+          Why you two match
         </span>
-        <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${TIER_STYLES[data.tier]}`}>
-          {TIER_LABELS[data.tier]}
+        <span className="rounded-full border border-white/15 bg-white/5 px-2.5 py-0.5 text-xs font-medium text-white/75">
+          {data.explanationSource === "llm" ? "Written by AI" : "Summary of what you share"}
         </span>
       </div>
 
@@ -109,7 +109,7 @@ export function MatchAIInsights({ state, firstName, onRetry }: MatchAIInsightsPr
 
       {data.reasons.length > 0 && (
         <div className="mt-4">
-          <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-white/35">Why you match</p>
+          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-white/60">What you share</p>
           <AIReasons reasons={data.reasons} />
         </div>
       )}
@@ -122,7 +122,7 @@ export function MatchAIInsights({ state, firstName, onRetry }: MatchAIInsightsPr
             aria-expanded={showBreakdown}
             className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-white/50 transition-colors hover:text-white"
           >
-            {showBreakdown ? "Hide breakdown" : "See breakdown"}
+            {showBreakdown ? "Hide details" : "See how we compared"}
             <motion.span animate={{ rotate: showBreakdown ? 180 : 0 }} transition={{ duration: 0.2 }}>
               <ChevronDown className="size-3.5" aria-hidden />
             </motion.span>
@@ -144,7 +144,7 @@ export function MatchAIInsights({ state, firstName, onRetry }: MatchAIInsightsPr
                       <li key={key}>
                         <div className="flex items-center justify-between text-xs">
                           <span className="text-white/65">{DIMENSION_LABELS[key]}</span>
-                          <span className="tabular-nums text-white/45">{dimension.score}%</span>
+                          <span className="tabular-nums text-white/60">{dimension.score}%</span>
                         </div>
                         <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/8">
                           <motion.div

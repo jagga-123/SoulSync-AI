@@ -59,7 +59,7 @@ export function DataTable({ children, minWidth = "40rem" }: { children: ReactNod
 }
 
 export const Th = ({ children, className }: { children?: ReactNode; className?: string }) => (
-  <th className={cn("px-4 py-3 text-xs font-medium uppercase tracking-wider text-white/40", className)}>{children}</th>
+  <th className={cn("px-4 py-3 text-xs font-medium uppercase tracking-wider text-white/60", className)}>{children}</th>
 );
 export const Td = ({ children, className }: { children?: ReactNode; className?: string }) => <td className={cn("px-4 py-3 text-white/75", className)}>{children}</td>;
 

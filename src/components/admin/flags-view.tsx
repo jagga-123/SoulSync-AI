@@ -96,7 +96,7 @@ export function FlagsView() {
                 <h2 id={`cat-${cat.key}`} className="font-display text-lg font-semibold text-white">
                   {cat.title}
                 </h2>
-                <p className="mb-3 text-sm text-white/45">{cat.blurb}</p>
+                <p className="mb-3 text-sm text-white/60">{cat.blurb}</p>
                 <ul className="glass divide-y divide-white/5 overflow-hidden rounded-2xl">
                   {items.map((flag) => (
                     <li key={flag.key} className="flex items-center gap-4 px-5 py-4">
@@ -105,16 +105,16 @@ export function FlagsView() {
                           {flag.label}
                           <Chip tone={flag.source === "database" ? "brand" : "neutral"}>{flag.source === "database" ? "Admin override" : flag.source === "env" ? "From environment" : "Default"}</Chip>
                         </label>
-                        <p className="mt-0.5 text-xs leading-relaxed text-white/45">{flag.description}</p>
-                        <p className="mt-0.5 font-mono text-[11px] text-white/25">{flag.key} · default {flag.defaultEnabled ? "on" : "off"}</p>
+                        <p className="mt-0.5 text-xs leading-relaxed text-white/60">{flag.description}</p>
+                        <p className="mt-0.5 font-mono text-xs text-white/60">{flag.key} · default {flag.defaultEnabled ? "on" : "off"}</p>
                       </div>
                       {flag.source === "database" && (
-                        <button type="button" onClick={() => void reset(flag)} disabled={busyKey === flag.key} aria-label={`Reset ${flag.label} to its default`} title="Reset to default" className="flex size-8 shrink-0 items-center justify-center rounded-full text-white/40 transition-colors hover:bg-white/10 hover:text-white">
+                        <button type="button" onClick={() => void reset(flag)} disabled={busyKey === flag.key} aria-label={`Reset ${flag.label} to its default`} title="Reset to default" className="flex size-8 shrink-0 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white">
                           <RotateCcw className="size-4" />
                         </button>
                       )}
                       {busyKey === flag.key ? (
-                        <Loader2 className="size-5 animate-spin text-white/40" />
+                        <Loader2 className="size-5 animate-spin text-white/60" />
                       ) : (
                         <Switch id={`flag-${flag.key}`} checked={flag.enabled} onCheckedChange={(v) => request(flag, v)} />
                       )}

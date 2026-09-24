@@ -69,7 +69,7 @@ export function MatchesView() {
       <div className="mt-10">
         {isLoading ? (
           <div className="flex justify-center py-20">
-            <Loader2 className="size-6 animate-spin text-white/40" />
+            <Loader2 className="size-6 animate-spin text-white/60" />
           </div>
         ) : matches.length === 0 ? (
           <EmptyState

@@ -69,9 +69,9 @@ export function AdvancedFilters({ perk, value, onApply }: { perk: PerkState; val
       >
         <SlidersHorizontal className="size-4" />
         Advanced filters
-        {activeCount > 0 && <span className="rounded-full bg-gradient-brand px-1.5 text-[11px] font-semibold text-white">{activeCount}</span>}
+        {activeCount > 0 && <span className="rounded-full bg-gradient-brand px-1.5 text-xs font-semibold text-white">{activeCount}</span>}
         {!perk.available && (
-          <span className="flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-semibold text-primary">
+          <span className="flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary">
             <Crown className="size-3" /> Premium
           </span>
         )}
@@ -83,7 +83,7 @@ export function AdvancedFilters({ perk, value, onApply }: { perk: PerkState; val
           <form onSubmit={submit} className="glass mt-3 grid gap-3 rounded-2xl p-4 sm:grid-cols-2">
             <div className="flex items-center gap-2">
               <Input type="number" min={18} max={120} inputMode="numeric" value={ageMin} onChange={(e) => setAgeMin(e.target.value)} placeholder="Min age" aria-label="Minimum age" />
-              <span className="text-white/30">–</span>
+              <span className="text-white/60">–</span>
               <Input type="number" min={18} max={120} inputMode="numeric" value={ageMax} onChange={(e) => setAgeMax(e.target.value)} placeholder="Max age" aria-label="Maximum age" />
             </div>
             <Select value={gender || ANY} onValueChange={(v) => setGender(v === ANY ? "" : v)}>

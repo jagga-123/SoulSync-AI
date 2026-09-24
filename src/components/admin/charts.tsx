@@ -102,7 +102,7 @@ export function AreaChart({ points, unit, height = 240 }: AreaChartProps) {
   return (
     <div>
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-xs text-white/45">
+        <p className="text-xs text-white/60">
           {number.format(total)} {unit} in the last {points.length} days
         </p>
         <button
@@ -118,7 +118,7 @@ export function AreaChart({ points, unit, height = 240 }: AreaChartProps) {
       {view === "table" ? (
         <div data-lenis-prevent className="max-h-60 overflow-y-auto rounded-xl border border-white/8">
           <table className="w-full text-left text-sm">
-            <thead className="sticky top-0 bg-[#0b1026] text-xs uppercase tracking-wider text-white/40">
+            <thead className="sticky top-0 bg-[#0b1026] text-xs uppercase tracking-wider text-white/60">
               <tr>
                 <th className="px-3 py-2 font-medium">Date</th>
                 <th className="px-3 py-2 text-right font-medium capitalize">{unit}</th>
@@ -234,7 +234,7 @@ export function FunnelBars({ steps }: { steps: FunnelStep[] }) {
             </span>
             <span className="min-w-[7.5rem] text-right tabular-nums text-white">
               {number.format(step.count)}
-              <span className="ml-2 text-xs text-white/45">{step.fromPrevious === null ? "" : `${step.fromPrevious}%`}</span>
+              <span className="ml-2 text-xs text-white/60">{step.fromPrevious === null ? "" : `${step.fromPrevious}%`}</span>
             </span>
           </li>
         );
@@ -261,7 +261,7 @@ export function StatTile({ label, value, sub, className, hero }: StatTileProps) 
     <div className={cn("glass rounded-2xl p-5", className)}>
       <p className="text-xs font-medium text-white/50">{label}</p>
       <p className={cn("mt-2 font-semibold text-white", hero ? "text-5xl" : "text-3xl")}>{value}</p>
-      {sub && <p className="mt-1.5 text-xs text-white/45">{sub}</p>}
+      {sub && <p className="mt-1.5 text-xs text-white/60">{sub}</p>}
     </div>
   );
 }

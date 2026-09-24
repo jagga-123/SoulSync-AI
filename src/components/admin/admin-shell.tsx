@@ -37,7 +37,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   if (isLoading || !user) {
     return (
       <div className="flex min-h-svh items-center justify-center">
-        <Loader2 className="size-6 animate-spin text-white/40" />
+        <Loader2 className="size-6 animate-spin text-white/60" />
       </div>
     );
   }
@@ -61,7 +61,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
     <div className="mx-auto max-w-7xl px-4 pb-16 pt-28 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-8 lg:flex-row">
         <aside className="lg:w-56 lg:shrink-0">
-          <p className="mb-3 hidden text-xs font-semibold uppercase tracking-wider text-white/35 lg:block">Admin</p>
+          <p className="mb-3 hidden text-xs font-semibold uppercase tracking-wider text-white/60 lg:block">Admin</p>
           <nav aria-label="Admin sections" className="flex gap-1 overflow-x-auto pb-2 lg:flex-col lg:overflow-visible lg:pb-0">
             {NAV.map(({ href, label, icon: Icon, exact, badge }) => {
               const active = exact ? pathname === href : pathname.startsWith(href);
@@ -78,7 +78,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                   <Icon className="size-4" />
                   {label}
                   {badge && pendingReports > 0 && (
-                    <span className={cn("ml-auto rounded-full px-1.5 text-[11px] font-semibold", active ? "bg-white/25 text-white" : "bg-primary/20 text-primary")}>{pendingReports}</span>
+                    <span className={cn("ml-auto rounded-full px-1.5 text-xs font-semibold", active ? "bg-white/25 text-white" : "bg-primary/20 text-primary")}>{pendingReports}</span>
                   )}
                 </Link>
               );
@@ -106,7 +106,7 @@ export function AdminHeading({ title, description, actions }: { title: string; d
 
 export function LoadingBlock() {
   return (
-    <div className="flex justify-center py-16 text-white/40">
+    <div className="flex justify-center py-16 text-white/60">
       <Loader2 className="size-6 animate-spin" />
     </div>
   );

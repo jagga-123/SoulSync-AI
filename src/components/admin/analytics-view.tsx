@@ -77,7 +77,7 @@ export function AnalyticsView() {
           <h2 id="funnel-h" className="mb-1 font-display text-lg font-semibold text-white">
             Conversion funnel
           </h2>
-          <p className="mb-4 text-xs text-white/45">Each step shows the count and the share of the step before it.</p>
+          <p className="mb-4 text-xs text-white/60">Each step shows the count and the share of the step before it.</p>
           {funnel.data ? <FunnelBars steps={funnel.data.steps} /> : <LoadingBlock />}
         </section>
 
@@ -88,20 +88,20 @@ export function AnalyticsView() {
           {!revenue.data ? (
             <LoadingBlock />
           ) : revenue.data.byCurrency.length === 0 ? (
-            <p className="text-sm text-white/45">No payments yet.</p>
+            <p className="text-sm text-white/60">No payments yet.</p>
           ) : (
             <ul className="space-y-4">
               {revenue.data.byCurrency.map((row) => (
                 <li key={row.currency}>
                   <p className="text-3xl font-semibold text-white">{formatMoney(row.amountMinor, row.currency)}</p>
-                  <p className="text-xs text-white/45">
+                  <p className="text-xs text-white/60">
                     {row.payments} payment{row.payments === 1 ? "" : "s"} · {row.currency.toUpperCase()}
                   </p>
                 </li>
               ))}
             </ul>
           )}
-          <p className="mt-4 text-xs text-white/30">Currencies are never added together.</p>
+          <p className="mt-4 text-xs text-white/60">Currencies are never added together.</p>
         </section>
       </div>
     </div>

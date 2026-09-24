@@ -128,7 +128,7 @@ function Settings({ initialUser }: { initialUser: AuthUser }) {
             </Button>
           )}
         </div>
-        {!user.emailVerified && <p className="mt-3 text-xs leading-relaxed text-white/45">We only send match and message emails to verified addresses.</p>}
+        {!user.emailVerified && <p className="mt-3 text-xs leading-relaxed text-white/60">We only send match and message emails to verified addresses.</p>}
         {verifyMessage && <p role="status" className="mt-3 text-sm text-white/65">{verifyMessage}</p>}
         <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/8 pt-4 text-sm">
           <span className="text-white/50">Subscription</span>
@@ -144,13 +144,13 @@ function Settings({ initialUser }: { initialUser: AuthUser }) {
 
       <Section title="Email" description="We never send marketing email — only things you can turn off here." className="md:order-4">
         <PreferenceList rows={EMAIL_ROWS} values={settings?.email} onChange={(key, v) => void toggle("email", key, v)} />
-        <p className="mt-4 text-xs text-white/35">Account emails (verification, receipts, safety notices) are always sent.</p>
+        <p className="mt-4 text-xs text-white/60">Account emails (verification, receipts, safety notices) are always sent.</p>
       </Section>
 
       <Section title="Blocked people" description="They can't see you, like you or message you — and you won't see them." className="md:order-2">
         {blocks.length === 0 ? (
-          <div className="flex h-full min-h-20 flex-col items-center justify-center gap-2 py-3 text-center text-sm text-white/45">
-            <UserX className="size-6 text-white/30" />
+          <div className="flex h-full min-h-20 flex-col items-center justify-center gap-2 py-3 text-center text-sm text-white/60">
+            <UserX className="size-6 text-white/60" />
             You haven&apos;t blocked anyone.
           </div>
         ) : (
@@ -160,7 +160,7 @@ function Settings({ initialUser }: { initialUser: AuthUser }) {
                 <ProfileMedia src={blocked.profileImage} initials={getInitials(blocked.fullName)} thumb className="size-10 shrink-0 rounded-full text-sm" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-white">{blocked.fullName}</p>
-                  <p className="text-xs text-white/40">Blocked {new Date(blockedAt).toLocaleDateString()}</p>
+                  <p className="text-xs text-white/60">Blocked {new Date(blockedAt).toLocaleDateString()}</p>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => void unblock(blocked.id)} className="rounded-full border-white/15 bg-white/[0.03] text-white hover:bg-white/[0.08]">
                   Unblock
@@ -191,7 +191,7 @@ function PreferenceList<K extends string>({
           <li key={key} className="flex items-center justify-between gap-4 py-3">
             <label htmlFor={id} className="min-w-0 flex-1 cursor-pointer">
               <p className="text-sm font-medium text-white">{label}</p>
-              <p className="mt-0.5 text-xs text-white/45">{description}</p>
+              <p className="mt-0.5 text-xs text-white/60">{description}</p>
             </label>
             {values ? (
               <Switch id={id} checked={values[key]} onCheckedChange={(v) => onChange(key, v)} />

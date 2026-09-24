@@ -59,7 +59,7 @@ export default function OpengraphImage() {
             letterSpacing: -1.5,
           }}
         >
-          Find Someone Who Truly Understands You
+          Start with who you are
         </span>
       </div>
     ),

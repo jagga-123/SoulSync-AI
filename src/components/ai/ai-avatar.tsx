@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { Sparkles } from "lucide-react";
+import { MessageCircleHeart } from "lucide-react";
 
 interface AIAvatarProps {
   /** Adds a slow "alive" glow — used while the AI is speaking or thinking. */
@@ -23,7 +23,7 @@ export function AIAvatar({ active = false, className = "size-9" }: AIAvatarProps
         />
       )}
       <span className="relative flex size-full items-center justify-center rounded-full bg-gradient-brand shadow-lg shadow-primary/25 ring-1 ring-white/20">
-        <Sparkles className="size-[48%] text-white" aria-hidden />
+        <MessageCircleHeart className="size-[50%] text-white" aria-hidden />
       </span>
     </span>
   );

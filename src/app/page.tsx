@@ -4,7 +4,7 @@ import { AIMatchmakingSection } from "@/components/sections/ai-matchmaking-secti
 import { MatchingDemoSection } from "@/components/sections/matching-demo-section";
 import { HowItWorksSection } from "@/components/sections/how-it-works-section";
 import { FeaturesSection } from "@/components/sections/features-section";
-import { TestimonialsSection } from "@/components/sections/testimonials-section";
+import { EarlyAccessSection } from "@/components/sections/early-access-section";
 import { CTASection } from "@/components/sections/cta-section";
 
 export default function Home() {
@@ -16,7 +16,7 @@ export default function Home() {
       <MatchingDemoSection />
       <HowItWorksSection />
       <FeaturesSection />
-      <TestimonialsSection />
+      <EarlyAccessSection />
       <CTASection />
     </>
   );

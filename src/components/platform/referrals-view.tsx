@@ -76,7 +76,7 @@ function Referrals() {
         <AlertDescription>{error}</AlertDescription>
       </Alert>
     ) : (
-      <div className="flex justify-center py-20 text-white/40">
+      <div className="flex justify-center py-20 text-white/60">
         <Loader2 className="size-6 animate-spin" />
       </div>
     );
@@ -93,7 +93,7 @@ function Referrals() {
       )}
 
       <Section>
-        <p className="text-xs font-medium uppercase tracking-wider text-white/40">Your referral code</p>
+        <p className="text-xs font-medium uppercase tracking-wider text-white/60">Your referral code</p>
         <div className="mt-2 flex flex-wrap items-center gap-3">
           <span className="font-display text-3xl font-semibold tracking-[0.18em] text-white">{summary.code}</span>
           <Button variant="outline" size="sm" onClick={() => void copy(summary.code, "code")} className="gap-1.5 rounded-full border-white/15 bg-white/[0.03] text-white hover:bg-white/[0.08]">
@@ -125,12 +125,12 @@ function Referrals() {
         <ul className="space-y-3">
           {summary.tiers.map((tier) => (
             <li key={tier.threshold} className={cn("flex items-center gap-3 rounded-2xl border p-3.5", tier.achieved ? "border-accent/30 bg-accent/[0.06]" : "border-white/8 bg-white/[0.02]")}>
-              <span className={cn("flex size-9 shrink-0 items-center justify-center rounded-xl", tier.achieved ? "bg-accent/20 text-accent" : "bg-white/5 text-white/40")}>
+              <span className={cn("flex size-9 shrink-0 items-center justify-center rounded-xl", tier.achieved ? "bg-accent/20 text-accent" : "bg-white/5 text-white/60")}>
                 {tier.granted ? <CheckCircle2 className="size-5" /> : <Gift className="size-5" />}
               </span>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-white">{tier.label}</p>
-                <p className="text-xs text-white/45">
+                <p className="text-xs text-white/60">
                   {tier.threshold} successful referral{tier.threshold === 1 ? "" : "s"}
                 </p>
               </div>
@@ -160,7 +160,7 @@ function Referrals() {
             {summary.recent.map((r, i) => (
               <li key={i} className="flex items-center justify-between py-3 text-sm">
                 <span className="flex items-center gap-2 text-white">
-                  <Users className="size-4 text-white/40" /> {r.name}
+                  <Users className="size-4 text-white/60" /> {r.name}
                 </span>
                 <span className={cn("rounded-full px-2.5 py-0.5 text-xs", r.status === "qualified" ? "bg-accent/10 text-accent" : "bg-white/10 text-white/55")}>
                   {r.status === "qualified" ? "Finished interview" : "Joined"}
@@ -178,7 +178,7 @@ function Stat({ label, value, highlight }: { label: string; value: number; highl
   return (
     <div className="glass rounded-2xl p-4 text-center">
       <p className={cn("font-display text-3xl font-semibold", highlight ? "text-gradient-brand" : "text-white")}>{value}</p>
-      <p className="mt-0.5 text-xs text-white/45">{label}</p>
+      <p className="mt-0.5 text-xs text-white/60">{label}</p>
     </div>
   );
 }

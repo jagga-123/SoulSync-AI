@@ -109,7 +109,7 @@ export function WaitlistAdminView() {
           <tbody className="divide-y divide-white/5">
             {list.data?.entries.map((entry) => (
               <tr key={entry.id}>
-                <Td className="tabular-nums text-white/45">{entry.position}</Td>
+                <Td className="tabular-nums text-white/60">{entry.position}</Td>
                 <Td className="text-white">
                   {entry.email} {entry.status !== "waiting" && <Chip tone={entry.status === "joined" ? "good" : "brand"}>{entry.status}</Chip>}
                 </Td>
@@ -125,7 +125,7 @@ export function WaitlistAdminView() {
             ))}
             {list.data?.entries.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-10 text-center text-white/45">
+                <td colSpan={4} className="px-4 py-10 text-center text-white/60">
                   Nobody here.
                 </td>
               </tr>

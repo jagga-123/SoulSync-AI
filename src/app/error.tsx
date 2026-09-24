@@ -34,7 +34,7 @@ export default function AppError({ error, reset }: { error: Error & { digest?: s
         <p className="mx-auto mt-2 max-w-md text-sm text-white/55">
           We hit an unexpected problem and have been notified. You can try again, or head back to your dashboard.
         </p>
-        {error.digest && <p className="mt-3 font-mono text-xs text-white/30">Reference: {error.digest}</p>}
+        {error.digest && <p className="mt-3 font-mono text-xs text-white/60">Reference: {error.digest}</p>}
       </div>
       <div className="flex gap-3">
         <Button onClick={reset} className="gap-2 rounded-full bg-gradient-brand text-white hover:opacity-90">

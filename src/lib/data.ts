@@ -1,45 +1,65 @@
 import {
-  Brain,
-  Gauge,
-  MessageSquareText,
-  ShieldCheck,
-  Fingerprint,
-  CalendarHeart,
-  MessageCircleHeart,
-  Sparkles,
   HeartHandshake,
+  Lock,
+  MessageCircle,
+  MessageCircleHeart,
 } from "lucide-react";
 
+import { TIER_LABELS } from "@/lib/ai-format";
 import type {
-  NavLink,
-  PersonalityTrait,
-  ProcessStep,
+  ExampleProfile,
   Feature,
-  Testimonial,
-  TrustStat,
-  ProfileCard,
+  FoundingNote,
+  MatchArea,
+  NavLink,
+  ProcessStep,
+  TrustFact,
 } from "@/types";
 
+/*
+ * Landing-page content.
+ *
+ * House rule: every statement here must be provable from the product itself — no invented metrics,
+ * no invented people, no features that don't exist. Anything illustrative is labelled "Example" where
+ * it is shown. If a claim can't point at code or a real query, it doesn't belong on this page.
+ */
+
+/** The project's public source code (the repository is public). */
+export const SOURCE_CODE_URL = "https://github.com/jagga-123/SoulSync-AI";
+
 export const NAV_LINKS: NavLink[] = [
-  { label: "Matchmaking", href: "#matchmaking" },
-  { label: "Live demo", href: "#matching-demo" },
-  { label: "How it works", href: "#how-it-works" },
-  { label: "Features", href: "#features" },
-  { label: "Stories", href: "#testimonials" },
+  { label: "How it works", href: "/#how-it-works" },
+  { label: "See an example", href: "/#matching-demo" },
+  { label: "What's different", href: "/#features" },
+  { label: "Early access", href: "/#early-access" },
 ];
 
-export const TRUST_STATS: TrustStat[] = [
-  { value: 2.4, decimals: 1, suffix: "M+", label: "Matches Created" },
-  { value: 94, suffix: "%", label: "Compatibility Accuracy" },
-  { value: 150, suffix: "+", label: "Countries" },
+/** Three facts that are true today (interview length: interview-view intro; six areas: compatibility engine; privacy: public-profile shape). */
+export const TRUST_FACTS: TrustFact[] = [
+  {
+    title: "Chat, don't swipe",
+    description: "15–25 friendly questions, about ten minutes. That's your whole setup.",
+    icon: MessageCircleHeart,
+  },
+  {
+    title: "Matches come with reasons",
+    description: "We compare six things and tell you what you have in common, in plain words.",
+    icon: HeartHandshake,
+  },
+  {
+    title: "Your report is yours",
+    description: "Only you see your full personality report. Matches see just what you share.",
+    icon: Lock,
+  },
 ];
 
-export const PROFILE_CARDS: ProfileCard[] = [
+/** Fictional people for the hero illustration — shown with an "Example" caption. Labels use the real match wording. */
+export const EXAMPLE_PROFILES: ExampleProfile[] = [
   {
     name: "Aria",
     age: 27,
     role: "Product Designer",
-    match: 96,
+    label: TIER_LABELS.exceptional,
     initials: "A",
     gradient: "from-primary to-secondary",
   },
@@ -47,7 +67,7 @@ export const PROFILE_CARDS: ProfileCard[] = [
     name: "Noah",
     age: 29,
     role: "Music Producer",
-    match: 91,
+    label: TIER_LABELS.strong,
     initials: "N",
     gradient: "from-accent to-secondary",
   },
@@ -55,164 +75,78 @@ export const PROFILE_CARDS: ProfileCard[] = [
     name: "Maya",
     age: 26,
     role: "Marine Biologist",
-    match: 88,
+    label: TIER_LABELS.promising,
     initials: "M",
     gradient: "from-secondary to-primary",
   },
 ];
 
-export const PERSONALITY_TRAITS: PersonalityTrait[] = [
-  {
-    label: "Emotional Intelligence",
-    value: 92,
-    description: "How you read, express, and respond to emotion.",
-  },
-  {
-    label: "Communication Style",
-    value: 88,
-    description: "The rhythm and openness of how you connect.",
-  },
-  {
-    label: "Core Values Alignment",
-    value: 95,
-    description: "Shared beliefs about what truly matters.",
-  },
-  {
-    label: "Lifestyle Compatibility",
-    value: 84,
-    description: "Pace, habits, and how you spend your time.",
-  },
+/**
+ * What the compatibility engine compares and how much each area counts.
+ * Mirrors COMPATIBILITY_WEIGHTS in backend/src/ai/compatibility.ts — update both together.
+ */
+export const MATCH_AREAS: MatchArea[] = [
+  { label: "What matters to you", weight: 25, description: "Your values — what you care about most." },
+  { label: "What you enjoy", weight: 20, description: "The interests and activities you love." },
+  { label: "How you talk", weight: 15, description: "How you like to connect and talk things through." },
+  { label: "How you live", weight: 15, description: "Your pace, habits and how you spend your time." },
+  { label: "What you want", weight: 15, description: "What you're each looking for in a relationship." },
+  { label: "Who you are", weight: 10, description: "Your temperament and how you show up." },
 ];
 
 export const PROCESS_STEPS: ProcessStep[] = [
   {
     index: "01",
-    title: "AI Interview",
+    title: "Have a conversation",
     description:
-      "Have a natural, guided conversation with our AI. No boring forms, just honest questions that reveal who you really are.",
+      "Sol, our AI interviewer, asks 15–25 friendly questions and builds on each answer. Say it your way — there are no wrong answers.",
     icon: MessageCircleHeart,
   },
   {
     index: "02",
-    title: "Smart Matching",
+    title: "See who fits — and why",
     description:
-      "Our neural matching engine analyzes 200+ compatibility signals to surface people who genuinely align with you.",
-    icon: Sparkles,
+      "We compare your values, interests, how you communicate, your lifestyle, what you want and your personality. Every match shows you the reasons.",
+    icon: HeartHandshake,
   },
   {
     index: "03",
-    title: "Meaningful Connections",
+    title: "Say hello",
     description:
-      "Skip the small talk. Get AI-suggested conversation starters and date ideas built for real chemistry.",
-    icon: HeartHandshake,
+      "When you both say yes, start chatting. You stay in control: pass, block or report anyone, any time.",
+    icon: MessageCircle,
   },
 ];
 
 export const FEATURES: Feature[] = [
   {
-    title: "AI Personality Analysis",
+    title: "Conversation first",
     description:
-      "Deep-learning models map your personality across 12 dimensions in minutes, not weeks of guesswork.",
-    icon: Brain,
+      "Your profile is built from what you say, not what you tick. Our AI asks, you answer in your own words.",
+    icon: MessageCircleHeart,
   },
   {
-    title: "Compatibility Scoring",
+    title: "Reasons, not mystery scores",
     description:
-      "Every match comes with a transparent, explainable score, so you always know why you were paired.",
-    icon: Gauge,
+      "Every match comes with a plain-English explanation and the interests, values and goals you share.",
+    icon: HeartHandshake,
   },
   {
-    title: "Smart Conversations",
-    description:
-      "AI-crafted icebreakers keep every conversation flowing naturally toward a real connection.",
-    icon: MessageSquareText,
-  },
-  {
-    title: "Privacy First",
-    description:
-      "Your data is encrypted end-to-end and never sold. You decide exactly what gets shared, always.",
-    icon: ShieldCheck,
-  },
-  {
-    title: "Secure Matching",
-    description:
-      "Verified profiles and on-device photo checks keep the community safe, real, and authentic.",
-    icon: Fingerprint,
-  },
-  {
-    title: "Date Planning",
-    description:
-      "Personalized date ideas generated from both your interests, mapped to whatever city you're in.",
-    icon: CalendarHeart,
+    title: "Private by design",
+    description: "Your full report is visible only to you. We never send marketing email.",
+    icon: Lock,
   },
 ];
 
-export const TESTIMONIALS: Testimonial[] = [
-  {
-    name: "Aanya & Rohit",
-    location: "Bengaluru, India",
-    quote:
-      "SoulSync understood what I wanted before I could put it into words. Three months in and it still feels like magic.",
-    rating: 5,
-    initials: "AR",
-  },
-  {
-    name: "Priya Sharma",
-    location: "Mumbai, India",
-    quote:
-      "The compatibility score wasn't just a number, every match actually made sense once we talked.",
-    rating: 5,
-    initials: "PS",
-  },
-  {
-    name: "Marcus Tan",
-    location: "Austin, USA",
-    quote:
-      "I'd tried every app out there. This is the first one that felt like it actually knew me.",
-    rating: 5,
-    initials: "MT",
-  },
-  {
-    name: "Sofia Reyes",
-    location: "Lisbon, Portugal",
-    quote:
-      "The AI interview felt like therapy in the best way. My match gets my humor immediately.",
-    rating: 5,
-    initials: "SR",
-  },
-  {
-    name: "Jordan Kim",
-    location: "Toronto, Canada",
-    quote:
-      "Meaningful connections, not endless swiping. That promise actually held true for me.",
-    rating: 5,
-    initials: "JK",
-  },
-  {
-    name: "Emily & Sam",
-    location: "London, UK",
-    quote:
-      "We got engaged eight months after matching. SoulSync saw something we hadn't seen yet.",
-    rating: 5,
-    initials: "ES",
-  },
-  {
-    name: "Diego Morales",
-    location: "Mexico City, Mexico",
-    quote:
-      "The date planning feature alone is worth it. Zero effort, genuinely great first dates.",
-    rating: 5,
-    initials: "DM",
-  },
-  {
-    name: "Hana Yoshida",
-    location: "Seoul, South Korea",
-    quote:
-      "Privacy was my biggest worry. SoulSync made me feel safe from the very first message.",
-    rating: 5,
-    initials: "HY",
-  },
-];
+/**
+ * Real quotes from real, consenting members — first name (and city, if they agree) only.
+ * The "Founding notes" block renders nothing until there are at least three, so add entries here
+ * only when a member has actually said them and agreed to be quoted. Never invent one.
+ */
+export const FOUNDING_NOTES: FoundingNote[] = [];
+export const MIN_FOUNDING_NOTES = 3;
+
+/* ---- The scroll-through demo ("See an example") — all fictional, labelled "Example" ---- */
 
 export const DEMO_INPUTS: string[] = [
   "Introvert",
@@ -220,57 +154,30 @@ export const DEMO_INPUTS: string[] = [
   "Wants a serious relationship",
 ];
 
-export const DEMO_TRAITS: PersonalityTrait[] = [
-  {
-    label: "Introversion",
-    value: 91,
-    description: "Recharges through quiet, one-on-one time.",
-  },
-  {
-    label: "Depth over small talk",
-    value: 88,
-    description: "Prefers meaningful conversation from the very start.",
-  },
-  {
-    label: "Commitment readiness",
-    value: 95,
-    description: "Actively looking for something long-term.",
-  },
+/** What the demo "notices" about the example answers — plain sentences, no scores. */
+export const DEMO_NOTICED: string[] = [
+  "Recharges with quiet, one-to-one time",
+  "Prefers a real conversation to small talk",
+  "Is looking for something long-term",
 ];
 
 export const DEMO_MATCH = {
   name: "Elena",
   age: 28,
   role: "Novelist & Editor",
-  match: 96,
+  label: TIER_LABELS.exceptional,
   initials: "E",
   gradient: "from-primary to-secondary",
   reasons: [
-    "Both recharge with quiet nights in, not crowded rooms",
-    "Shares your love of getting lost in a good book",
-    "Looking for the same kind of long-term commitment",
+    "You both recharge with quiet nights in, not crowded rooms",
+    "You both love getting lost in a good book",
+    "You're both looking for something long-term",
   ],
 };
 
 export const MATCHING_STAGES = [
-  {
-    key: "thinking",
-    label: "AI Thinking",
-    caption: "Reading your answers…",
-  },
-  {
-    key: "analysis",
-    label: "Personality Analysis",
-    caption: "Mapping your traits…",
-  },
-  {
-    key: "calculation",
-    label: "Compatibility Calculation",
-    caption: "Scanning for alignment…",
-  },
-  {
-    key: "match",
-    label: "Match Generation",
-    caption: "Here's who we found.",
-  },
+  { key: "listening", label: "Listening", caption: "Reading what you shared…" },
+  { key: "noticing", label: "Noticing", caption: "Noticing what matters to you…" },
+  { key: "comparing", label: "Comparing", caption: "Comparing six things you share…" },
+  { key: "introducing", label: "Introducing", caption: "Here's someone you might click with." },
 ] as const;

@@ -32,7 +32,7 @@ export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
         <div
           className={`mt-1 flex items-center gap-1 ${isOwn ? "justify-end" : "justify-start"}`}
         >
-          <span className={`text-[10px] ${isOwn ? "text-white/70" : "text-white/40"}`}>
+          <span className={`text-xs ${isOwn ? "text-white/70" : "text-white/60"}`}>
             {formatClockTime(message.createdAt)}
           </span>
           {isOwn &&

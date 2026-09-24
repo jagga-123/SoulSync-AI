@@ -1,26 +1,29 @@
-import { Check, Sparkles } from "lucide-react";
+import { Check, Heart } from "lucide-react";
 import { TIER_LABELS, TIER_STYLES } from "@/lib/ai-format";
 import type { CompatibilityTier } from "@/types/api";
 
 interface AIMatchPillProps {
   score: number;
   tier: CompatibilityTier;
-  /** Score only ("94%") for tight spaces; the full label stays available to
-   * screen readers and as a tooltip. */
+  /** A heart only, for tight spaces (the row already says why); the label and overlap stay available
+   * to screen readers and as a tooltip. */
   compact?: boolean;
   className?: string;
 }
 
-/** "94% Compatible" — tinted by how strong the match is. */
+/**
+ * The human label for a match — "You two click", "On the same wavelength"… The percentage is deliberately not
+ * the headline: it sits in the tooltip and is announced to screen readers as "overlap".
+ */
 export function AIMatchPill({ score, tier, compact = false, className = "" }: AIMatchPillProps) {
   return (
     <span
-      title={`${TIER_LABELS[tier]} — ${score}% compatible`}
+      title={`${TIER_LABELS[tier]} — ${score}% overlap`}
       className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold backdrop-blur-md ${TIER_STYLES[tier]} ${className}`}
     >
-      <Sparkles className="size-3.5" aria-hidden />
-      <span className="tabular-nums">{score}%</span>
-      <span className={compact ? "sr-only" : undefined}> Compatible</span>
+      <Heart className="size-3.5 shrink-0 fill-primary text-primary" aria-hidden />
+      <span className={compact ? "sr-only" : undefined}>{TIER_LABELS[tier]}</span>
+      <span className="sr-only"> ({score}% overlap)</span>
     </span>
   );
 }
@@ -39,7 +42,7 @@ export function AIReasons({ reasons, max = 3, className = "" }: AIReasonsProps) 
   return (
     <ul className={`space-y-1.5 ${className}`}>
       {shown.map((reason) => (
-        <li key={reason} className="flex items-start gap-2 text-xs leading-snug text-white/65">
+        <li key={reason} className="flex items-start gap-2 text-xs leading-snug text-white/75">
           <Check className="mt-0.5 size-3.5 shrink-0 text-accent" aria-hidden />
           <span>{reason}</span>
         </li>

@@ -283,7 +283,7 @@ export function ChatView() {
               <p className="truncate font-display text-sm font-semibold text-white">
                 {otherUser.fullName}
               </p>
-              <p className={`flex items-center gap-1.5 text-xs ${isOnline ? "text-accent" : "text-white/40"}`}>
+              <p className={`flex items-center gap-1.5 text-xs ${isOnline ? "text-accent" : "text-white/60"}`}>
                 <span className={`size-1.5 rounded-full ${isOnline ? "bg-accent" : "bg-white/30"}`} />
                 {isOnline ? "Online" : "Offline"}
               </p>
@@ -312,7 +312,13 @@ export function ChatView() {
         </div>
       )}
 
-      <div ref={scrollRef} data-lenis-prevent className="flex-1 space-y-3 overflow-y-auto px-4 py-4 sm:px-6">
+      <div
+        ref={scrollRef}
+        data-lenis-prevent
+        tabIndex={0}
+        aria-label="Conversation"
+        className="flex-1 space-y-3 overflow-y-auto px-4 py-4 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring sm:px-6"
+      >
         {messages === null ? (
           <MessageAreaSkeleton />
         ) : messages.length === 0 ? (

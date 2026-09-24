@@ -3,14 +3,14 @@
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Check, Loader2 } from "lucide-react";
-import { AIAvatar } from "@/components/ai/ai-avatar";
+import { HeartPulse } from "@/components/brand/heart-pulse";
 
 const STEPS = [
   "Reading everything you shared",
-  "Mapping your values and lifestyle",
-  "Understanding how you communicate",
-  "Estimating your personality traits",
-  "Writing your personality report",
+  "Noticing what matters to you",
+  "Hearing how you communicate",
+  "Sketching your personality",
+  "Writing your report — just for you",
 ];
 
 const STEP_MS = 1100;
@@ -36,9 +36,9 @@ export function AnalyzingScreen() {
       role="status"
       aria-live="polite"
     >
-      <AIAvatar active className="size-16" />
+      <HeartPulse className="size-16" />
       <div>
-        <h2 className="font-display text-xl font-semibold text-white">Analysing your interview</h2>
+        <h2 className="font-display text-xl font-semibold text-white">Reading what you shared</h2>
         <p className="mt-1.5 text-sm text-white/55">This only takes a moment.</p>
       </div>
 
@@ -65,7 +65,7 @@ export function AnalyzingScreen() {
                   <Loader2 className="size-3 animate-spin" />
                 ) : null}
               </span>
-              <span className={done || current ? "text-white/85" : "text-white/40"}>{step}</span>
+              <span className={done || current ? "text-white/85" : "text-white/60"}>{step}</span>
             </motion.li>
           );
         })}

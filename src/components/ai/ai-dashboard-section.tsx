@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
-  Brain,
+  HeartHandshake,
   CheckCircle2,
   MessageCircle,
   RotateCcw,
@@ -161,7 +161,7 @@ function InterviewCard({ status }: { status: AIStatus }) {
               style={{ width: `${percent}%` }}
             />
           </div>
-          <p className="mb-4 mt-2 text-xs text-white/45">
+          <p className="mb-4 mt-2 text-xs text-white/60">
             {interview.answered} answered
             {interview.canFinish ? " · you can finish any time" : ` · ${interview.min - interview.answered} more to unlock your report`}
           </p>
@@ -204,9 +204,9 @@ function PersonalityCard({ status }: { status: AIStatus }) {
 
   if (!profile) {
     return (
-      <Card icon={Brain} title="Personality">
-        <p className="mt-3 font-display text-lg font-semibold text-white/40">Not analysed yet</p>
-        <p className="mt-1 text-sm text-white/45">
+      <Card icon={HeartHandshake} title="Personality">
+        <p className="mt-3 font-display text-lg font-semibold text-white/60">Not analysed yet</p>
+        <p className="mt-1 text-sm text-white/60">
           Finish your AI interview to unlock your personality type, strengths and communication style.
         </p>
       </Card>
@@ -214,7 +214,7 @@ function PersonalityCard({ status }: { status: AIStatus }) {
   }
 
   return (
-    <Card icon={Brain} title="Personality">
+    <Card icon={HeartHandshake} title="Personality">
       <p className="mt-3 font-display text-2xl font-semibold">
         <span className="text-gradient-brand">{profile.personalityType}</span>
       </p>
@@ -248,17 +248,17 @@ function InsightsCard({
 }) {
   if (!status.hasAIProfile) {
     return (
-      <Card icon={TrendingUp} title="AI compatibility insights">
-        <p className="mt-3 font-display text-lg font-semibold text-white/40">Locked</p>
-        <p className="mt-1 text-sm text-white/45">
-          Complete your interview and every profile you see gets a personal compatibility score.
+      <Card icon={TrendingUp} title="Why you might click">
+        <p className="mt-3 font-display text-lg font-semibold text-white/60">Locked</p>
+        <p className="mt-1 text-sm text-white/60">
+          Finish your interview and every profile you see comes with the reasons you two might click.
         </p>
       </Card>
     );
   }
 
   return (
-    <Card icon={TrendingUp} title="AI compatibility insights">
+    <Card icon={TrendingUp} title="Why you might click">
       {recommendations === null ? (
         <div className="mt-4 space-y-3">
           <Skeleton className="h-12 rounded-2xl" />
@@ -289,9 +289,9 @@ function InsightsCard({
                   />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-white">{user.fullName}</p>
-                    <p className="truncate text-xs text-white/45">{ai.reasons[0] ?? "Worth a conversation"}</p>
+                    <p className="truncate text-xs text-white/60">{ai.reasons[0] ?? "Worth a conversation"}</p>
                   </div>
-                  <AIMatchPill score={ai.score} tier={ai.tier} compact className="shrink-0 px-2 py-0.5 text-[11px]" />
+                  <AIMatchPill score={ai.score} tier={ai.tier} compact className="shrink-0 px-2 py-0.5 text-xs" />
                 </Link>
               </li>
             ))}

@@ -5,9 +5,18 @@ export interface NavLink {
   href: string;
 }
 
-export interface PersonalityTrait {
+/** A plain, provable statement about the product (never a metric we can't back up). */
+export interface TrustFact {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+}
+
+/** One of the six things the compatibility engine compares, with the weight it really carries. */
+export interface MatchArea {
   label: string;
-  value: number;
+  /** Share of the overall read, in percent. Mirrors COMPATIBILITY_WEIGHTS in backend/src/ai/compatibility.ts. */
+  weight: number;
   description: string;
 }
 
@@ -24,26 +33,21 @@ export interface Feature {
   icon: LucideIcon;
 }
 
-export interface Testimonial {
-  name: string;
-  location: string;
+/** A real, consented quote from a member. The section stays hidden until there are enough of them. */
+export interface FoundingNote {
   quote: string;
-  rating: number;
-  initials: string;
+  /** First name only. */
+  name: string;
+  city?: string;
 }
 
-export interface TrustStat {
-  value: number;
-  suffix: string;
-  decimals?: number;
-  label: string;
-}
-
-export interface ProfileCard {
+/** A fictional profile used purely as an illustration on the landing page. Always shown labelled "Example". */
+export interface ExampleProfile {
   name: string;
   age: number;
   role: string;
-  match: number;
+  /** The match label shown on the card — the same wording the real product uses. */
+  label: string;
   initials: string;
   gradient: string;
 }

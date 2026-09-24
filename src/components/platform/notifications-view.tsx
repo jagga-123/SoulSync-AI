@@ -131,7 +131,7 @@ function NotificationCenter() {
       )}
 
       {isLoading ? (
-        <div className="flex justify-center py-20 text-white/40">
+        <div className="flex justify-center py-20 text-white/60">
           <Loader2 className="size-6 animate-spin" />
         </div>
       ) : items.length === 0 ? (

@@ -77,7 +77,7 @@ export function ProfileCard({ profile, liked, isLiking, onLike, ai, aiPending, o
                   </span>
                 ))}
                 {profile.interests.length > 4 && (
-                  <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-white/40">
+                  <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-white/60">
                     +{profile.interests.length - 4}
                   </span>
                 )}
@@ -90,7 +90,7 @@ export function ProfileCard({ profile, liked, isLiking, onLike, ai, aiPending, o
               </div>
             )}
             {!ai && aiPending && (
-              <p className="text-xs text-white/35">AI compatibility unlocks when they finish their interview.</p>
+              <p className="text-xs text-white/60">You’ll see why you two match once they finish their interview.</p>
             )}
 
             <Button

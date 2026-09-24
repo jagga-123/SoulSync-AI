@@ -29,7 +29,7 @@ export function InterviewProgress({ progress }: InterviewProgressProps) {
           style={{ left: `${minMarker}%` }}
         />
       </div>
-      <div className="mt-1.5 flex items-center justify-between text-[11px] text-white/45">
+      <div className="mt-1.5 flex items-center justify-between text-xs text-white/60">
         <span>
           {answered} of up to {max} answered
         </span>

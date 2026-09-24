@@ -43,7 +43,7 @@ export function UserMenu() {
         aria-haspopup="true"
         aria-expanded={open}
         aria-label="Account menu"
-        className="flex items-center gap-1.5 rounded-full p-0.5 pr-2 transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:outline-none"
+        className="flex h-11 items-center gap-1.5 rounded-full px-1.5 transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:outline-none"
       >
         <AvatarOrb initials={getInitials(user.fullName)} gradient="from-primary to-secondary" className="size-8 text-xs" />
         <ChevronDown className="size-3.5 text-white/50" />
@@ -60,8 +60,8 @@ export function UserMenu() {
           >
             <div className="border-b border-white/10 px-4 py-3">
               <p className="truncate text-sm font-semibold text-white">{user.fullName}</p>
-              <p className="truncate text-xs text-white/45">{user.email}</p>
-              <span className="mt-2 inline-flex rounded-full bg-gradient-brand px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+              <p className="truncate text-xs text-white/60">{user.email}</p>
+              <span className="mt-2 inline-flex rounded-full bg-gradient-brand px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-white">
                 {PLAN_NAMES[plan]}
               </span>
             </div>
@@ -69,7 +69,7 @@ export function UserMenu() {
             <nav className="p-1.5">
               {ITEMS.map(({ href, label, icon: Icon }) => (
                 <Link key={href} href={href} className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-white/75 transition-colors hover:bg-white/8 hover:text-white">
-                  <Icon className="size-4 text-white/45" />
+                  <Icon className="size-4 text-white/60" />
                   {label}
                 </Link>
               ))}
@@ -90,7 +90,7 @@ export function UserMenu() {
                 }}
                 className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm text-white/75 transition-colors hover:bg-white/8 hover:text-white"
               >
-                <LogOut className="size-4 text-white/45" />
+                <LogOut className="size-4 text-white/60" />
                 Sign out
               </button>
             </div>

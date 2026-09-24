@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Bell,
-  Brain,
+  HeartHandshake,
   CalendarDays,
   CircleUserRound,
   CreditCard,
@@ -140,7 +140,7 @@ export function DashboardView() {
   if (isAuthLoading || !user) {
     return (
       <div className="flex min-h-svh items-center justify-center">
-        <Sparkles className="size-6 animate-pulse text-white/40" />
+        <Sparkles className="size-6 animate-pulse text-white/60" />
       </div>
     );
   }
@@ -198,7 +198,7 @@ export function DashboardView() {
           <Badge variant="outline" className="mt-2 border-white/15 text-white/70">
             {user.role}
           </Badge>
-          <div className="mt-4 flex items-center gap-1.5 text-xs text-white/45">
+          <div className="mt-4 flex items-center gap-1.5 text-xs text-white/60">
             <CalendarDays className="size-3.5" />
             Member since {formatDate(user.createdAt)}
           </div>
@@ -220,8 +220,12 @@ export function DashboardView() {
               style={{ width: `${isProfileLoading ? 0 : completion}%` }}
             />
           </div>
-          <p className="mt-3 text-xs text-white/45">
-            {profile ? "Add a bio, interests and photo for a stronger profile." : "Complete your profile to start matching."}
+          <p className="mt-3 text-xs text-white/60">
+            {!profile
+              ? "Complete your profile to start matching."
+              : completion < 100
+                ? "Add a bio, interests and photo for a stronger profile."
+                : "Your profile is complete."}
           </p>
         </div>
 
@@ -234,7 +238,7 @@ export function DashboardView() {
             {profile ? GOAL_LABELS[profile.relationshipGoal] : "Not set yet"}
           </p>
           {profile && (
-            <div className="mt-4 flex items-center gap-1.5 text-xs text-white/45">
+            <div className="mt-4 flex items-center gap-1.5 text-xs text-white/60">
               <MapPin className="size-3.5" />
               {profile.city}
             </div>
@@ -252,7 +256,7 @@ export function DashboardView() {
           <p className="mt-3 font-display text-3xl font-semibold text-white">
             {conversationsCount}
           </p>
-          <p className="text-xs text-white/45">
+          <p className="text-xs text-white/60">
             conversation{conversationsCount === 1 ? "" : "s"}
           </p>
           <div className="mt-4 flex items-center gap-1.5 text-xs">
@@ -262,7 +266,7 @@ export function DashboardView() {
                 <span className="text-accent">{unreadMessagesCount} unread</span>
               </>
             ) : (
-              <span className="text-white/40">All caught up</span>
+              <span className="text-white/60">All caught up</span>
             )}
           </div>
         </Link>
@@ -277,7 +281,7 @@ export function DashboardView() {
             <Crown className="size-5" />
           </span>
           <div className="min-w-0 sm:w-40 sm:shrink-0">
-            <p className="text-xs font-medium uppercase tracking-wider text-white/45">Your plan</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-white/60">Your plan</p>
             <p className="font-display text-lg font-semibold text-white">{PLAN_NAMES[features.plan]}</p>
           </div>
           <p className="hidden min-w-0 flex-1 border-l border-white/10 pl-5 text-sm text-white/55 md:block">
@@ -359,7 +363,7 @@ export function DashboardView() {
           />
           <QuickAction
             href="/personality-report"
-            icon={Brain}
+            icon={HeartHandshake}
             title="Personality report"
             description="Your AI-generated profile"
           />
@@ -427,7 +431,7 @@ function QuickAction({
       }`}
     >
       {Boolean(badge) && (
-        <span className="absolute right-4 top-4 flex min-w-5 items-center justify-center rounded-full bg-gradient-brand px-1.5 py-0.5 text-[11px] font-semibold text-white">
+        <span className="absolute right-4 top-4 flex min-w-5 items-center justify-center rounded-full bg-gradient-brand px-1.5 py-0.5 text-xs font-semibold text-white">
           {badge}
         </span>
       )}
@@ -436,7 +440,7 @@ function QuickAction({
       </span>
       <div>
         <p className="text-sm font-semibold text-white">{title}</p>
-        <p className="mt-0.5 text-xs text-white/45">{description}</p>
+        <p className="mt-0.5 text-xs text-white/60">{description}</p>
       </div>
     </div>
   );

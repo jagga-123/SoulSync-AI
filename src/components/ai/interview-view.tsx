@@ -5,7 +5,7 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRight,
-  Brain,
+  Heart,
   CheckCircle2,
   Clock,
   Loader2,
@@ -260,7 +260,7 @@ export function InterviewView() {
           <AIAvatar active={pendingAnswer !== null || showAnalyzing} className="size-10" />
           <div className="min-w-0 flex-1">
             <h1 className="font-display text-sm font-semibold text-white">AI Interview</h1>
-            <p className="truncate text-xs text-white/45">
+            <p className="truncate text-xs text-white/60">
               {isCompleted
                 ? "Complete"
                 : interview.progress.currentCategory
@@ -295,6 +295,8 @@ export function InterviewView() {
         ref={scrollRef}
         data-lenis-prevent
         role="log"
+        aria-label="Interview conversation"
+        tabIndex={0}
         aria-live="polite"
         aria-relevant="additions"
         className="flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-6"
@@ -346,7 +348,7 @@ export function InterviewView() {
                 disabled={!awaitingAnswer || showAnalyzing}
                 aria-label="Your answer"
                 placeholder="Type your answer…"
-                className="max-h-40 min-h-[3.25rem] flex-1 resize-none rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-white/40 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
+                className="max-h-40 min-h-[3.25rem] flex-1 resize-none rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-white/50 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
               />
               <Button
                 type="submit"
@@ -359,7 +361,7 @@ export function InterviewView() {
               </Button>
             </div>
 
-            <div className="mt-2 flex items-center justify-between gap-3 px-1 text-[11px] text-white/40">
+            <div className="mt-2 flex items-center justify-between gap-3 px-1 text-xs text-white/60">
               <span className="hidden sm:inline">Enter to send · Shift+Enter for a new line</span>
               <span className="tabular-nums">
                 {draft.length}/{MAX_ANSWER_LENGTH}
@@ -407,7 +409,7 @@ function AssistantMessage({
     >
       <AIAvatar />
       <div className="min-w-0 max-w-[85%]">
-        <span className="mb-1 block pl-1 text-[10px] font-medium uppercase tracking-wider text-white/35">
+        <span className="mb-1 block pl-1 text-xs font-medium uppercase tracking-wider text-white/60">
           {categoryLabel(message.category)}
         </span>
         <div className="glass rounded-2xl rounded-bl-md px-4 py-3 text-sm leading-relaxed text-white/90">
@@ -566,9 +568,9 @@ const INTRO_POINTS = [
     body: "Answer 15–25 friendly questions in your own words. Each one builds on what you said.",
   },
   {
-    icon: Brain,
-    title: "AI reads between the lines",
-    body: "We work out your personality, values, lifestyle and how you communicate — then match on that.",
+    icon: Heart,
+    title: "I look for what matters",
+    body: "Your values, lifestyle and the way you communicate — then we match on that.",
   },
   {
     icon: Lock,
@@ -605,11 +607,11 @@ function IntroPanel({
           <AIAvatar active className="size-16" />
         </div>
         <h1 className="mt-6 font-display text-3xl font-semibold text-white sm:text-4xl">
-          Let&apos;s get to <span className="text-gradient-brand">know you</span>
+          Hi, I&apos;m <span className="text-gradient-brand">Sol</span> — an AI
         </h1>
-        <p className="mx-auto mt-3 max-w-md text-pretty text-white/55">
-          Instead of swiping on photos, you&apos;ll chat with SoulSync AI. It learns who you really are
-          — then finds people who genuinely fit.
+        <p className="mx-auto mt-3 max-w-md text-pretty text-white/70">
+          I&apos;m not a person. I&apos;ll ask you a few friendly questions so we can find people who
+          genuinely fit you.
         </p>
       </motion.div>
 
@@ -629,6 +631,18 @@ function IntroPanel({
             <p className="mt-1 text-sm leading-relaxed text-white/55">{point.body}</p>
           </motion.div>
         ))}
+      </div>
+
+      <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-left">
+        <h2 className="text-sm font-semibold text-white">Before we start</h2>
+        <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-white/70">
+          <li>
+            Your answers are sent to an AI service so your report can be written, and they&apos;re stored in
+            your account so we can match you.
+          </li>
+          <li>The AI can be wrong. Your report is a starting point, not a verdict — you can redo it whenever you like.</li>
+          <li>Please don&apos;t share anything you&apos;d want kept private, like health details or ID numbers.</li>
+        </ul>
       </div>
 
       {error && (

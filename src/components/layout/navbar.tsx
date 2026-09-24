@@ -58,7 +58,7 @@ export function Navbar() {
             scrolled ? "glass shadow-lg shadow-black/20" : "bg-transparent",
           )}
         >
-          <a href={isAuthed && pathname !== "/" ? "/dashboard" : "#top"} className="group flex items-center gap-2">
+          <a href={isAuthed && pathname !== "/" ? "/dashboard" : "/#top"} className="group flex items-center gap-2">
             <span className="relative flex size-8 items-center justify-center rounded-xl bg-gradient-brand">
               <Heart className="size-4 fill-white text-white" />
               <span className="absolute inset-0 rounded-xl bg-gradient-brand opacity-60 blur-md transition-opacity group-hover:opacity-90" />
@@ -73,7 +73,7 @@ export function Navbar() {
               <NavAnchor
                 key={link.href}
                 href={link.href}
-                className="text-sm font-medium text-white/70 transition-colors hover:text-white"
+                className="text-sm font-medium text-white/75 transition-colors hover:text-white"
               >
                 {link.label}
               </NavAnchor>
@@ -93,7 +93,7 @@ export function Navbar() {
             </Button>
             <MagneticButton>
               <Button asChild className="bg-gradient-brand text-white shadow-lg shadow-primary/25 hover:opacity-90">
-                <Link href="/register">Get Started</Link>
+                <Link href="/register">Get started</Link>
               </Button>
             </MagneticButton>
           </div>
@@ -101,7 +101,7 @@ export function Navbar() {
           <button
             type="button"
             aria-label="Toggle navigation menu"
-            className="flex size-9 items-center justify-center rounded-lg text-white md:hidden"
+            className="flex size-11 items-center justify-center rounded-lg text-white md:hidden"
             onClick={() => setOpen((v) => !v)}
           >
             {open ? <X className="size-5" /> : <Menu className="size-5" />}
@@ -136,7 +136,7 @@ export function Navbar() {
                   </Button>
                   <Button asChild className="justify-center bg-gradient-brand text-white">
                     <Link href="/register" onClick={() => setOpen(false)}>
-                      Get Started
+                      Get started
                     </Link>
                   </Button>
                 </div>

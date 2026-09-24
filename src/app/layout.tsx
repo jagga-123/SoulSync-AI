@@ -9,6 +9,7 @@ import { ScrollProgress } from "@/components/layout/scroll-progress";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { PlatformProvider } from "@/components/platform/platform-provider";
+import { SITE_URL } from "@/lib/site";
 
 import "./globals.css";
 
@@ -25,23 +26,19 @@ const spaceGrotesk = Space_Grotesk({
   display: "swap",
 });
 
-const SITE_URL = "https://soulsyncai.com";
-
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "SoulSync AI — Find Someone Who Truly Understands You",
+    default: "SoulSync AI — Start with who you are",
     template: "%s | SoulSync AI",
   },
   description:
-    "SoulSync AI is an AI-powered dating platform that learns your personality through real conversation and matches you with people you're genuinely compatible with.",
+    "A conversation-first dating app. Chat with our AI for about ten minutes, then meet people who share your values and what you're looking for. Free to join.",
   keywords: [
     "AI dating app",
     "AI matchmaking",
-    "compatibility matching",
     "SoulSync AI",
     "online dating",
-    "relationship AI",
   ],
   authors: [{ name: "SoulSync AI" }],
   creator: "SoulSync AI",
@@ -49,16 +46,16 @@ export const metadata: Metadata = {
     type: "website",
     url: SITE_URL,
     siteName: "SoulSync AI",
-    title: "SoulSync AI — Find Someone Who Truly Understands You",
+    title: "SoulSync AI — Start with who you are",
     description:
-      "AI-powered matchmaking that learns your personality and matches you with people you're genuinely compatible with.",
+      "Chat with our AI for about ten minutes, then meet people who share your values and what you're looking for. Free to join.",
     images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "SoulSync AI — Find Someone Who Truly Understands You",
+    title: "SoulSync AI — Start with who you are",
     description:
-      "AI-powered matchmaking that learns your personality and matches you with people you're genuinely compatible with.",
+      "Chat with our AI for about ten minutes, then meet people who share your values and what you're looking for. Free to join.",
     images: ["/opengraph-image"],
   },
   robots: {

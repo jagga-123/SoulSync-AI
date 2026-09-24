@@ -79,7 +79,7 @@ function MockCheckout() {
       </div>
 
       <div>
-        <p className="text-xs uppercase tracking-wider text-white/40">You&apos;re subscribing to</p>
+        <p className="text-xs uppercase tracking-wider text-white/60">You&apos;re subscribing to</p>
         <p className="mt-1 font-display text-2xl font-semibold text-white">{PLAN_NAMES[details.plan]}</p>
         <p className="mt-1 text-white/60">
           {formatMoney(amount, "usd")} billed {details.interval}

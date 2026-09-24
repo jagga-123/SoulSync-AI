@@ -71,7 +71,7 @@ function Billing() {
         <AlertDescription>{error}</AlertDescription>
       </Alert>
     ) : (
-      <div className="flex justify-center py-20 text-white/40">
+      <div className="flex justify-center py-20 text-white/60">
         <Loader2 className="size-6 animate-spin" />
       </div>
     );
@@ -99,7 +99,7 @@ function Billing() {
       <Section>
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wider text-white/40">Current plan</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-white/60">Current plan</p>
             <p className="mt-1 font-display text-3xl font-semibold text-white">{sub.planName}</p>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <StatusPill status={ending ? "ending" : sub.status} />
@@ -147,14 +147,14 @@ function Billing() {
 
       <Section title="Payment history" description="Receipts for every charge on your account.">
         {payments.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 py-8 text-center text-white/45">
+          <div className="flex flex-col items-center gap-2 py-8 text-center text-white/60">
             <CreditCard className="size-6" />
             <p className="text-sm">No payments yet.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[30rem] text-left text-sm">
-              <thead className="text-xs uppercase tracking-wider text-white/35">
+              <thead className="text-xs uppercase tracking-wider text-white/60">
                 <tr>
                   <th className="pb-3 font-medium">Date</th>
                   <th className="pb-3 font-medium">Description</th>
@@ -214,7 +214,7 @@ function Billing() {
 function Detail({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-xs text-white/40">{label}</dt>
+      <dt className="text-xs text-white/60">{label}</dt>
       <dd className="mt-0.5 font-medium text-white">{value}</dd>
     </div>
   );

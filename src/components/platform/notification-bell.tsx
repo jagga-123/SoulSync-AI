@@ -39,7 +39,7 @@ export function NotificationBell() {
         aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"}
         aria-haspopup="true"
         aria-expanded={open}
-        className="relative flex size-9 items-center justify-center rounded-full text-white/75 transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:outline-none"
+        className="relative flex size-11 items-center justify-center rounded-full text-white/75 transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:outline-none"
       >
         <Bell className="size-[18px]" />
         <AnimatePresence>
@@ -49,7 +49,7 @@ export function NotificationBell() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0 }}
-              className="absolute -right-0.5 -top-0.5 flex min-w-[18px] items-center justify-center rounded-full bg-gradient-brand px-1 text-[10px] font-bold leading-[18px] text-white ring-2 ring-background"
+              className="absolute -right-0.5 -top-0.5 flex min-w-[18px] items-center justify-center rounded-full bg-gradient-brand px-1 text-xs font-bold leading-[18px] text-white ring-2 ring-background"
             >
               {badge}
             </motion.span>
@@ -72,7 +72,7 @@ export function NotificationBell() {
                 type="button"
                 onClick={() => void markAllRead()}
                 disabled={unreadCount === 0}
-                className="flex items-center gap-1 text-xs font-medium text-accent transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:text-white/30"
+                className="flex items-center gap-1 text-xs font-medium text-accent transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:text-white/60"
               >
                 <CheckCheck className="size-3.5" />
                 Mark all read
@@ -81,12 +81,12 @@ export function NotificationBell() {
 
             <div data-lenis-prevent className="max-h-[26rem] overflow-y-auto divide-y divide-white/5">
               {isLoadingRecent && recent.length === 0 ? (
-                <div className="flex items-center justify-center py-10 text-white/40">
+                <div className="flex items-center justify-center py-10 text-white/60">
                   <Loader2 className="size-5 animate-spin" />
                 </div>
               ) : recent.length === 0 ? (
                 <div className="flex flex-col items-center gap-2 px-6 py-10 text-center">
-                  <BellOff className="size-6 text-white/30" />
+                  <BellOff className="size-6 text-white/60" />
                   <p className="text-sm text-white/55">You&apos;re all caught up.</p>
                 </div>
               ) : (

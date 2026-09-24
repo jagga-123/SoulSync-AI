@@ -24,7 +24,7 @@ export function AppPage({ title, description, actions, width = "default", childr
   if (isLoading || !user) {
     return (
       <div className="flex min-h-svh items-center justify-center">
-        <Sparkles className="size-6 animate-pulse text-white/40" />
+        <Sparkles className="size-6 animate-pulse text-white/60" />
       </div>
     );
   }

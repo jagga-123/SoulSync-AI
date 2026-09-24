@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { AIAvatar } from "@/components/ai/ai-avatar";
+import { TypingHearts } from "@/components/brand/heart-pulse";
 
 const DEFAULT_PHRASES = [
   "Reading your answer",
@@ -17,7 +18,6 @@ interface ThinkingIndicatorProps {
 /** The AI's "thinking" state: pulsing avatar, animated dots, and a status
  * line that cycles so a slow response still feels alive. */
 export function ThinkingIndicator({ phrases = DEFAULT_PHRASES }: ThinkingIndicatorProps) {
-  const reduceMotion = useReducedMotion();
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -38,15 +38,8 @@ export function ThinkingIndicator({ phrases = DEFAULT_PHRASES }: ThinkingIndicat
     >
       <AIAvatar active />
       <div className="glass flex items-center gap-3 rounded-2xl rounded-bl-md px-4 py-3">
-        <span className="flex gap-1" aria-hidden>
-          {[0, 1, 2].map((i) => (
-            <motion.span
-              key={i}
-              className="size-1.5 rounded-full bg-accent"
-              animate={reduceMotion ? undefined : { y: [0, -4, 0], opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 0.9, repeat: Infinity, delay: i * 0.16, ease: "easeInOut" }}
-            />
-          ))}
+        <span aria-hidden>
+          <TypingHearts />
         </span>
         <AnimatePresence mode="wait">
           <motion.span

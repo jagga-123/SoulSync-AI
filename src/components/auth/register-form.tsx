@@ -178,6 +178,9 @@ export function RegisterForm() {
           {isSubmitting && <Loader2 className="size-4 animate-spin" />}
           {isSubmitting ? "Creating account..." : "Create account"}
         </Button>
+        <p className="text-center text-xs leading-relaxed text-white/60">
+          SoulSync is for adults. By creating an account you confirm you&apos;re 18 or older.
+        </p>
       </form>
     </AuthCard>
   );
