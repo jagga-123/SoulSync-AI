@@ -140,6 +140,15 @@ export function DiscoverView() {
     };
   }, [user, mode]);
 
+  const hasFilters = Boolean(city || relationshipGoal || Object.values(advanced).some((x) => x !== undefined && x !== ""));
+
+  function clearFilters() {
+    setCityInput("");
+    setCity("");
+    setRelationshipGoal("");
+    setAdvanced({});
+  }
+
   function handleSearchSubmit(event: FormEvent) {
     event.preventDefault();
     setCity(cityInput.trim());
@@ -261,6 +270,7 @@ export function DiscoverView() {
             value={cityInput}
             onChange={(e) => setCityInput(e.target.value)}
             placeholder="Search by city"
+            aria-label="Search by city"
             className="pl-9"
           />
         </div>
@@ -271,7 +281,7 @@ export function DiscoverView() {
             setRelationshipGoal(value === ANY_GOAL ? "" : (value as RelationshipGoal))
           }
         >
-          <SelectTrigger className="w-full sm:w-56">
+          <SelectTrigger aria-label="Relationship goal" className="w-full sm:w-56">
             <SelectValue placeholder="Any relationship goal" />
           </SelectTrigger>
           <SelectContent>
@@ -318,14 +328,24 @@ export function DiscoverView() {
           isRecommended ? (
             <EmptyState
               icon={Sparkles}
-              title="No recommendations yet"
-              description="Matches are ranked once other people finish their AI interviews. Browse everyone in the meantime — new recommendations appear as more people join."
+              title="You're all caught up for now"
+              description="You've seen everyone we can suggest right now. New people show up as more members join — meanwhile, you can browse everyone."
+              actionLabel="Browse everyone"
+              onAction={() => setMode("all")}
+            />
+          ) : hasFilters ? (
+            <EmptyState
+              icon={Users}
+              title="No one fits those filters"
+              description="Try a different city or goal — or clear the filters to see everyone."
+              actionLabel="Clear filters"
+              onAction={clearFilters}
             />
           ) : (
             <EmptyState
               icon={Users}
-              title="No users found"
-              description="Try a different city or relationship goal — or check back later as more people join."
+              title="No one new to show right now"
+              description="You've seen everyone for now. New members join all the time — check back soon."
             />
           )
         ) : (

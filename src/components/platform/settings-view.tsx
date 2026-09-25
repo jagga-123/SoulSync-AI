@@ -34,7 +34,7 @@ const EMAIL_ROWS: Array<{ key: keyof EmailPrefs; label: string; description: str
 
 export function SettingsView() {
   return (
-    <AppPage title="Settings" description="Control how and when SoulSync AI gets in touch." width="wide">
+    <AppPage title="Settings" description="Control how and when SoulSync gets in touch." width="wide">
       {(user) => <Settings initialUser={user} />}
     </AppPage>
   );

@@ -3,7 +3,7 @@ import { MatchesView } from "@/components/matches/matches-view";
 
 export const metadata: Metadata = {
   title: "Matches",
-  description: "Your matches on SoulSync AI.",
+  description: "Your matches on SoulSync.",
   robots: { index: false, follow: false },
 };
 

@@ -16,7 +16,7 @@ export function AvatarOrb({
   return (
     <div
       className={cn(
-        "relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br font-display font-semibold text-white",
+        "relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br font-display font-semibold text-primary-foreground",
         gradient,
         ringed && "ring-2 ring-white/15",
         className,

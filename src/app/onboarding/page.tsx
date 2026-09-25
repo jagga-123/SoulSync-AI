@@ -3,7 +3,7 @@ import { OnboardingForm } from "@/components/auth/onboarding-form";
 
 export const metadata: Metadata = {
   title: "Complete your profile",
-  description: "Tell SoulSync AI a bit about yourself.",
+  description: "Tell SoulSync a bit about yourself.",
   robots: { index: false, follow: false },
 };
 

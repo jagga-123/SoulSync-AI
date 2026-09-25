@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { AdminShell } from "@/components/admin/admin-shell";
 
 export const metadata: Metadata = {
-  title: { default: "Admin", template: "%s · Admin | SoulSync AI" },
+  title: { default: "Admin", template: "%s · Admin | SoulSync" },
   robots: { index: false, follow: false },
 };
 

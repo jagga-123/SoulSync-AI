@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { ExternalLink, Heart } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { RevealText, FadeIn } from "@/components/effects/reveal-text";
+import { SectionHeading } from "@/components/sections/section-heading";
 import { FOUNDING_NOTES, MIN_FOUNDING_NOTES, SOURCE_CODE_URL } from "@/lib/data";
 
 /**
@@ -17,7 +16,7 @@ function FoundingNotes() {
   return (
     <ul className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {FOUNDING_NOTES.map((note) => (
-        <li key={`${note.name}-${note.quote.slice(0, 24)}`} className="glass rounded-3xl p-6">
+        <li key={`${note.name}-${note.quote.slice(0, 24)}`} className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
           <p className="text-sm leading-relaxed text-white/85">&ldquo;{note.quote}&rdquo;</p>
           <p className="mt-4 text-sm font-semibold text-white">
             {note.name}
@@ -32,34 +31,18 @@ function FoundingNotes() {
 /** Honest social proof for a product that has just launched: no invented crowd, just what's true. */
 export function EarlyAccessSection() {
   return (
-    <section id="early-access" className="relative py-28 sm:py-36">
+    <section id="early-access" aria-labelledby="early-access-title" className="relative py-24 sm:py-32">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
-          <FadeIn className="flex justify-center">
-            <Badge className="glass gap-1.5 rounded-full border-white/15 px-4 py-1.5 text-xs font-medium text-white/80">
-              <Heart className="size-3.5 fill-primary text-primary" />
-              Early access
-            </Badge>
-          </FadeIn>
+        <SectionHeading id="early-access-title" eyebrow="Early access" title="Be one of the first.">
+          <p>
+            SoulSync is new, and we&apos;re opening it up gradually. You won&apos;t find made-up reviews
+            here — just an honest start, and a promise to tell you what the AI does and what it can&apos;t.
+          </p>
+        </SectionHeading>
 
-          <RevealText
-            as="h2"
-            text="Be one of the first."
-            className="mt-5 text-balance font-display text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl"
-            stagger={0.05}
-          />
-
-          <FadeIn delay={0.2}>
-            <p className="mt-5 text-pretty leading-relaxed text-white/70">
-              SoulSync is new, and we&apos;re opening it up gradually. You won&apos;t find made-up reviews
-              here — just an honest start, and a promise to tell you what the AI does and what it can&apos;t.
-            </p>
-          </FadeIn>
-        </div>
-
-        <FadeIn delay={0.3}>
+        <div className="reveal">
           <div className="mt-12 grid gap-5 md:grid-cols-2">
-            <div className="glass flex flex-col rounded-3xl p-7">
+            <div className="flex flex-col rounded-3xl border border-white/10 bg-white/[0.04] p-7">
               <h3 className="font-display text-xl font-semibold text-white">Join early</h3>
               <p className="mt-3 flex-1 text-sm leading-relaxed text-white/70">
                 It&apos;s free to join. Spend about ten minutes chatting with our AI and see who you might
@@ -73,7 +56,7 @@ export function EarlyAccessSection() {
               </Button>
             </div>
 
-            <div className="glass flex flex-col rounded-3xl p-7">
+            <div className="flex flex-col rounded-3xl border border-white/10 bg-white/[0.04] p-7">
               <h3 className="font-display text-xl font-semibold text-white">Built in the open</h3>
               <p className="mt-3 flex-1 text-sm leading-relaxed text-white/70">
                 Curious how it works? The code is public, so you can see exactly how matching, privacy and
@@ -92,7 +75,7 @@ export function EarlyAccessSection() {
               </Button>
             </div>
           </div>
-        </FadeIn>
+        </div>
 
         <FoundingNotes />
       </div>

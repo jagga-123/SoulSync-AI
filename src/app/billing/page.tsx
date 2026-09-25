@@ -4,7 +4,7 @@ import { BillingView } from "@/components/platform/billing-view";
 
 export const metadata: Metadata = {
   title: "Plan & billing",
-  description: "Manage your SoulSync AI subscription.",
+  description: "Manage your SoulSync subscription.",
   robots: { index: false, follow: false },
 };
 

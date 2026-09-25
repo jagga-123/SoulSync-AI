@@ -116,7 +116,7 @@ export function AreaChart({ points, unit, height = 240 }: AreaChartProps) {
       </div>
 
       {view === "table" ? (
-        <div data-lenis-prevent className="max-h-60 overflow-y-auto rounded-xl border border-white/8">
+        <div className="max-h-60 overflow-y-auto rounded-xl border border-white/8">
           <table className="w-full text-left text-sm">
             <thead className="sticky top-0 bg-[#0b1026] text-xs uppercase tracking-wider text-white/60">
               <tr>

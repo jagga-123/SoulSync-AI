@@ -56,7 +56,7 @@ export function MatchesView() {
           Your matches
         </h1>
         <p className="mx-auto mt-3 max-w-md text-pretty text-white/55">
-          Everyone you and SoulSync AI have both said yes to.
+          Everyone you&apos;ve both said yes to.
         </p>
       </div>
 

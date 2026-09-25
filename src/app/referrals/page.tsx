@@ -3,7 +3,7 @@ import { ReferralsView } from "@/components/platform/referrals-view";
 
 export const metadata: Metadata = {
   title: "Invite friends",
-  description: "Invite friends to SoulSync AI and earn rewards.",
+  description: "Invite friends to SoulSync and earn rewards.",
   robots: { index: false, follow: false },
 };
 

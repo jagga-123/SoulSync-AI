@@ -41,7 +41,7 @@ export function ProfileMedia({
   return (
     <div
       className={cn(
-        "relative flex shrink-0 items-center justify-center overflow-hidden bg-gradient-to-br font-display font-semibold text-white",
+        "relative flex shrink-0 items-center justify-center overflow-hidden bg-gradient-to-br font-display font-semibold text-primary-foreground",
         !showImage && gradient,
         className,
       )}

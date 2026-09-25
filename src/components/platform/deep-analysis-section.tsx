@@ -6,6 +6,7 @@ import { HeartHandshake, Loader2, MessageSquareQuote, RefreshCw, Sparkles, Trian
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { UpgradeNotice } from "@/components/platform/upgrade-notice";
+import { usePerkGate } from "@/hooks/use-perk-gate";
 import { generateDeepAnalysis, getDeepAnalysis } from "@/lib/api/platform";
 import { errorMessage, gateOf, type Gate } from "@/lib/gate";
 import type { DeepAnalysisResponse } from "@/types/platform";
@@ -22,8 +23,15 @@ export function DeepAnalysisSection() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
+  // Free plan / feature switched off: know it from the plan we already loaded instead of provoking a 402/403.
+  const perk = usePerkGate("ai_deep_analysis");
 
   useEffect(() => {
+    if (!perk.ready) return;
+    if (!perk.allowed) {
+      setIsLoading(false);
+      return;
+    }
     let active = true;
     getDeepAnalysis()
       .then((r) => active && setData(r))
@@ -37,7 +45,7 @@ export function DeepAnalysisSection() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [perk.ready, perk.allowed]);
 
   async function generate(force: boolean) {
     setIsGenerating(true);
@@ -52,7 +60,8 @@ export function DeepAnalysisSection() {
   }
 
   // Feature switched off: say nothing rather than tease something unavailable.
-  if (gate?.kind === "disabled") return null;
+  const activeGate = perk.gate ?? gate;
+  if (activeGate?.kind === "disabled") return null;
 
   const analysis = data?.analysis;
 
@@ -90,8 +99,8 @@ export function DeepAnalysisSection() {
             <div className="flex justify-center py-8 text-white/60">
               <Loader2 className="size-5 animate-spin" />
             </div>
-          ) : gate ? (
-            <UpgradeNotice gate={gate} />
+          ) : activeGate ? (
+            <UpgradeNotice gate={activeGate} />
           ) : data && !data.hasAIProfile ? (
             <p className="text-sm text-white/55">Finish your AI interview first — the deep analysis builds on it.</p>
           ) : !analysis ? (

@@ -1,8 +1,33 @@
 import { ImageResponse } from "next/og";
 
+import { HEART_PATH } from "@/components/brand/heart-path";
+
 export const runtime = "edge";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+
+const SCALE = 3.4; // the heart lives in a 48 × 44 box
+
+/** The split-heart mark for the share image: two clipped halves (rose + lilac), like the site logo. */
+function Mark() {
+  const w = 48 * SCALE;
+  const h = 44 * SCALE;
+  const heart = (fill: string, offsetX: number) => (
+    <svg width={w} height={h} viewBox="0 0 48 44" style={{ position: "absolute", left: -offsetX, top: 0 }}>
+      <path d={HEART_PATH} fill={fill} />
+    </svg>
+  );
+  return (
+    <div style={{ display: "flex", position: "relative", width: w, height: h }}>
+      <div style={{ display: "flex", position: "absolute", left: 0, top: 0, width: 23.1 * SCALE, height: h, overflow: "hidden" }}>
+        {heart("#ff7aa8", 0)}
+      </div>
+      <div style={{ display: "flex", position: "absolute", left: 24.9 * SCALE, top: 0, width: 23.1 * SCALE, height: h, overflow: "hidden" }}>
+        {heart("#b58ad1", 24.9 * SCALE)}
+      </div>
+    </div>
+  );
+}
 
 export default function OpengraphImage() {
   return new ImageResponse(
@@ -15,44 +40,20 @@ export default function OpengraphImage() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#050816",
+          backgroundColor: "#150c1b",
           backgroundImage:
-            "radial-gradient(circle at 20% 20%, rgba(255,77,141,0.35), transparent 55%), radial-gradient(circle at 80% 30%, rgba(124,58,237,0.4), transparent 55%), radial-gradient(circle at 50% 90%, rgba(34,211,238,0.25), transparent 55%)",
+            "radial-gradient(circle at 50% 0%, rgba(255,178,122,0.28), transparent 60%), radial-gradient(circle at 15% 95%, rgba(255,122,168,0.16), transparent 55%)",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 16,
-            marginBottom: 28,
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              width: 64,
-              height: 64,
-              borderRadius: 20,
-              background: "linear-gradient(135deg, #FF4D8D, #7C3AED)",
-            }}
-          />
-          <span
-            style={{
-              fontSize: 44,
-              fontWeight: 700,
-              color: "white",
-              letterSpacing: -1,
-            }}
-          >
-            SoulSync AI
-          </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 22, marginBottom: 34 }}>
+          <Mark />
+          <span style={{ fontSize: 64, fontWeight: 700, color: "#f8eef1", letterSpacing: -1.5 }}>SoulSync</span>
         </div>
         <span
           style={{
-            fontSize: 56,
+            fontSize: 60,
             fontWeight: 700,
-            color: "white",
+            color: "#f8eef1",
             textAlign: "center",
             maxWidth: 900,
             lineHeight: 1.15,

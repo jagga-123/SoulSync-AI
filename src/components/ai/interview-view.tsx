@@ -293,7 +293,6 @@ export function InterviewView() {
 
       <div
         ref={scrollRef}
-        data-lenis-prevent
         role="log"
         aria-label="Interview conversation"
         tabIndex={0}

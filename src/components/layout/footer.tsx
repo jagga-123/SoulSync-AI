@@ -1,12 +1,14 @@
 import Link from "next/link";
-import { Heart } from "lucide-react";
+import { Logo } from "@/components/brand/logo";
 
 /** Only real destinations — a link goes here when the page behind it exists. */
 const FOOTER_LINKS = {
   Product: [
     { label: "How it works", href: "/#how-it-works" },
     { label: "Why it works", href: "/#matchmaking" },
-    { label: "Early access", href: "/#early-access" },
+    { label: "How our AI works", href: "/how-our-ai-works" },
+    { label: "FAQ", href: "/#faq" },
+    { label: "Pricing", href: "/pricing" },
   ],
   Account: [
     { label: "Sign in", href: "/login" },
@@ -21,13 +23,8 @@ export function Footer() {
       <div className="mx-auto max-w-8xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
           <div className="col-span-2">
-            <Link href="/" className="flex items-center gap-2">
-              <span className="flex size-8 items-center justify-center rounded-xl bg-gradient-brand">
-                <Heart className="size-4 fill-white text-white" />
-              </span>
-              <span className="font-display text-lg font-semibold text-white">
-                SoulSync <span className="text-gradient-brand">AI</span>
-              </span>
+            <Link href="/" aria-label="SoulSync home" className="inline-flex rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <Logo />
             </Link>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/70">
               Conversation-first dating. SoulSync uses AI to suggest matches and to explain why — AI can be
@@ -52,7 +49,7 @@ export function Footer() {
         </div>
 
         <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 sm:flex-row">
-          <p className="text-xs text-white/60">&copy; {new Date().getFullYear()} SoulSync AI. All rights reserved.</p>
+          <p className="text-xs text-white/60">&copy; {new Date().getFullYear()} SoulSync. All rights reserved.</p>
           <p className="text-xs text-white/60">Free to join · About 10 minutes to set up</p>
         </div>
       </div>

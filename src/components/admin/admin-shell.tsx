@@ -49,7 +49,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           <ShieldAlert className="size-6 text-white/50" />
         </span>
         <h1 className="font-display text-2xl font-semibold text-white">Admins only</h1>
-        <p className="max-w-sm text-sm text-white/55">This area is restricted to SoulSync AI administrators.</p>
+        <p className="max-w-sm text-sm text-white/55">This area is restricted to SoulSync administrators.</p>
         <Button asChild className="rounded-full bg-gradient-brand text-white hover:opacity-90">
           <Link href="/dashboard">Back to dashboard</Link>
         </Button>

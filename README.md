@@ -11,7 +11,8 @@ backend.
 ## Tech stack
 
 **Frontend** — Next.js 15 (App Router), TypeScript, Tailwind CSS, Shadcn UI,
-Framer Motion, GSAP, Lenis, Socket.IO client.
+Framer Motion, Socket.IO client. The landing page is static server-rendered markup with CSS-only motion (no animation
+library is shipped to signed-out visitors).
 
 **Backend** (`backend/`) — Node.js, Express, TypeScript, MongoDB Atlas via
 Mongoose, JWT auth, bcrypt password hashing, Zod validation, Socket.IO,
@@ -628,8 +629,8 @@ A few deliberate choices worth knowing about:
   either end), never when older history is *prepended* (via "load earlier
   messages") — prepending instead preserves the reader's scroll position by
   measuring `scrollHeight` before the fetch and correcting `scrollTop` by the
-  delta after. The chat's own scroll container uses `data-lenis-prevent` so
-  the site-wide Lenis smooth-scroll doesn't hijack it.
+  delta after. (The site once ran a Lenis smooth-scroll layer that the chat had to opt out of; it was
+  removed in Phase B, so the chat now scrolls natively.)
 - **Phase 5 touches earlier phases only where the spec asked, and additively**:
   the Discover *controller* gains `aiReady` + a per-user `ai` field (the
   discover service and its exclusion/pagination logic are untouched), the Matches

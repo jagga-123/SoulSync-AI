@@ -4,22 +4,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { BarChart3, Bell, ChevronDown, CreditCard, Gift, LayoutDashboard, LogOut, Settings, Sparkles } from "lucide-react";
+import { BarChart3, ChevronDown, LogOut } from "lucide-react";
 
 import { AvatarOrb } from "@/components/ui/avatar-orb";
+import { ACCOUNT_LINKS } from "@/components/layout/nav-config";
 import { usePlatform } from "@/components/platform/platform-provider";
 import { useDismiss } from "@/hooks/use-dismiss";
 import { PLAN_NAMES } from "@/lib/gate";
 import { getInitials } from "@/lib/format";
-
-const ITEMS = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/notifications", label: "Notifications", icon: Bell },
-  { href: "/premium", label: "My perks", icon: Sparkles },
-  { href: "/billing", label: "Plan & billing", icon: CreditCard },
-  { href: "/referrals", label: "Invite friends", icon: Gift },
-  { href: "/settings", label: "Settings", icon: Settings },
-];
 
 export function UserMenu() {
   const { user, features, signOut } = usePlatform();
@@ -31,7 +23,7 @@ export function UserMenu() {
   useDismiss(ref, open, close);
   useEffect(() => close(), [pathname, close]);
 
-  if (!user) return <span className="size-9 animate-pulse rounded-full bg-white/10" aria-hidden />;
+  if (!user) return <span className="size-11 animate-pulse rounded-full bg-white/10" aria-hidden />;
 
   const plan = features?.plan ?? "free";
 
@@ -67,7 +59,7 @@ export function UserMenu() {
             </div>
 
             <nav className="p-1.5">
-              {ITEMS.map(({ href, label, icon: Icon }) => (
+              {ACCOUNT_LINKS.map(({ href, label, icon: Icon }) => (
                 <Link key={href} href={href} className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-white/75 transition-colors hover:bg-white/8 hover:text-white">
                   <Icon className="size-4 text-white/60" />
                   {label}

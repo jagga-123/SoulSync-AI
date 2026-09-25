@@ -59,6 +59,8 @@ const nextConfig: NextConfig = {
   // Lets a separate build (e.g. the browser E2E stack) use its own folder without touching a running `next dev`.
   distDir: process.env.NEXT_DIST_DIR || ".next",
   poweredByHeader: false,
+  // The UI imports primitives from the "radix-ui" barrel; this bundles only the ones actually used.
+  experimental: { optimizePackageImports: ["radix-ui"] },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

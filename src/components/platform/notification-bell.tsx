@@ -79,7 +79,7 @@ export function NotificationBell() {
               </button>
             </div>
 
-            <div data-lenis-prevent className="max-h-[26rem] overflow-y-auto divide-y divide-white/5">
+            <div className="max-h-[26rem] overflow-y-auto divide-y divide-white/5">
               {isLoadingRecent && recent.length === 0 ? (
                 <div className="flex items-center justify-center py-10 text-white/60">
                   <Loader2 className="size-5 animate-spin" />

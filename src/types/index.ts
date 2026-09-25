@@ -41,13 +41,14 @@ export interface FoundingNote {
   city?: string;
 }
 
-/** A fictional profile used purely as an illustration on the landing page. Always shown labelled "Example". */
-export interface ExampleProfile {
-  name: string;
-  age: number;
-  role: string;
-  /** The match label shown on the card — the same wording the real product uses. */
-  label: string;
-  initials: string;
-  gradient: string;
+/** One line of the landing page's plain-English "how our AI works" section. */
+export interface AiPoint {
+  title: string;
+  body: string;
+  icon: LucideIcon;
+}
+
+export interface FaqItem {
+  q: string;
+  a: string;
 }

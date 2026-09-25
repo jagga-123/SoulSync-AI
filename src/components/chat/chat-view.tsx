@@ -314,7 +314,6 @@ export function ChatView() {
 
       <div
         ref={scrollRef}
-        data-lenis-prevent
         tabIndex={0}
         aria-label="Conversation"
         className="flex-1 space-y-3 overflow-y-auto px-4 py-4 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring sm:px-6"

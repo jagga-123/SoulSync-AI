@@ -1,13 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Fraunces, Inter } from "next/font/google";
 
-import { SmoothScrollProvider } from "@/components/layout/smooth-scroll-provider";
-import { AuroraBackground } from "@/components/effects/aurora-background";
-import { SpotlightCursor } from "@/components/effects/spotlight-cursor";
-import { PageIntro } from "@/components/effects/page-intro";
-import { ScrollProgress } from "@/components/layout/scroll-progress";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
+import { MobileTabBar } from "@/components/layout/mobile-tab-bar";
 import { PlatformProvider } from "@/components/platform/platform-provider";
 import { SITE_URL } from "@/lib/site";
 
@@ -19,41 +15,50 @@ const inter = Inter({
   display: "swap",
 });
 
-const spaceGrotesk = Space_Grotesk({
+// Fraunces: the soft serif for headlines, names and emotional moments. Its italic is only used for the wordmark's
+// "Sync" (and later one accent word per headline), so it is a separate face that is not preloaded.
+const fraunces = Fraunces({
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
   variable: "--font-display",
   display: "swap",
+});
+
+const frauncesItalic = Fraunces({
+  subsets: ["latin"],
+  style: ["italic"],
+  variable: "--font-display-italic",
+  display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "SoulSync AI — Start with who you are",
-    template: "%s | SoulSync AI",
+    default: "SoulSync — Start with who you are",
+    template: "%s | SoulSync",
   },
   description:
     "A conversation-first dating app. Chat with our AI for about ten minutes, then meet people who share your values and what you're looking for. Free to join.",
   keywords: [
     "AI dating app",
     "AI matchmaking",
-    "SoulSync AI",
+    "SoulSync",
     "online dating",
   ],
-  authors: [{ name: "SoulSync AI" }],
-  creator: "SoulSync AI",
+  authors: [{ name: "SoulSync" }],
+  creator: "SoulSync",
   openGraph: {
     type: "website",
     url: SITE_URL,
-    siteName: "SoulSync AI",
-    title: "SoulSync AI — Start with who you are",
+    siteName: "SoulSync",
+    title: "SoulSync — Start with who you are",
     description:
       "Chat with our AI for about ten minutes, then meet people who share your values and what you're looking for. Free to join.",
     images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "SoulSync AI — Start with who you are",
+    title: "SoulSync — Start with who you are",
     description:
       "Chat with our AI for about ten minutes, then meet people who share your values and what you're looking for. Free to join.",
     images: ["/opengraph-image"],
@@ -63,31 +68,37 @@ export const metadata: Metadata = {
     follow: true,
   },
 };
+// Each public page sets its own canonical (see the page files); none is set here so member-only pages don't inherit "/".
 
 export const viewport: Viewport = {
-  themeColor: "#050816",
+  themeColor: "#150c1b",
+  colorScheme: "dark",
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover", // lets the bottom tab bar respect the iPhone home-indicator inset via env(safe-area-inset-bottom)
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`}
+      className={`${inter.variable} ${fraunces.variable} ${frauncesItalic.variable} h-full antialiased`}
     >
       <body className="relative min-h-full">
-        <SmoothScrollProvider>
-          <PageIntro />
-          <AuroraBackground />
-          <SpotlightCursor />
-          <ScrollProgress />
-          <PlatformProvider>
-            <Navbar />
-            <main className="relative z-10">{children}</main>
-            <Footer />
-          </PlatformProvider>
-        </SmoothScrollProvider>
+        <PlatformProvider>
+          <a
+            href="#main"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-primary-solid focus:px-5 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-white focus:outline-none focus:ring-2 focus:ring-ring"
+          >
+            Skip to content
+          </a>
+          <Navbar />
+          <main id="main" tabIndex={-1} className="relative z-10 outline-none">
+            {children}
+          </main>
+          <Footer />
+          <MobileTabBar />
+        </PlatformProvider>
       </body>
     </html>
   );

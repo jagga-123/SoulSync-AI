@@ -155,7 +155,7 @@ export function OnboardingForm() {
         <p className="mx-auto mt-3 max-w-md text-pretty text-white/55">
           {mode === "edit"
             ? "Keep your profile current so your matches stay accurate."
-            : "A few honest details help SoulSync AI find people who actually fit."}
+            : "A few honest details help SoulSync find people who actually fit."}
         </p>
       </div>
 

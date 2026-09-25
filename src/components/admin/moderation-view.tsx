@@ -179,7 +179,7 @@ function ReportDialog({ reportId, onClose, onChanged }: { reportId: string | nul
             {d.messages.length > 0 && (
               <div className="mt-5">
                 <p className="text-xs font-medium uppercase tracking-wider text-white/60">Their recent messages in the reported chat</p>
-                <ul data-lenis-prevent className="mt-2 max-h-48 space-y-2 overflow-y-auto">
+                <ul className="mt-2 max-h-48 space-y-2 overflow-y-auto">
                   {d.messages.map((m) => (
                     <li key={m.id} className={cn("rounded-xl border p-3 text-sm", m.isReported ? "border-primary/50 bg-primary/10 text-white" : "border-white/8 bg-white/[0.02] text-white/70")}>
                       {m.isReported && <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-primary">Reported message</span>}

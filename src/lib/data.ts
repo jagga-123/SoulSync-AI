@@ -3,13 +3,15 @@ import {
   Lock,
   MessageCircle,
   MessageCircleHeart,
+  RefreshCw,
 } from "lucide-react";
 
-import { TIER_LABELS } from "@/lib/ai-format";
+import { TIER_LABELS, TIER_SUBLINES } from "@/lib/ai-format";
 import type {
-  ExampleProfile,
+  AiPoint,
   Feature,
   FoundingNote,
+  FaqItem,
   MatchArea,
   NavLink,
   ProcessStep,
@@ -29,9 +31,9 @@ export const SOURCE_CODE_URL = "https://github.com/jagga-123/SoulSync-AI";
 
 export const NAV_LINKS: NavLink[] = [
   { label: "How it works", href: "/#how-it-works" },
-  { label: "See an example", href: "/#matching-demo" },
-  { label: "What's different", href: "/#features" },
-  { label: "Early access", href: "/#early-access" },
+  { label: "Why it works", href: "/#matchmaking" },
+  { label: "Our AI", href: "/#our-ai" },
+  { label: "FAQ", href: "/#faq" },
 ];
 
 /** Three facts that are true today (interview length: interview-view intro; six areas: compatibility engine; privacy: public-profile shape). */
@@ -50,34 +52,6 @@ export const TRUST_FACTS: TrustFact[] = [
     title: "Your report is yours",
     description: "Only you see your full personality report. Matches see just what you share.",
     icon: Lock,
-  },
-];
-
-/** Fictional people for the hero illustration — shown with an "Example" caption. Labels use the real match wording. */
-export const EXAMPLE_PROFILES: ExampleProfile[] = [
-  {
-    name: "Aria",
-    age: 27,
-    role: "Product Designer",
-    label: TIER_LABELS.exceptional,
-    initials: "A",
-    gradient: "from-primary to-secondary",
-  },
-  {
-    name: "Noah",
-    age: 29,
-    role: "Music Producer",
-    label: TIER_LABELS.strong,
-    initials: "N",
-    gradient: "from-accent to-secondary",
-  },
-  {
-    name: "Maya",
-    age: 26,
-    role: "Marine Biologist",
-    label: TIER_LABELS.promising,
-    initials: "M",
-    gradient: "from-secondary to-primary",
   },
 ];
 
@@ -146,38 +120,81 @@ export const FEATURES: Feature[] = [
 export const FOUNDING_NOTES: FoundingNote[] = [];
 export const MIN_FOUNDING_NOTES = 3;
 
-/* ---- The scroll-through demo ("See an example") — all fictional, labelled "Example" ---- */
+/* ---- "Not a score. A reason." showcase — one fictional pair, always labelled "Example" ---- */
 
-export const DEMO_INPUTS: string[] = [
-  "Introvert",
-  "Loves books",
-  "Wants a serious relationship",
-];
-
-/** What the demo "notices" about the example answers — plain sentences, no scores. */
-export const DEMO_NOTICED: string[] = [
-  "Recharges with quiet, one-to-one time",
-  "Prefers a real conversation to small talk",
-  "Is looking for something long-term",
-];
-
-export const DEMO_MATCH = {
-  name: "Elena",
-  age: 28,
-  role: "Novelist & Editor",
-  label: TIER_LABELS.exceptional,
-  initials: "E",
-  gradient: "from-primary to-secondary",
-  reasons: [
-    "You both recharge with quiet nights in, not crowded rooms",
-    "You both love getting lost in a good book",
-    "You're both looking for something long-term",
+export const SHOWCASE = {
+  people: [
+    { name: "Aria", age: 27, initials: "A", gradient: "from-primary to-secondary" },
+    { name: "Noah", age: 29, initials: "N", gradient: "from-accent to-primary" },
   ],
+  label: TIER_LABELS.exceptional,
+  sublabel: TIER_SUBLINES.exceptional,
+  /** Mirrors the wording of the engine's real reason templates (backend/src/ai/compatibility.ts). */
+  reasons: [
+    "You both value honesty and personal growth",
+    "You both enjoy hiking, cooking and travel",
+    "Your communication styles complement each other",
+  ],
+  /** Hearts (1–5) for each area of MATCH_AREAS, in the same order — illustrative. */
+  hearts: [5, 4, 4, 3, 5, 4],
 };
 
-export const MATCHING_STAGES = [
-  { key: "listening", label: "Listening", caption: "Reading what you shared…" },
-  { key: "noticing", label: "Noticing", caption: "Noticing what matters to you…" },
-  { key: "comparing", label: "Comparing", caption: "Comparing six things you share…" },
-  { key: "introducing", label: "Introducing", caption: "Here's someone you might click with." },
-] as const;
+/** "Being honest about the AI" — each line is true today. */
+export const AI_POINTS: AiPoint[] = [
+  {
+    title: "Sol is an AI, not a person",
+    body: "It asks the questions and writes a summary of what you told it.",
+    icon: MessageCircleHeart,
+  },
+  {
+    title: "Your answers are processed by AI services",
+    body: "We use outside AI providers to write your report, and we keep your answers in your account so we can match you. Only you see the full report.",
+    icon: Lock,
+  },
+  {
+    title: "It suggests. You decide.",
+    body: "The AI suggests people and tells you why. It never decides who you talk to.",
+    icon: HeartHandshake,
+  },
+  {
+    title: "It can be wrong",
+    body: "If a match doesn't feel right, pass on it — and you can redo the interview any time.",
+    icon: RefreshCw,
+  },
+];
+
+/** Landing-page FAQ. Every answer describes what the product does today — no promises about features that don't exist yet. */
+export const FAQ_ITEMS: FaqItem[] = [
+  {
+    q: "Is SoulSync free?",
+    a: "Yes. You can join, do the interview and get your report and matches for free. Free accounts have a daily limit on likes; paid plans are opening soon — the Pricing page shows exactly what each one includes.",
+  },
+  {
+    q: "How long does the interview take?",
+    a: "About ten minutes: 15 to 25 friendly questions. You can stop after 15 answers and pick it back up any time.",
+  },
+  {
+    q: "Can I use SoulSync without doing the interview?",
+    a: "Yes, you can browse people straight away. The interview is what unlocks personal suggestions and the reasons behind each match.",
+  },
+  {
+    q: "Who can see my personality report?",
+    a: "Only you. Your matches see what you have in common, not your full report.",
+  },
+  {
+    q: "Is Sol a real person?",
+    a: "No. Sol is an AI. It writes the questions and your summary. Real people only appear when you match and start chatting.",
+  },
+  {
+    q: "What happens to my answers?",
+    a: "They're sent to outside AI services so Sol can write questions and your report, and they're stored in your account so we can match you. Only you can see them.",
+  },
+  {
+    q: "What if I don't like my matches?",
+    a: "You never have to act on a suggestion — just move on. You can block anyone, and you can redo your interview whenever you like.",
+  },
+  {
+    q: "How do you keep people safe?",
+    a: "You can report or block anyone from their profile or a chat, at any time. Reports go to our moderation team.",
+  },
+];

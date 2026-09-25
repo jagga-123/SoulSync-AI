@@ -4,7 +4,8 @@ import { WaitlistView } from "@/components/platform/waitlist-view";
 
 export const metadata: Metadata = {
   title: "Join the waitlist",
-  description: "Get early access to SoulSync AI, the AI-powered dating platform.",
+  alternates: { canonical: "/waitlist" },
+  description: "Get early access to SoulSync, the conversation-first dating app.",
 };
 
 export default function WaitlistPage() {

@@ -8,6 +8,8 @@ interface EmptyStateProps {
   description: string;
   actionLabel?: string;
   actionHref?: string;
+  /** A button instead of a link, for actions that change the current screen (switch tab, clear filters). */
+  onAction?: () => void;
 }
 
 export function EmptyState({
@@ -16,6 +18,7 @@ export function EmptyState({
   description,
   actionLabel,
   actionHref,
+  onAction,
 }: EmptyStateProps) {
   return (
     <div className="glass flex flex-col items-center gap-4 rounded-3xl px-6 py-16 text-center">
@@ -34,6 +37,15 @@ export function EmptyState({
           className="mt-2 gap-2 rounded-full bg-gradient-brand text-white shadow-lg shadow-primary/25 hover:opacity-90"
         >
           <Link href={actionHref}>{actionLabel}</Link>
+        </Button>
+      )}
+      {actionLabel && !actionHref && onAction && (
+        <Button
+          type="button"
+          onClick={onAction}
+          className="mt-2 gap-2 rounded-full bg-gradient-brand text-white shadow-lg shadow-primary/25 hover:opacity-90"
+        >
+          {actionLabel}
         </Button>
       )}
     </div>

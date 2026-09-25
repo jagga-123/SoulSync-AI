@@ -3,7 +3,7 @@ import { LikesView } from "@/components/likes/likes-view";
 
 export const metadata: Metadata = {
   title: "Likes",
-  description: "See who liked you and who you've liked on SoulSync AI.",
+  description: "See who liked you and who you've liked on SoulSync.",
   robots: { index: false, follow: false },
 };
 

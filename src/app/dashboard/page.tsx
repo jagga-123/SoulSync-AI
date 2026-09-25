@@ -3,7 +3,7 @@ import { DashboardView } from "@/components/dashboard/dashboard-view";
 
 export const metadata: Metadata = {
   title: "Dashboard",
-  description: "Your SoulSync AI dashboard.",
+  description: "Your SoulSync dashboard.",
   robots: { index: false, follow: false },
 };
 

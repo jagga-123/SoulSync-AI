@@ -42,7 +42,7 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
     });
   } catch {
     throw new ApiClientError(
-      "Couldn't reach the SoulSync AI server. Check that the API is running and NEXT_PUBLIC_API_URL is correct.",
+      "Couldn't reach the SoulSync server. Check that the API is running and NEXT_PUBLIC_API_URL is correct.",
       0,
     );
   }

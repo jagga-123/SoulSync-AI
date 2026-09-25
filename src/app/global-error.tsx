@@ -27,9 +27,9 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
 
   return (
     <html lang="en">
-      <body style={{ margin: 0, background: "#050816", color: "#fff", fontFamily: "system-ui, sans-serif" }}>
+      <body style={{ margin: 0, background: "#150c1b", color: "#fff", fontFamily: "system-ui, sans-serif" }}>
         <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: 24, textAlign: "center" }}>
-          <h1 style={{ fontSize: 24, margin: 0 }}>SoulSync AI hit a problem</h1>
+          <h1 style={{ fontSize: 24, margin: 0 }}>SoulSync hit a problem</h1>
           <p style={{ maxWidth: 420, margin: 0, color: "rgba(255,255,255,0.6)", lineHeight: 1.6 }}>
             Something went wrong while loading the app, and we&apos;ve been notified. Please try again.
           </p>

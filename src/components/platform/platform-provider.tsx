@@ -1,8 +1,9 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
-import { io, type Socket } from "socket.io-client";
+import type { Socket } from "socket.io-client";
 
 import { getCurrentUser } from "@/lib/api/auth";
 import { ApiClientError } from "@/lib/api-client";
@@ -11,9 +12,11 @@ import {
 } from "@/lib/api/platform";
 import { clearToken, getToken } from "@/lib/auth-storage";
 import { SOCKET_URL } from "@/lib/env";
-import { NotificationToaster } from "@/components/platform/notification-toaster";
 import type { AuthUser } from "@/types/api";
 import type { AppNotification, UserFeatures } from "@/types/platform";
+
+// Toasts only ever appear for a signed-in member, so the component (and the animation library it uses) loads on demand.
+const NotificationToaster = dynamic(() => import("@/components/platform/notification-toaster").then((m) => m.NotificationToaster));
 
 interface PlatformContextValue {
   /** The signed-in user, once known. `null` while loading or signed out. */
@@ -140,20 +143,26 @@ export function PlatformProvider({ children }: { children: ReactNode }) {
     getUserFeatures().then((f) => active && setFeatures(f)).catch(() => {});
     getUnreadCount().then((r) => active && setUnreadCount(r.unreadCount)).catch(() => {});
 
-    const socket = io(SOCKET_URL, { auth: { token, purpose: "notifications" }, transports: ["websocket", "polling"] });
-    socketRef.current = socket;
+    // socket.io-client is only needed once someone is signed in, so it is loaded then — signed-out visitors
+    // (the landing page) never download it.
+    let socket: Socket | null = null;
+    import("socket.io-client").then(({ io }) => {
+      if (!active) return;
+      socket = io(SOCKET_URL, { auth: { token, purpose: "notifications" }, transports: ["websocket", "polling"] });
+      socketRef.current = socket;
 
-    socket.on("notification", ({ notification, unreadCount: count }: NotificationEvent) => {
-      setUnreadCount(count);
-      setRecent((prev) => [notification, ...prev.filter((n) => n.id !== notification.id)].slice(0, 30));
-      pushToast(notification);
+      socket.on("notification", ({ notification, unreadCount: count }: NotificationEvent) => {
+        setUnreadCount(count);
+        setRecent((prev) => [notification, ...prev.filter((n) => n.id !== notification.id)].slice(0, 30));
+        pushToast(notification);
+      });
+      socket.on("notification_count", ({ unreadCount: count }: { unreadCount: number }) => setUnreadCount(count));
     });
-    socket.on("notification_count", ({ unreadCount: count }: { unreadCount: number }) => setUnreadCount(count));
 
     return () => {
       active = false;
-      socket.removeAllListeners();
-      socket.disconnect();
+      socket?.removeAllListeners();
+      socket?.disconnect();
       socketRef.current = null;
     };
   }, [token, reset, pushToast]);
@@ -226,7 +235,7 @@ export function PlatformProvider({ children }: { children: ReactNode }) {
   return (
     <PlatformContext.Provider value={value}>
       {children}
-      <NotificationToaster />
+      {token && <NotificationToaster />}
     </PlatformContext.Provider>
   );
 }

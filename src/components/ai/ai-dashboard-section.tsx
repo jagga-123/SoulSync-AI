@@ -138,7 +138,7 @@ function InterviewCard({ status }: { status: AIStatus }) {
             Complete
           </p>
           <p className="mb-4 mt-1 text-sm text-white/55">
-            SoulSync AI has learned who you are from {interview.answered} answers.
+            Sol has learned who you are from {interview.answered} answers.
           </p>
           <Button
             asChild
@@ -180,7 +180,7 @@ function InterviewCard({ status }: { status: AIStatus }) {
         <>
           <p className="mt-3 font-display text-lg font-semibold text-white">Not started</p>
           <p className="mb-4 mt-1 text-sm text-white/55">
-            Chat with SoulSync AI for about 10 minutes so it can learn your personality, values and
+            Chat with Sol for about 10 minutes so it can learn your personality, values and
             what you want.
           </p>
           <Button

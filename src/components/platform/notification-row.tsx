@@ -57,7 +57,7 @@ export function NotificationRow({ notification, onOpen, onDelete, compact = fals
 
       <div className="flex shrink-0 flex-col items-end gap-1.5">
         <span className="text-xs tabular-nums text-white/60">{formatRelativeTime(notification.updatedAt)}</span>
-        {!notification.isRead && <span aria-label="Unread" className="size-2 rounded-full bg-accent" />}
+        {!notification.isRead && <span role="img" aria-label="Unread" className="size-2 rounded-full bg-accent" />}
         {onDelete && (
           <button
             type="button"

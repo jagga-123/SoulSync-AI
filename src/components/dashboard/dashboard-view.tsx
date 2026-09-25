@@ -359,7 +359,7 @@ export function DashboardView() {
             href="/ai-interview"
             icon={MessageCircle}
             title="AI interview"
-            description="Chat with SoulSync AI"
+            description="Chat with Sol"
           />
           <QuickAction
             href="/personality-report"
@@ -368,10 +368,10 @@ export function DashboardView() {
             description="Your AI-generated profile"
           />
           <QuickAction
-            href="/#matching-demo"
+            href="/#matchmaking"
             icon={Sparkles}
-            title="See AI matching"
-            description="Watch the live demo"
+            title="How matching works"
+            description="See how a match is explained"
           />
           <QuickAction
             href="/notifications"

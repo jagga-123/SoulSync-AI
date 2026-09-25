@@ -22,6 +22,10 @@
 
   --color-primary: var(--primary);
   --color-primary-solid: var(--primary-solid);
+  --color-primary-deep: var(--primary-deep);
+  --color-brand-plum: var(--brand-plum);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -44,54 +48,43 @@
 
   --container-8xl: 97.5rem;
 
-  --animate-aurora-1: aurora-drift-1 22s ease-in-out infinite;
-  --animate-aurora-2: aurora-drift-2 26s ease-in-out infinite;
-  --animate-aurora-3: aurora-drift-3 30s ease-in-out infinite;
-  --animate-float-slow: float-slow 7s ease-in-out infinite;
-  --animate-float-slower: float-slow 10s ease-in-out infinite;
-  --animate-marquee: marquee 42s linear infinite;
-  --animate-marquee-reverse: marquee-reverse 42s linear infinite;
-  --animate-spin-slow: spin 14s linear infinite;
-  --animate-pulse-ring: pulse-ring 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  --animate-particle-drift: particle-drift 12s ease-in-out infinite;
-  --animate-gradient-x: gradient-x 8s ease infinite;
-  --animate-blob-morph: blob-morph 16s ease-in-out infinite;
-  --animate-spin-slow-reverse: spin-reverse 18s linear infinite;
-  --animate-scan-line: scan-line 2.6s ease-in-out infinite;
-  --animate-node-pulse: node-pulse 3.2s ease-in-out infinite;
-  --animate-line-flow: line-flow 5s linear infinite;
   --animate-caret-blink: caret-blink 1s step-end infinite;
 }
 
 :root {
-  --background: #050816;
-  --foreground: #ffffff;
-  --surface: #0a0f24;
-  --surface-foreground: #ffffff;
+  /* "Evening" — warm aubergine ground, rose primary, apricot accent. Contrast (WCAG): foreground on background 16.8:1,
+     muted-foreground on card 7.8:1, primary/accent text on card 7.2:1 / 10.0:1, white on --primary-solid 5.66:1. */
+  --background: #150c1b;
+  --foreground: #f8eef1;
+  --surface: #1f1428;
+  --surface-foreground: #f8eef1;
 
-  --card: #0b1026;
-  --card-foreground: #ffffff;
-  --popover: #0b1026;
-  --popover-foreground: #ffffff;
+  --card: #1f1428;
+  --card-foreground: #f8eef1;
+  --popover: #1f1428;
+  --popover-foreground: #f8eef1;
 
-  --primary: #ff4d8d;
-  --primary-foreground: #ffffff;
-  /* Filled-button pink: white text on it is 5.66:1 (white on --primary is only 3.14:1, below WCAG AA).
-     Use --primary for accents, glows and text on dark surfaces; use this wherever white text sits on pink. */
+  --primary: #ff7aa8; /* rose — accents, icons and text on dark surfaces */
+  --primary-foreground: #150c1b; /* text ON --primary */
+  --primary-deep: #ff9dbf; /* rose links / hover */
+  /* Filled-button rose: white text on it is 5.66:1 (white on --primary is only 2.1:1). Use wherever white text sits on rose. */
   --primary-solid: #c2255c;
-  --secondary: #7c3aed;
-  --secondary-foreground: #ffffff;
-  --accent: #22d3ee;
-  --accent-foreground: #041016;
+  --brand-plum: #7a2f8f; /* the deep end of the filled-button gradient (white text 8.0:1) */
+  --secondary: #b58ad1;
+  --secondary-foreground: #150c1b;
+  --accent: #ffb27a; /* apricot */
+  --accent-foreground: #150c1b;
 
-  --muted: #10162e;
-  --muted-foreground: #93a0c2;
-  --destructive: #ef4444;
-  --border: color-mix(in oklch, white 10%, transparent);
-  --input: color-mix(in oklch, white 12%, transparent);
-  --ring: #ff4d8d;
+  --muted: #2d1830;
+  --muted-foreground: #b9a6bd;
+  --success: #7fd1b0;
+  --warning: #f5c36b;
+  --destructive: #ff8a80;
+  --border: color-mix(in oklch, #f8eef1 14%, transparent);
+  --input: color-mix(in oklch, #f8eef1 18%, transparent);
+  --ring: #ff9dbf;
 
-  --radius: 1rem;
+  --radius: 1.25rem;
 }
 
 @layer base {
@@ -106,10 +99,8 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    background-image:
-      radial-gradient(ellipse 80% 50% at 50% -10%, color-mix(in oklch, var(--secondary) 22%, transparent), transparent),
-      radial-gradient(ellipse 60% 40% at 100% 0%, color-mix(in oklch, var(--primary) 14%, transparent), transparent);
-    background-attachment: fixed;
+    background-image: radial-gradient(ellipse 70% 38% at 50% -6%, color-mix(in oklch, var(--accent) 11%, transparent), transparent);
+    background-repeat: no-repeat;
   }
 
   ::selection {
@@ -124,7 +115,7 @@
     background: var(--background);
   }
   ::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, var(--primary), var(--secondary));
+    background: color-mix(in oklch, var(--foreground) 24%, transparent);
     border-radius: 999px;
     border: 2px solid var(--background);
   }
@@ -132,11 +123,27 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-display tracking-tight;
   }
+
+  /* In-page links (#how-it-works, #faq, …) land below the fixed header, not under it. */
+  [id] {
+    scroll-margin-top: 5rem;
+  }
+
+  /* Phones: the bottom tab bar (4rem + the home-indicator inset) must never cover page content or toasts.
+     MobileTabBar sets body[data-tabbar] only while it is shown. */
+  @media (max-width: 767px) {
+    body[data-tabbar="on"] {
+      padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+    }
+    body[data-tabbar="on"] .toaster-region {
+      bottom: calc(4.75rem + env(safe-area-inset-bottom));
+    }
+  }
 }
 
 @layer utilities {
   .text-gradient {
-    background: linear-gradient(90deg, #ffffff 0%, var(--accent) 45%, var(--primary) 100%);
+    background: linear-gradient(90deg, var(--foreground) 0%, var(--accent) 45%, var(--primary) 100%);
     background-clip: text;
     -webkit-background-clip: text;
     color: transparent;
@@ -191,7 +198,12 @@
   }
 
   .bg-gradient-brand {
-    background: linear-gradient(135deg, var(--primary-solid), var(--secondary));
+    background: linear-gradient(135deg, var(--primary-solid), var(--brand-plum));
+  }
+
+  /* "Ember": rose to apricot — for moments (the match heart, glows), never for text or body. */
+  .bg-ember {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
   }
 
   .bg-size-200 {
@@ -212,89 +224,76 @@
   }
 }
 
-@keyframes aurora-drift-1 {
-  0%, 100% { transform: translate(-5%, -5%) scale(1) rotate(0deg); }
-  33% { transform: translate(8%, 4%) scale(1.15) rotate(8deg); }
-  66% { transform: translate(-8%, 10%) scale(0.95) rotate(-6deg); }
-}
-
-@keyframes aurora-drift-2 {
-  0%, 100% { transform: translate(6%, 8%) scale(1) rotate(0deg); }
-  50% { transform: translate(-10%, -6%) scale(1.2) rotate(-10deg); }
-}
-
-@keyframes aurora-drift-3 {
-  0%, 100% { transform: translate(0%, 0%) scale(1); }
-  50% { transform: translate(-6%, -10%) scale(1.25); }
-}
-
-@keyframes float-slow {
-  0%, 100% { transform: translateY(0) rotate(var(--rot, 0deg)); }
-  50% { transform: translateY(-18px) rotate(var(--rot, 0deg)); }
-}
-
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-
-@keyframes marquee-reverse {
-  from { transform: translateX(-50%); }
-  to { transform: translateX(0); }
-}
-
-@keyframes pulse-ring {
-  0% { transform: scale(0.9); opacity: 0.7; }
-  70% { transform: scale(1.6); opacity: 0; }
-  100% { transform: scale(1.6); opacity: 0; }
-}
-
-@keyframes particle-drift {
-  0%, 100% { transform: translate(0, 0); opacity: var(--op, 0.5); }
-  50% { transform: translate(var(--dx, 12px), var(--dy, -18px)); opacity: var(--op-mid, 0.9); }
-}
-
-@keyframes gradient-x {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-
-@keyframes blob-morph {
-  0%, 100% { border-radius: 42% 58% 65% 35% / 45% 40% 60% 55%; }
-  25% { border-radius: 65% 35% 40% 60% / 55% 65% 35% 45%; }
-  50% { border-radius: 35% 65% 55% 45% / 40% 55% 45% 60%; }
-  75% { border-radius: 55% 45% 35% 65% / 60% 40% 55% 45%; }
-}
-
-@keyframes spin-reverse {
-  from { transform: rotate(360deg); }
-  to { transform: rotate(0deg); }
-}
-
-@keyframes scan-line {
-  0% { top: -15%; opacity: 0; }
-  15% { opacity: 1; }
-  85% { opacity: 1; }
-  100% { top: 115%; opacity: 0; }
-}
-
-@keyframes node-pulse {
-  0%, 100% { opacity: 0.35; }
-  50% { opacity: 0.9; }
-}
-
-@keyframes line-flow {
-  to { stroke-dashoffset: -200; }
-}
-
 @keyframes caret-blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
 }
 
+/* The hero chat: each bubble fades up in turn. */
+@keyframes bubble-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes typing-dot {
+  0%, 80%, 100% { opacity: 0.3; transform: translateY(0); }
+  40% { opacity: 1; transform: translateY(-2px); }
+}
+
+.hero-bubble {
+  animation: bubble-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.typing-dot {
+  display: block;
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 999px;
+  background: var(--foreground);
+  animation: typing-dot 1.2s ease-in-out infinite;
+}
+
+/*
+ * Scroll reveals, as pure CSS. Everything is visible by default; only browsers that support scroll-driven
+ * animations, for people who haven't asked for reduced motion, get the fade-up. There is no JavaScript, so
+ * nothing can stay hidden if a script fails or hydration is slow.
+ */
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes reveal-scale-x {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: reveal-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 40%;
+    }
+    .reveal-bar {
+      transform-origin: left center;
+      animation: reveal-scale-x linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 70%;
+    }
+    .reveal-line {
+      transform-origin: left center;
+      animation: reveal-scale-x linear both;
+      animation-timeline: view();
+      animation-range: entry 20% cover 50%;
+    }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
+    animation-delay: 0s !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;

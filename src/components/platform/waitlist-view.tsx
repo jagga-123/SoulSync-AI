@@ -58,7 +58,7 @@ export function WaitlistView() {
   return (
     <AuthCard
       title="Join the waitlist"
-      description={inviteOnly === false ? "SoulSync AI is open right now — you can create an account straight away." : "We're letting people in gradually so every new member gets a great experience."}
+      description={inviteOnly === false ? "SoulSync is open right now — you can create an account straight away." : "We're letting people in gradually so every new member gets a great experience."}
       footer={
         <>
           Already invited?{" "}

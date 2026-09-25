@@ -10,6 +10,7 @@ import { AppPage, Section } from "@/components/platform/app-page";
 import { usePlatform } from "@/components/platform/platform-provider";
 import { UpgradeNotice } from "@/components/platform/upgrade-notice";
 import { activateBoost, getBoost, getReadReceipts } from "@/lib/api/platform";
+import { usePerkGate } from "@/hooks/use-perk-gate";
 import { errorMessage, gateOf, PLAN_NAMES, type Gate } from "@/lib/gate";
 import { cn } from "@/lib/utils";
 import type { BoostStatus, PerkKey, ReadReceiptInsights } from "@/types/platform";
@@ -199,8 +200,11 @@ function ReadReceipts() {
   const [data, setData] = useState<ReadReceiptInsights | null>(null);
   const [gate, setGate] = useState<Gate | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Not on this plan / feature off: show the notice without provoking a 402/403 (see use-perk-gate.ts).
+  const perk = usePerkGate("read_receipts_insights");
 
   useEffect(() => {
+    if (!perk.ready || !perk.allowed) return;
     getReadReceipts()
       .then(setData)
       .catch((err) => {
@@ -208,14 +212,14 @@ function ReadReceipts() {
         if (g) setGate(g);
         else setError(errorMessage(err));
       });
-  }, []);
+  }, [perk.ready, perk.allowed]);
 
   const fmt = (seconds: number | null) => (seconds === null ? "—" : seconds < 90 ? `${seconds}s` : seconds < 5400 ? `${Math.round(seconds / 60)}m` : `${(seconds / 3600).toFixed(1)}h`);
 
   return (
     <Section title="Read receipts insights" description="How often — and how fast — your messages get read.">
-      {gate ? (
-        <UpgradeNotice gate={gate} />
+      {perk.gate ?? gate ? (
+        <UpgradeNotice gate={(perk.gate ?? gate) as Gate} />
       ) : error ? (
         <p className="text-sm text-destructive">{error}</p>
       ) : !data ? (

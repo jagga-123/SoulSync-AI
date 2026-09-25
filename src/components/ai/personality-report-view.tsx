@@ -23,7 +23,6 @@ import type { LucideIcon } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CompatibilityRing } from "@/components/effects/compatibility-ring";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { getMyAIProfile } from "@/lib/api/ai";
@@ -149,6 +148,31 @@ function TraitBar({ traitKey, value, index }: { traitKey: keyof TraitScores; val
   );
 }
 
+/** How deep the read is, in words and hearts — deliberately not a percentage, so it can't feel like a grade for the person. */
+function ReadDepth({ score, answers }: { score: number; answers: number }) {
+  const level = score >= 75 ? 3 : score >= 50 ? 2 : 1;
+  const title = ["A first read", "A good read", "A strong read"][level - 1];
+  return (
+    <div className="flex max-w-[13rem] flex-col items-center gap-2 text-center md:items-end md:text-right">
+      <p className="text-xs font-medium uppercase tracking-wide text-white/60">How well we know you</p>
+      <p className="font-display text-2xl font-semibold text-white">{title}</p>
+      <div className="flex gap-1" role="img" aria-label={`${level} of 3 hearts`}>
+        {[1, 2, 3].map((i) => (
+          <Heart key={i} className={i <= level ? "size-5 fill-primary text-primary" : "size-5 text-white/40"} aria-hidden />
+        ))}
+      </div>
+      <p className="text-xs leading-snug text-white/60">
+        Based on your {answers} answers.{level < 3 && " Fuller answers give a sharper read."}
+      </p>
+      {level < 3 && (
+        <Link href="/ai-interview" className="text-xs font-medium text-accent underline-offset-2 hover:underline">
+          Redo the interview
+        </Link>
+      )}
+    </div>
+  );
+}
+
 function ReportSkeleton() {
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-4 py-28 sm:px-6 lg:px-8">
@@ -202,7 +226,7 @@ export function PersonalityReportView() {
         <EmptyState
           icon={HeartHandshake}
           title="Your report is waiting"
-          description="Chat with SoulSync AI for a few minutes and it will build your personality report — strengths, values, communication style and more."
+          description="Chat with Sol for a few minutes and it will build your personality report — strengths, values, communication style and more."
           actionLabel="Start the AI interview"
           actionHref="/ai-interview"
         />
@@ -286,12 +310,7 @@ export function PersonalityReportView() {
               ))}
             </div>
           </div>
-          <div className="flex flex-col items-center gap-2">
-            <CompatibilityRing value={profile.confidenceScore} size={150} strokeWidth={10} label="Confidence" />
-            <p className="max-w-[10rem] text-center text-xs leading-snug text-white/60">
-              How much your {profile.interviewAnswerCount} answers gave us to go on
-            </p>
-          </div>
+          <ReadDepth score={profile.confidenceScore} answers={profile.interviewAnswerCount} />
         </div>
       </motion.section>
 

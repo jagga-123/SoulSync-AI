@@ -4,7 +4,8 @@ import { LoginForm } from "@/components/auth/login-form";
 
 export const metadata: Metadata = {
   title: "Log in",
-  description: "Log in to your SoulSync AI account.",
+  alternates: { canonical: "/login" },
+  description: "Log in to your SoulSync account.",
   robots: { index: false, follow: false },
 };
 

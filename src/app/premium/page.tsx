@@ -3,7 +3,7 @@ import { PremiumView } from "@/components/platform/premium-view";
 
 export const metadata: Metadata = {
   title: "My perks",
-  description: "Your SoulSync AI plan perks and tools.",
+  description: "Your SoulSync plan perks and tools.",
   robots: { index: false, follow: false },
 };
 
