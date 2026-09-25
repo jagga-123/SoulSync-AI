@@ -1,9 +1,16 @@
 {
+  // Compiled with TypeScript 7 (pinned in package.json). The output is plain CommonJS that Node runs directly
+  // (`node dist/server.js`). Verified: TypeScript 7.0.2 with these options emits byte-identical JavaScript to the
+  // previous TypeScript 5.9 + "moduleResolution": "Node" setup.
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["ES2022"],
     "module": "CommonJS",
-    "moduleResolution": "Node",
+    // "Node" (= node10) was removed in TypeScript 7 (error TS5108). "Bundler" is the supported way to keep
+    // extensionless relative imports and CommonJS output without changing any source file.
+    "moduleResolution": "Bundler",
+    // TypeScript 6+ no longer loads every @types/* package implicitly — declare what the code relies on.
+    "types": ["node"],
     "rootDir": "src",
     "outDir": "dist",
     "strict": true,

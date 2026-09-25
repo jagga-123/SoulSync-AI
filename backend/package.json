@@ -4,6 +4,9 @@
   "private": true,
   "description": "SoulSync AI backend â€” REST + Socket.IO API",
   "main": "dist/server.js",
+  "engines": {
+    "node": ">=22.12.0 <25"
+  },
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc -p tsconfig.json",
@@ -53,6 +56,11 @@
     "smtp-server": "^3.19.13",
     "socket.io-client": "^4.8.3",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "typescript": "~7.0.2"
+  },
+  "config": {
+    "mongodbMemoryServer": {
+      "disablePostinstall": "1"
+    }
   }
 }

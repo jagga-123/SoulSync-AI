@@ -31,7 +31,7 @@ Every step below can be done on free/test tiers first.
 ## 0. Before you start
 
 - A GitHub repo containing this project (Render, Railway and Vercel all deploy from Git).
-- Node 22 locally (the API's `render.yaml` pins Node 22).
+- Node 22.12+ locally (`backend/package.json` "engines" allows 22.12 – 24; `render.yaml` pins Node 24, the same as the live service).
 - Generate secrets you'll paste later:
   ```bash
   openssl rand -hex 64     # JWT_SECRET (>= 32 chars is enforced in production)
@@ -66,7 +66,10 @@ flips to `503` instead of hanging requests.
 Notes on the blueprint:
 
 - **Plan:** use an always-on instance. Free plans sleep, which drops WebSocket connections and delays the first request.
-- **Build:** `npm ci --include=dev && npm run build` — TypeScript is a dev dependency and is needed to compile. Runtime is `node dist/server.js`.
+- **Build:** `npm ci --include=dev && npm run build` — TypeScript is a dev dependency and is needed to compile. Runtime is `node dist/server.js`. `backend/.npmrc` (`include=dev`) keeps devDependencies installed even when `NODE_ENV=production` is set and a dashboard Build Command is a plain `npm install` (otherwise the build fails with `tsc: not found`).
+- **TypeScript is pinned to 7.0.x** (`~7.0.2` + `package-lock.json`). TypeScript 7 removed `"moduleResolution": "node10"`; `backend/tsconfig.json` uses `"module": "CommonJS"` + `"moduleResolution": "Bundler"` (needs TypeScript 6 or newer — it fails on 5.x). Don't loosen the pin to `^`/`latest`, and commit `package-lock.json` whenever it changes. TypeScript 7 ships a native compiler as optional platform packages, so don't install with `--omit=optional`.
+- **`NODE_ENV=production` has consequences:** the server refuses to start unless `JWT_SECRET` is ≥ 32 characters, `CLIENT_URL` is `https://`, `PAYMENT_PROVIDER` isn't `mock` and rate limiting is on — and **photo uploads turn off** unless Cloudinary is configured or `LOCAL_UPLOADS=on` (see the photo section below).
+- **`mongodb-memory-server`** (tests only) would download a MongoDB binary during every build that installs devDependencies; `backend/package.json` disables that postinstall (`config.mongodbMemoryServer.disablePostinstall`).
 - **`TRUST_PROXY=1`:** Render puts exactly one proxy in front of the app. Without this, every visitor shares one IP and the rate limiter locks everyone out together.
 
 ### Railway

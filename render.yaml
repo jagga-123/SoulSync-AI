@@ -11,7 +11,8 @@ services:
     rootDir: backend
     plan: starter           # WebSockets need an always-on instance; free plans sleep and drop connections
     region: oregon
-    # devDependencies (TypeScript) are needed to compile, so install them explicitly.
+    # devDependencies (TypeScript 7, pinned in backend/package.json) are needed to compile, so install them explicitly.
+    # backend/.npmrc (include=dev) enforces the same even if a dashboard Build Command is a plain `npm install`.
     buildCommand: npm ci --include=dev && npm run build
     startCommand: npm start
     healthCheckPath: /api/health/ready   # 503 while MongoDB is unreachable → Render stops routing here
@@ -20,7 +21,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: NODE_VERSION
-        value: "22"
+        value: "24"           # backend/package.json "engines": >=22.12.0 <25 (22.12+ is needed for require(esm), used by the Gemini SDK)
       - key: TRUST_PROXY
         value: "1"            # one proxy (Render's) in front of the app
       - key: LOG_LEVEL
