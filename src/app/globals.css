@@ -229,6 +229,17 @@
   50% { opacity: 0; }
 }
 
+/* The Finish button's one slow glow when the report unlocks (15 answers), then it rests. */
+@keyframes finish-glow {
+  0% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--accent) 60%, transparent); }
+  70% { box-shadow: 0 0 0 12px color-mix(in oklch, var(--accent) 0%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--accent) 0%, transparent); }
+}
+
+.finish-glow {
+  animation: finish-glow 1.6s ease-out 1;
+}
+
 /* The hero chat: each bubble fades up in turn. */
 @keyframes bubble-in {
   from { opacity: 0; transform: translateY(10px) scale(0.98); }

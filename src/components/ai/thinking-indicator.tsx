@@ -11,20 +11,29 @@ const DEFAULT_PHRASES = [
   "Finding the right question",
 ];
 
+/** After this long with no reply, say so kindly — never an error, just honesty about the wait. */
+const SLOW_AFTER_MS = 8000;
+
 interface ThinkingIndicatorProps {
   phrases?: string[];
 }
 
-/** The AI's "thinking" state: pulsing avatar, animated dots, and a status
- * line that cycles so a slow response still feels alive. */
+/** Sol's "writing" state: a glowing avatar, three little hearts, and a status line that cycles so a slow
+ * response still feels alive (and says so after 8 seconds). */
 export function ThinkingIndicator({ phrases = DEFAULT_PHRASES }: ThinkingIndicatorProps) {
   const [index, setIndex] = useState(0);
+  const [slow, setSlow] = useState(false);
 
   useEffect(() => {
     if (phrases.length < 2) return;
     const timer = setInterval(() => setIndex((i) => (i + 1) % phrases.length), 1800);
     return () => clearInterval(timer);
   }, [phrases.length]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setSlow(true), SLOW_AFTER_MS);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <motion.div
@@ -39,18 +48,18 @@ export function ThinkingIndicator({ phrases = DEFAULT_PHRASES }: ThinkingIndicat
       <AIAvatar active />
       <div className="glass flex items-center gap-3 rounded-2xl rounded-bl-md px-4 py-3">
         <span aria-hidden>
-          <TypingHearts />
+          <TypingHearts label="Sol is writing" />
         </span>
         <AnimatePresence mode="wait">
           <motion.span
-            key={index}
+            key={slow ? "slow" : index}
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.2 }}
-            className="text-xs text-white/55"
+            className="text-xs text-white/70"
           >
-            {phrases[index]}…
+            {slow ? "Sol is taking a little longer…" : `${phrases[index]}…`}
           </motion.span>
         </AnimatePresence>
       </div>

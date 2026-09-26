@@ -127,3 +127,14 @@ export function analysisSourceLabel(source: "llm" | "heuristic", provider?: stri
   }
   return "Analysed by SoulSync's built-in engine";
 }
+
+/** sessionStorage flag: set when an interview finishes so the report page can play its one-time "Your read is ready." arrival. */
+export const REPORT_REVEAL_KEY = "soulsync:report-reveal";
+
+/** With this few of the six areas to go on, a match is an "early read" rather than a firm one. */
+export const EARLY_READ_MAX_AREAS = 3;
+
+/** How many of the six areas both people have given us data for (dropped areas mean less to compare). */
+export function availableAreaCount(breakdown: Record<CompatibilityDimension, { available: boolean }>): number {
+  return Object.values(breakdown).filter((area) => area.available).length;
+}

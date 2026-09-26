@@ -8,6 +8,8 @@ interface AIMatchPillProps {
   /** A heart only, for tight spaces (the row already says why); the label and overlap stay available
    * to screen readers and as a tooltip. */
   compact?: boolean;
+  /** Little data on either side: say "Early read" instead of a firm label. */
+  early?: boolean;
   className?: string;
 }
 
@@ -15,14 +17,15 @@ interface AIMatchPillProps {
  * The human label for a match — "You two click", "On the same wavelength"… The percentage is deliberately not
  * the headline: it sits in the tooltip and is announced to screen readers as "overlap".
  */
-export function AIMatchPill({ score, tier, compact = false, className = "" }: AIMatchPillProps) {
+export function AIMatchPill({ score, tier, compact = false, early = false, className = "" }: AIMatchPillProps) {
+  const label = early ? "Early read" : TIER_LABELS[tier];
   return (
     <span
-      title={`${TIER_LABELS[tier]} — ${score}% overlap`}
+      title={`${label} — ${score}% overlap`}
       className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold backdrop-blur-md ${TIER_STYLES[tier]} ${className}`}
     >
       <Heart className="size-3.5 shrink-0 fill-primary text-primary" aria-hidden />
-      <span className={compact ? "sr-only" : undefined}>{TIER_LABELS[tier]}</span>
+      <span className={compact ? "sr-only" : undefined}>{label}</span>
       <span className="sr-only"> ({score}% overlap)</span>
     </span>
   );

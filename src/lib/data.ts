@@ -191,7 +191,7 @@ export const FAQ_ITEMS: FaqItem[] = [
   },
   {
     q: "What if I don't like my matches?",
-    a: "You never have to act on a suggestion — just move on. You can block anyone, and you can redo your interview whenever you like.",
+    a: "You never have to act on a suggestion — just move on. You can decline a like, block anyone, and redo your interview whenever you like.",
   },
   {
     q: "How do you keep people safe?",

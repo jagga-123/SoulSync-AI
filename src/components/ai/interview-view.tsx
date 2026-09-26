@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import Link from "next/link";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
   Heart,
@@ -18,6 +18,7 @@ import {
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { HEART_PATH } from "@/components/brand/heart-path";
 import { AIAvatar } from "@/components/ai/ai-avatar";
 import { AnalyzingScreen } from "@/components/ai/analyzing-screen";
 import { InterviewProgress } from "@/components/ai/interview-progress";
@@ -34,13 +35,22 @@ import {
   submitInterviewAnswer,
 } from "@/lib/api/ai";
 import { ApiClientError } from "@/lib/api-client";
-import { categoryLabel } from "@/lib/ai-format";
+import { REPORT_REVEAL_KEY, categoryLabel } from "@/lib/ai-format";
 import type { InterviewMessage, InterviewState } from "@/types/api";
 
 const MAX_ANSWER_LENGTH = 1000;
 // The analysis screen is held at least this long so its steps register
 // instead of flashing by when the analysis returns instantly.
 const MIN_ANALYSIS_DISPLAY_MS = 2600;
+
+// Small moments of encouragement under Sol's next question (docs/redesign/02 §4.3), keyed by answer count.
+const MILESTONES: Record<number, string> = {
+  5: "Good start.",
+  10: "Halfway there.",
+  15: "That's plenty for a great read — keep going or finish whenever you like.",
+};
+// A small heart pops at the corner of these answers only, so it stays special.
+const POP_ANSWERS = new Set([5, 10, 15]);
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -64,6 +74,9 @@ export function InterviewView() {
   const [isRestarting, setIsRestarting] = useState(false);
   const [confirmRestart, setConfirmRestart] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [canRetry, setCanRetry] = useState(false);
+  const [glowFinish, setGlowFinish] = useState(false);
+  const previousAnswered = useRef<number | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -117,6 +130,18 @@ export function InterviewView() {
     if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [messageCount, pendingAnswer]);
 
+  // When the count crosses the point where the report unlocks, the Finish button gives one slow glow, then rests.
+  const answeredCount = interview?.progress.answered ?? null;
+  const unlockAt = interview?.progress.min ?? 15;
+  useEffect(() => {
+    const before = previousAnswered.current;
+    previousAnswered.current = answeredCount;
+    if (before === null || answeredCount === null || before >= unlockAt || answeredCount < unlockAt) return;
+    setGlowFinish(true);
+    const timer = setTimeout(() => setGlowFinish(false), 1800);
+    return () => clearTimeout(timer);
+  }, [answeredCount, unlockAt]);
+
   // Follow the text while it streams in, but never yank the view if the user
   // has scrolled up to reread something.
   const followStream = useCallback(() => {
@@ -151,6 +176,7 @@ export function InterviewView() {
     if (!content || pendingAnswer !== null || isAnalyzing) return;
 
     setError(null);
+    setCanRetry(false);
     setPendingAnswer(content);
     setDraft("");
 
@@ -170,7 +196,8 @@ export function InterviewView() {
           .then((res) => setInterview(res.interview))
           .catch(() => {});
       }
-      setError(errorMessage(err, "Something went wrong sending that. Please try again."));
+      setError(errorMessage(err, "That didn't send. Your answer is still in the box — try again."));
+      setCanRetry(true);
     } finally {
       setPendingAnswer(null);
       inputRef.current?.focus();
@@ -184,6 +211,12 @@ export function InterviewView() {
       const [res] = await Promise.all([completeInterview(), sleep(MIN_ANALYSIS_DISPLAY_MS)]);
       setInterview(res.interview);
       setPersonalityType(res.aiProfile.personalityType);
+      try {
+        // The report page plays its one-time "Your read is ready." arrival when it finds this.
+        sessionStorage.setItem(REPORT_REVEAL_KEY, "1");
+      } catch {
+        /* private mode — the report simply opens without the arrival moment */
+      }
     } catch (err) {
       setError(errorMessage(err, "The analysis didn't finish. Please try again."));
     } finally {
@@ -253,14 +286,25 @@ export function InterviewView() {
   const awaitingAnswer = interview.status === "in_progress" && pendingAnswer === null;
   const showAnalyzing = isAnalyzing || interview.status === "analyzing";
 
+  // Which of Sol's questions carries an encouragement line: the one right after the 5th, 10th and 15th answer.
+  const milestoneNotes = new Map<string, string>();
+  let answersSoFar = 0;
+  interview.messages.forEach((message, i) => {
+    if (message.role === "user") answersSoFar += 1;
+    else if (i > 0 && interview.messages[i - 1].role === "user" && MILESTONES[answersSoFar]) {
+      milestoneNotes.set(message.id, MILESTONES[answersSoFar]);
+    }
+  });
+
   return (
     <div className="mx-auto flex h-svh max-w-2xl flex-col pt-20 sm:pt-24">
       <header className="glass sticky top-20 z-10 shrink-0 px-4 py-3 sm:top-24 sm:px-6">
         <div className="flex items-center gap-3">
           <AIAvatar active={pendingAnswer !== null || showAnalyzing} className="size-10" />
           <div className="min-w-0 flex-1">
-            <h1 className="font-display text-sm font-semibold text-white">AI Interview</h1>
+            <h1 className="font-display text-sm font-semibold text-white">Sol</h1>
             <p className="truncate text-xs text-white/60">
+              AI interviewer ·{" "}
               {isCompleted
                 ? "Complete"
                 : interview.progress.currentCategory
@@ -286,7 +330,14 @@ export function InterviewView() {
       {error && (
         <div className="shrink-0 px-4 pt-3 sm:px-6">
           <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+              <span>{error}</span>
+              {canRetry && draft.trim() && (
+                <Button type="button" size="sm" variant="outline" onClick={handleSend} className="rounded-full border-white/20 bg-transparent text-white hover:bg-white/10">
+                  Try again
+                </Button>
+              )}
+            </AlertDescription>
           </Alert>
         </div>
       )}
@@ -298,30 +349,35 @@ export function InterviewView() {
         tabIndex={0}
         aria-live="polite"
         aria-relevant="additions"
-        className="flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-6"
+        className="flex-1 overflow-y-auto px-4 py-5 sm:px-6"
       >
-        {showAnalyzing ? (
-          <div className="flex h-full items-center">
-            <AnalyzingScreen />
-          </div>
-        ) : (
-          <>
-            {interview.messages.map((message) =>
-              message.role === "assistant" ? (
-                <AssistantMessage
-                  key={message.id}
-                  message={message}
-                  animate={message.id === streamId}
-                  onProgress={followStream}
-                />
-              ) : (
-                <UserMessage key={message.id} content={message.content} />
-              ),
-            )}
-            {pendingAnswer !== null && <UserMessage content={pendingAnswer} animateIn />}
-            <AnimatePresence>{pendingAnswer !== null && <ThinkingIndicator />}</AnimatePresence>
-          </>
-        )}
+        <AnimatePresence mode="wait" initial={false}>
+          {showAnalyzing ? (
+            <div key="analyzing" className="flex h-full items-center">
+              <AnalyzingScreen />
+            </div>
+          ) : (
+            <div key="chat" className="space-y-4">
+              {interview.messages.map((message) =>
+                message.role === "assistant" ? (
+                  <AssistantMessage
+                    key={message.id}
+                    message={message}
+                    animate={message.id === streamId}
+                    onProgress={followStream}
+                    note={milestoneNotes.get(message.id)}
+                  />
+                ) : (
+                  <UserMessage key={message.id} content={message.content} />
+                ),
+              )}
+              {pendingAnswer !== null && (
+                <UserMessage content={pendingAnswer} animateIn pop={POP_ANSWERS.has(interview.progress.answered + 1)} />
+              )}
+              <AnimatePresence>{pendingAnswer !== null && <ThinkingIndicator />}</AnimatePresence>
+            </div>
+          )}
+        </AnimatePresence>
       </div>
 
       <div className="shrink-0 border-t border-white/10 bg-background/60 p-3 backdrop-blur-xl sm:p-4">
@@ -372,10 +428,10 @@ export function InterviewView() {
                   size="sm"
                   onClick={handleFinish}
                   disabled={pendingAnswer !== null || showAnalyzing}
-                  className="ml-auto gap-1.5 rounded-full border-accent/40 bg-accent/10 text-accent hover:bg-accent/20"
+                  className={`ml-auto gap-1.5 rounded-full border-accent/40 bg-accent/10 text-accent hover:bg-accent/20 ${glowFinish ? "finish-glow" : ""}`}
                 >
                   <Sparkles className="size-3.5" />
-                  Finish &amp; analyse
+                  Finish and see my report
                 </Button>
               )}
             </div>
@@ -394,10 +450,13 @@ function AssistantMessage({
   message,
   animate,
   onProgress,
+  note,
 }: {
   message: InterviewMessage;
   animate: boolean;
   onProgress: () => void;
+  /** An encouragement line under the bubble (answers 5, 10 and 15). */
+  note?: string;
 }) {
   return (
     <motion.div
@@ -414,12 +473,23 @@ function AssistantMessage({
         <div className="glass rounded-2xl rounded-bl-md px-4 py-3 text-sm leading-relaxed text-white/90">
           <StreamingText text={message.content} animate={animate} onProgress={onProgress} />
         </div>
+        {note && (
+          <motion.p
+            initial={animate ? { opacity: 0 } : false}
+            animate={{ opacity: 1 }}
+            transition={{ delay: animate ? 1.4 : 0, duration: 0.2 }}
+            className="mt-1.5 pl-1 text-xs text-accent"
+          >
+            {note}
+          </motion.p>
+        )}
       </div>
     </motion.div>
   );
 }
 
-function UserMessage({ content, animateIn = false }: { content: string; animateIn?: boolean }) {
+function UserMessage({ content, animateIn = false, pop = false }: { content: string; animateIn?: boolean; pop?: boolean }) {
+  const reduceMotion = useReducedMotion();
   return (
     <motion.div
       initial={animateIn ? { opacity: 0, y: 12, scale: 0.98 } : false}
@@ -427,8 +497,20 @@ function UserMessage({ content, animateIn = false }: { content: string; animateI
       transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
       className="flex justify-end"
     >
-      <div className="max-w-[85%] rounded-2xl rounded-br-md bg-gradient-brand px-4 py-2.5 text-white">
+      <div className="relative max-w-[85%] rounded-2xl rounded-br-md bg-gradient-brand px-4 py-2.5 text-white">
         <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">{content}</p>
+        {pop && !reduceMotion && (
+          <motion.svg
+            aria-hidden
+            viewBox="0 0 48 44"
+            className="absolute -bottom-2 -right-1.5 size-4"
+            initial={{ scale: 0 }}
+            animate={{ scale: [0, 1.3, 1] }}
+            transition={{ delay: 0.25, duration: 0.4 }}
+          >
+            <path d={HEART_PATH} fill="var(--accent)" />
+          </motion.svg>
+        )}
       </div>
     </motion.div>
   );
@@ -677,6 +759,12 @@ function IntroPanel({
             </Button>
           </div>
         )}
+        <Link
+          href="/how-our-ai-works"
+          className="rounded-md text-sm font-medium text-accent underline-offset-2 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          How does the AI work?
+        </Link>
       </div>
     </div>
   );

@@ -1,42 +1,66 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useEffect, useRef } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+
+import { HEART_PATH } from "@/components/brand/heart-path";
 import type { InterviewProgress as Progress } from "@/types/api";
 
 interface InterviewProgressProps {
   progress: Progress;
 }
 
-/** Progress toward the 25-answer maximum, with a marker where the report
- * unlocks (15 answers) — so it's clear the interview can be finished early. */
+/**
+ * A row of small hearts that fill as you answer — one per answer up to the point where the report unlocks
+ * (15), so "Question 7 of about 15" is something you can see. Past that you can keep going for a sharper
+ * read or finish whenever you like. Each new heart springs in (still under reduced motion).
+ */
 export function InterviewProgress({ progress }: InterviewProgressProps) {
-  const { answered, min, max, percent } = progress;
-  const minMarker = (min / max) * 100;
+  const { answered, min, max } = progress;
   const unlocked = answered >= min;
+  const reduceMotion = useReducedMotion();
+
+  // Only hearts that fill *after* the first render animate, so reloading a half-finished interview doesn't replay them all.
+  const firstRender = useRef(true);
+  useEffect(() => {
+    firstRender.current = false;
+  }, []);
 
   return (
-    <div className="w-full">
-      <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-white/10">
-        <motion.div
-          className="h-full rounded-full bg-gradient-to-r from-primary via-secondary to-accent"
-          initial={false}
-          animate={{ width: `${percent}%` }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        />
-        <span
-          aria-hidden
-          className="absolute top-0 h-full w-px bg-white/40"
-          style={{ left: `${minMarker}%` }}
-        />
+    <div
+      role="progressbar"
+      aria-label="Interview progress"
+      aria-valuemin={0}
+      aria-valuemax={max}
+      aria-valuenow={answered}
+      aria-valuetext={unlocked ? `${answered} answered. Enough for a great read.` : `${answered} of about ${min} answered`}
+      className="w-full"
+    >
+      <div aria-hidden className="flex items-center gap-[3px]">
+        {Array.from({ length: min }, (_, i) => {
+          const filled = i < answered;
+          return (
+            <svg key={i} viewBox="0 0 48 44" className="h-[13px] flex-1 max-w-4">
+              <path d={HEART_PATH} fill="none" stroke="var(--foreground)" strokeOpacity={0.3} strokeWidth={3} strokeLinejoin="round" />
+              {filled && (
+                <motion.path
+                  d={HEART_PATH}
+                  fill="var(--primary)"
+                  style={{ transformOrigin: "center", transformBox: "fill-box" }}
+                  initial={firstRender.current || reduceMotion ? false : { scale: 0.4, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", stiffness: 420, damping: 14 }}
+                />
+              )}
+            </svg>
+          );
+        })}
       </div>
-      <div className="mt-1.5 flex items-center justify-between text-xs text-white/60">
-        <span>
-          {answered} of up to {max} answered
-        </span>
-        <span className={unlocked ? "text-accent" : undefined}>
-          {unlocked ? "Report unlocked — keep going for a sharper read" : `${min - answered} more to unlock your report`}
-        </span>
-      </div>
+      <p className="mt-1.5 text-xs text-white/70">
+        {unlocked
+          ? `${answered} answered — plenty for a great read`
+          : `Question ${answered + 1} of about ${min}`}
+      </p>
     </div>
   );
 }

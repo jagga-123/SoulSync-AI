@@ -12,6 +12,7 @@ import {
   Heart,
   Home,
   Loader2,
+  Lock,
   MessageCircle,
   RotateCcw,
   Smile,
@@ -23,12 +24,14 @@ import type { LucideIcon } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { HeartPulse } from "@/components/brand/heart-pulse";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { getMyAIProfile } from "@/lib/api/ai";
 import { ApiClientError } from "@/lib/api-client";
 import {
   ARCHETYPE_TAGLINES,
+  REPORT_REVEAL_KEY,
   STYLE_DESCRIPTIONS,
   TRAIT_META,
   analysisSourceLabel,
@@ -111,8 +114,14 @@ function ChipGroup({
   );
 }
 
-function TraitBar({ traitKey, value, index }: { traitKey: keyof TraitScores; value: number; index: number }) {
+/**
+ * A trait as a soft range, not a score: a dot on a track between its two ends ("Reflective … Outgoing") with the
+ * plain-words read beside it ("Leans reflective"). The number stays available to assistive tech only.
+ */
+function TraitRange({ traitKey, value, index }: { traitKey: keyof TraitScores; value: number; index: number }) {
   const meta = TRAIT_META[traitKey];
+  const read = describeTrait(traitKey, value);
+  const position = Math.min(94, Math.max(6, value)); // keep the dot inside the track
   return (
     <div>
       <div className="flex items-baseline justify-between gap-3">
@@ -120,32 +129,37 @@ function TraitBar({ traitKey, value, index }: { traitKey: keyof TraitScores; val
           <span className="text-sm font-medium text-white">{meta.label}</span>
           <span className="ml-2 hidden text-xs text-white/60 sm:inline">{meta.blurb}</span>
         </div>
-        <span className="shrink-0 text-xs text-white/55">
-          {describeTrait(traitKey, value)} · <span className="tabular-nums">{value}</span>
-        </span>
+        <span className="shrink-0 text-sm font-medium text-white/85">{read}</span>
       </div>
       <div
-        className="relative mt-2 h-2 overflow-hidden rounded-full bg-white/8"
+        className="relative mt-3 h-2 rounded-full bg-gradient-to-r from-secondary/35 via-white/10 to-primary/35"
         role="meter"
         aria-label={meta.label}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={value}
+        aria-valuetext={read}
       >
-        <motion.div
-          className="h-full rounded-full bg-gradient-to-r from-primary via-secondary to-accent"
-          initial={{ width: 0 }}
-          whileInView={{ width: `${value}%` }}
+        <motion.span
+          aria-hidden
+          className="absolute top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary ring-4 ring-background"
+          initial={{ left: "50%" }}
+          whileInView={{ left: `${position}%` }}
           viewport={{ once: true }}
-          transition={{ duration: 1.1, delay: 0.15 + index * 0.08, ease: EASE }}
+          transition={{ duration: 0.9, delay: 0.15 + index * 0.08, ease: EASE }}
         />
       </div>
-      <div className="mt-1 flex justify-between text-xs uppercase tracking-wide text-white/60">
+      <div className="mt-2 flex justify-between text-xs uppercase tracking-wide text-white/60">
         <span>{meta.low}</span>
         <span>{meta.high}</span>
       </div>
     </div>
   );
+}
+
+/** Splits a summary into sentences so the reveal can bring them in one at a time (never letter by letter). */
+function sentences(text: string): string[] {
+  return text.match(/[^.!?]+[.!?]+(?:\s+|$)|[^.!?]+$/g)?.map((s) => s.trim()) ?? [text];
 }
 
 /** How deep the read is, in words and hearts — deliberately not a percentage, so it can't feel like a grade for the person. */
@@ -192,6 +206,19 @@ export function PersonalityReportView() {
   const [profile, setProfile] = useState<AIProfile | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // True only when the person has just finished the interview: the report then opens with a one-time arrival.
+  const [reveal, setReveal] = useState(false);
+
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem(REPORT_REVEAL_KEY)) {
+        sessionStorage.removeItem(REPORT_REVEAL_KEY);
+        setReveal(true);
+      }
+    } catch {
+      /* no sessionStorage — no arrival moment, the report is unchanged */
+    }
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -272,6 +299,11 @@ export function PersonalityReportView() {
         </span>
       </motion.div>
 
+      <p className="mt-3 flex items-center gap-2 text-sm text-white/75">
+        <Lock className="size-4 shrink-0 text-accent" aria-hidden />
+        Only you can see this report. Matches see just what you have in common.
+      </p>
+
       {/* Hero */}
       <motion.section
         initial={{ opacity: 0, y: 20 }}
@@ -289,9 +321,28 @@ export function PersonalityReportView() {
         />
         <div className="relative flex flex-col items-center gap-8 text-center md:flex-row md:text-left">
           <div className="flex-1">
-            <p className="text-sm text-white/50">Your personality type</p>
+            {reveal && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.92 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, ease: EASE }}
+                role="status"
+                className="mb-5 flex items-center justify-center gap-3 md:justify-start"
+              >
+                <HeartPulse loop={false} className="size-9" />
+                <p className="font-display text-xl font-semibold text-white">Your read is ready.</p>
+              </motion.div>
+            )}
+            <p className="text-sm text-white/60">Your personality type</p>
             <h1 className="mt-2 font-display text-5xl font-semibold leading-tight sm:text-6xl">
-              <span className="text-gradient-brand">{profile.personalityType}</span>
+              <motion.span
+                className="inline-block text-gradient-brand"
+                initial={reveal ? { opacity: 0, y: 10 } : false}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: reveal ? 0.9 : 0, duration: 0.6, ease: EASE }}
+              >
+                {profile.personalityType}
+              </motion.span>
             </h1>
             {tagline && <p className="mt-4 max-w-lg text-pretty text-lg text-white/65">{tagline}.</p>}
             <div className="mt-5 flex flex-wrap items-center justify-center gap-2 md:justify-start">
@@ -318,7 +369,21 @@ export function PersonalityReportView() {
       <Section className="mt-6" delay={0.05}>
         <div className="glass rounded-3xl p-6 sm:p-8">
           <CardTitle icon={Sparkles}>AI summary</CardTitle>
-          <p className="mt-4 text-pretty text-lg leading-relaxed text-white/85">{profile.summary}</p>
+          <p className="mt-4 text-pretty text-lg leading-relaxed text-white/85">
+            {reveal
+              ? sentences(profile.summary).map((line, i) => (
+                  <motion.span
+                    key={i}
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.3 + i * 0.35, duration: 0.5 }}
+                  >
+                    {line}{" "}
+                  </motion.span>
+                ))
+              : profile.summary}
+          </p>
         </div>
       </Section>
 
@@ -359,7 +424,7 @@ export function PersonalityReportView() {
           <CardTitle icon={HeartHandshake}>Personality dimensions</CardTitle>
           <div className="mt-6 space-y-6">
             {traitKeys.map((key, index) => (
-              <TraitBar key={key} traitKey={key} value={profile.traitScores[key]} index={index} />
+              <TraitRange key={key} traitKey={key} value={profile.traitScores[key]} index={index} />
             ))}
           </div>
         </div>
@@ -445,9 +510,15 @@ export function PersonalityReportView() {
             </Button>
           </div>
         </div>
-        <p className="mt-5 text-center text-xs text-white/60">
-          {analysisSourceLabel(profile.analysisSource, profile.provider)} · Only you can see this report;
-          matches see just what you have in common.
+        <p className="mx-auto mt-5 max-w-xl text-center text-xs leading-relaxed text-white/60">
+          {profile.analysisSource === "llm"
+            ? "Written by AI from your answers."
+            : "Built by SoulSync's own rules from your answers, not by an AI model."}{" "}
+          It can be wrong —{" "}
+          <Link href="/ai-interview" className="font-medium text-accent underline-offset-2 hover:underline">
+            redo the interview
+          </Link>{" "}
+          if it doesn&apos;t feel like you. · {analysisSourceLabel(profile.analysisSource, profile.provider)}
         </p>
       </Section>
     </div>

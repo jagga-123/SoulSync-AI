@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { Heart, Inbox, Loader2, Send, Sparkles } from "lucide-react";
+import dynamic from "next/dynamic";
+import { AnimatePresence } from "framer-motion";
+import { Heart, Inbox, Loader2, Send } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LikeCard } from "@/components/likes/like-card";
@@ -11,6 +12,9 @@ import { useRequireAuth } from "@/hooks/use-require-auth";
 import { acceptLike, getIncomingLikes, getOutgoingLikes, rejectLike } from "@/lib/api/likes";
 import { ApiClientError } from "@/lib/api-client";
 import type { LikeEntry, MatchEntry } from "@/types/api";
+
+// The reveal only ever plays right after accepting a like, so its code (and the dialog it uses) loads on demand.
+const MatchReveal = dynamic(() => import("@/components/ai/match-reveal").then((m) => m.MatchReveal));
 
 type Tab = "incoming" | "outgoing";
 
@@ -54,7 +58,6 @@ export function LikesView() {
       const { match } = await acceptLike(likeId);
       setIncoming((prev) => prev.filter((entry) => entry.likeId !== likeId));
       setJustMatched(match);
-      setTimeout(() => setJustMatched(null), 4000);
     } catch (err) {
       setError(err instanceof ApiClientError ? err.message : "Couldn't accept that like.");
     } finally {
@@ -94,24 +97,8 @@ export function LikesView() {
         </p>
       </div>
 
-      <AnimatePresence>
-        {justMatched && (
-          <motion.div
-            initial={{ opacity: 0, y: -12, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -12, scale: 0.95 }}
-            className="glass-strong glow-primary mx-auto mt-6 flex max-w-md items-center gap-3 rounded-2xl p-4"
-          >
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gradient-brand">
-              <Sparkles className="size-4 text-white" />
-            </span>
-            <p className="text-sm text-white">
-              It&apos;s a match with{" "}
-              <span className="font-semibold">{justMatched.user.fullName}</span> — say hello!
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* A mutual match is the one big celebration: see MatchReveal. */}
+      {justMatched && user && <MatchReveal match={justMatched} viewerName={user.fullName} onClose={() => setJustMatched(null)} />}
 
       <div className="glass mx-auto mt-8 flex max-w-xs rounded-full p-1">
         <button

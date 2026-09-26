@@ -101,7 +101,7 @@ export default function HowOurAiWorksPage() {
 
       <Block title="What you control">
         <ul className="list-disc space-y-2 pl-5 marker:text-white/40">
-          <li>You decide who to like and who to talk to. A suggestion is only a suggestion.</li>
+          <li>You decide who to like, whose likes to accept or decline, and who to talk to. A suggestion is only a suggestion.</li>
           <li>You can redo the interview whenever you like.</li>
           <li>You can report or block anyone, from their profile or from a chat.</li>
         </ul>

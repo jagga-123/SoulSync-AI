@@ -8,12 +8,12 @@ import { ChevronDown, Heart, Loader2, MapPin, MessageCircle, Sparkles } from "lu
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AIMatchPill } from "@/components/ai/ai-match-pill";
-import { MatchAIInsights } from "@/components/ai/match-ai-insights";
+import { WhyPanel } from "@/components/ai/why-panel";
 import { ProfileMedia } from "@/components/shared/profile-media";
 import { SafetyMenu } from "@/components/platform/safety-menu";
 import { recordProfileView } from "@/lib/api/platform";
 import { useAICompatibility } from "@/hooks/use-ai-compatibility";
-import { TIER_SUBLINES } from "@/lib/ai-format";
+import { EARLY_READ_MAX_AREAS, TIER_SUBLINES, availableAreaCount } from "@/lib/ai-format";
 import { getInitials, RELATIONSHIP_GOAL_LABELS } from "@/lib/format";
 import { startConversation } from "@/lib/api/conversations";
 import { ApiClientError } from "@/lib/api-client";
@@ -32,6 +32,9 @@ export function MatchCard({ match, onBlocked }: { match: MatchEntry; onBlocked?:
   const cardRef = useRef<HTMLDivElement>(null);
   const inView = useInView(cardRef, { once: true, amount: 0.2 });
   const { state: aiState, retry: retryAI } = useAICompatibility(user.id, inView);
+
+  // With very little data on either side the label softens to an "early read" (see WhyPanel).
+  const early = aiState.status === "ready" && availableAreaCount(aiState.data.breakdown) <= EARLY_READ_MAX_AREAS;
 
   async function handleStartConversation() {
     setIsStartingChat(true);
@@ -80,8 +83,10 @@ export function MatchCard({ match, onBlocked }: { match: MatchEntry; onBlocked?:
         {/* The label and a line about what it means come first; the percentage lives in the tooltip. */}
         {aiState.status === "ready" ? (
           <div className="flex shrink-0 flex-col items-center gap-1.5 sm:max-w-[13rem] sm:items-end sm:text-right">
-            <AIMatchPill score={aiState.data.score} tier={aiState.data.tier} />
-            <p className="text-xs leading-snug text-white/70">{TIER_SUBLINES[aiState.data.tier]}</p>
+            <AIMatchPill score={aiState.data.score} tier={aiState.data.tier} early={early} />
+            <p className="text-xs leading-snug text-white/70">
+              {early ? "We only know a little about you both so far." : TIER_SUBLINES[aiState.data.tier]}
+            </p>
           </div>
         ) : (
           <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/20 bg-background/80 px-3 py-1 text-xs font-semibold text-white">
@@ -91,7 +96,7 @@ export function MatchCard({ match, onBlocked }: { match: MatchEntry; onBlocked?:
         )}
       </div>
 
-      <MatchAIInsights state={aiState} firstName={user.fullName.split(" ")[0] ?? user.fullName} onRetry={retryAI} />
+      <WhyPanel state={aiState} firstName={user.fullName.split(" ")[0] ?? user.fullName} onRetry={retryAI} />
 
       <div className="px-6 pb-6">
         {chatError && (
