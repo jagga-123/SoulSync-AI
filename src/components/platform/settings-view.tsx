@@ -1,52 +1,79 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { BadgeCheck, Loader2, MailWarning, UserX } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { Bell, ChevronLeft, ChevronRight, CreditCard, LifeBuoy, ShieldCheck, UserRound, UserX } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { AppPage, Section } from "@/components/platform/app-page";
-import { ProfileMedia } from "@/components/shared/profile-media";
+import { AppPage } from "@/components/platform/app-page";
+import {
+  AccountGroup,
+  BlockedGroup,
+  HelpGroup,
+  NotificationsGroup,
+  PlanGroup,
+  PrivacyGroup,
+} from "@/components/settings/settings-groups";
 import { getBlocks, getSettings, resendVerification, unblockUser, updateSettings } from "@/lib/api/platform";
 import { getCurrentUser } from "@/lib/api/auth";
 import { errorMessage } from "@/lib/gate";
-import { getInitials } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import type { AuthUser } from "@/types/api";
-import type { BlockedUser, EmailPrefs, NotificationPrefs, UserSettings } from "@/types/platform";
+import type { BlockedUser, UserSettings } from "@/types/platform";
 
-
-const NOTIFICATION_ROWS: Array<{ key: keyof NotificationPrefs; label: string; description: string }> = [
-  { key: "like", label: "Likes", description: "When someone likes your profile." },
-  { key: "match", label: "Matches", description: "When you and someone else both say yes." },
-  { key: "message", label: "Messages", description: "New messages in your conversations." },
-  { key: "profileView", label: "Profile views", description: "A daily summary when people view your profile." },
-  { key: "aiRecommendation", label: "AI recommendations", description: "When your AI matches are ready or a great match joins." },
+/** The settings groups, in order. On a laptop they are a left-hand list; on a phone the list is the first screen and each group opens on its own. */
+const GROUPS: Array<{ id: string; label: string; blurb: string; icon: LucideIcon }> = [
+  { id: "account", label: "Account", blurb: "Email, verification, sign out", icon: UserRound },
+  { id: "privacy", label: "Privacy & AI", blurb: "Who sees what, your AI report", icon: ShieldCheck },
+  { id: "notifications", label: "Notifications", blurb: "In the app and by email", icon: Bell },
+  { id: "plan", label: "Plan & billing", blurb: "Your plan at a glance", icon: CreditCard },
+  { id: "blocked", label: "Blocked people", blurb: "Who you've blocked", icon: UserX },
+  { id: "help", label: "Help & about", blurb: "How our AI works, plans, the code", icon: LifeBuoy },
 ];
 
-const EMAIL_ROWS: Array<{ key: keyof EmailPrefs; label: string; description: string }> = [
-  { key: "matches", label: "Match alerts", description: "An email when you get a new match." },
-  { key: "messages", label: "Message alerts", description: "If you're offline, at most one email per conversation every 30 minutes." },
-  { key: "weeklyReport", label: "Weekly compatibility report", description: "Your top AI matches and activity, every Monday." },
-  { key: "referrals", label: "Referral updates", description: "When a friend you invited joins." },
-];
+const NOTIFICATION_KEYS = ["like", "match", "message", "profileView", "aiRecommendation"] as const;
+const EMAIL_KEYS = ["matches", "messages", "weeklyReport", "referrals"] as const;
 
 export function SettingsView() {
   return (
-    <AppPage title="Settings" description="Control how and when SoulSync gets in touch." width="wide">
+    <AppPage title="Settings" description="Your account, your privacy, your rules." width="wide">
       {(user) => <Settings initialUser={user} />}
     </AppPage>
   );
 }
 
 function Settings({ initialUser }: { initialUser: AuthUser }) {
+  const params = useSearchParams();
+  const requested = params.get("group");
+  const chosen = GROUPS.find((g) => g.id === requested);
+  // Phones: no group in the address = the list; a group = that group's own screen. Laptops always show both, defaulting to Account.
+  const active = chosen ?? GROUPS[0];
+  const showList = !chosen;
+
   const [user, setUser] = useState(initialUser);
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [blocks, setBlocks] = useState<BlockedUser[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [verifyMessage, setVerifyMessage] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [savedGroup, setSavedGroup] = useState<"notifications" | "email" | null>(null);
+  const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const firstRender = useRef(true);
+
+  // When you move to another group, keyboard focus follows to its heading.
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    headingRef.current?.focus();
+  }, [chosen?.id]);
+
+  useEffect(() => () => void (savedTimer.current && clearTimeout(savedTimer.current)), []);
 
   const load = useCallback(async () => {
     try {
@@ -63,6 +90,12 @@ function Settings({ initialUser }: { initialUser: AuthUser }) {
     void load();
   }, [load]);
 
+  function flashSaved(group: "notifications" | "email") {
+    setSavedGroup(group);
+    if (savedTimer.current) clearTimeout(savedTimer.current);
+    savedTimer.current = setTimeout(() => setSavedGroup(null), 1600);
+  }
+
   async function toggle<G extends "notifications" | "email">(group: G, key: keyof UserSettings[G], value: boolean) {
     if (!settings) return;
     const previous = settings;
@@ -71,6 +104,24 @@ function Settings({ initialUser }: { initialUser: AuthUser }) {
     try {
       const saved = await updateSettings({ [group]: { [key]: value } });
       setSettings(saved.settings);
+      flashSaved(group);
+    } catch (err) {
+      setSettings(previous);
+      setError(errorMessage(err, "Couldn't save that change."));
+    }
+  }
+
+  async function setAll(group: "notifications" | "email", value: boolean) {
+    if (!settings) return;
+    const previous = settings;
+    const keys = group === "notifications" ? NOTIFICATION_KEYS : EMAIL_KEYS;
+    const all = Object.fromEntries(keys.map((k) => [k, value]));
+    setSettings({ ...settings, [group]: { ...settings[group], ...all } });
+    setError(null);
+    try {
+      const saved = await updateSettings({ [group]: all });
+      setSettings(saved.settings);
+      flashSaved(group);
     } catch (err) {
       setSettings(previous);
       setError(errorMessage(err, "Couldn't save that change."));
@@ -97,111 +148,68 @@ function Settings({ initialUser }: { initialUser: AuthUser }) {
   }
 
   return (
-    // From tablet up: Account | Blocked people on the first row, Notifications | Email on the second —
-    // cards that share a row have similar heights, so nothing is stretched to fill empty space.
-    // (On phones they stack in their natural order.)
-    <div className="grid gap-5 md:grid-cols-2">
-      {error && (
-        <Alert variant="destructive" className="md:col-span-2">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      <Section title="Account" className="md:order-1">
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
-          <div className="min-w-0">
-            <p className="truncate font-medium text-white">{user.email}</p>
-            {user.emailVerified ? (
-              <p className="mt-0.5 flex items-center gap-1.5 text-sm text-accent">
-                <BadgeCheck className="size-4" /> Email verified
-              </p>
-            ) : (
-              <p className="mt-0.5 flex items-center gap-1.5 text-sm text-white/55">
-                <MailWarning className="size-4 text-primary" /> Not verified yet
-              </p>
-            )}
-          </div>
-          {!user.emailVerified && (
-            <Button size="sm" onClick={() => void sendVerification()} disabled={isSending} className="h-8 gap-1.5 rounded-full bg-gradient-brand px-4 text-white hover:opacity-90">
-              {isSending && <Loader2 className="size-3.5 animate-spin" />}
-              Send verification email
-            </Button>
-          )}
-        </div>
-        {!user.emailVerified && <p className="mt-3 text-xs leading-relaxed text-white/60">We only send match and message emails to verified addresses.</p>}
-        {verifyMessage && <p role="status" className="mt-3 text-sm text-white/65">{verifyMessage}</p>}
-        <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/8 pt-4 text-sm">
-          <span className="text-white/50">Subscription</span>
-          <Link href="/billing" className="font-medium text-accent hover:underline">
-            Plan &amp; billing →
-          </Link>
-        </div>
-      </Section>
-
-      <Section title="In-app notifications" description="The bell in the top bar and live pop-ups." className="md:order-3">
-        <PreferenceList rows={NOTIFICATION_ROWS} values={settings?.notifications} onChange={(key, v) => void toggle("notifications", key, v)} />
-      </Section>
-
-      <Section title="Email" description="We never send marketing email — only things you can turn off here." className="md:order-4">
-        <PreferenceList rows={EMAIL_ROWS} values={settings?.email} onChange={(key, v) => void toggle("email", key, v)} />
-        <p className="mt-4 text-xs text-white/60">Account emails (verification, receipts, safety notices) are always sent.</p>
-      </Section>
-
-      <Section title="Blocked people" description="They can't see you, like you or message you — and you won't see them." className="md:order-2">
-        {blocks.length === 0 ? (
-          <div className="flex h-full min-h-20 flex-col items-center justify-center gap-2 py-3 text-center text-sm text-white/60">
-            <UserX className="size-6 text-white/60" />
-            You haven&apos;t blocked anyone.
-          </div>
-        ) : (
-          <ul className="divide-y divide-white/5">
-            {blocks.map(({ user: blocked, blockedAt }) => (
-              <li key={blocked.id} className="flex items-center gap-3 py-3">
-                <ProfileMedia src={blocked.profileImage} initials={getInitials(blocked.fullName)} thumb className="size-10 shrink-0 rounded-full text-sm" />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-white">{blocked.fullName}</p>
-                  <p className="text-xs text-white/60">Blocked {new Date(blockedAt).toLocaleDateString()}</p>
-                </div>
-                <Button variant="outline" size="sm" onClick={() => void unblock(blocked.id)} className="rounded-full border-white/15 bg-white/[0.03] text-white hover:bg-white/[0.08]">
-                  Unblock
-                </Button>
+    <div className="grid gap-6 md:grid-cols-[240px_minmax(0,1fr)] md:gap-10">
+      <nav aria-label="Settings sections" className={cn("md:sticky md:top-28 md:self-start", showList ? "block" : "hidden md:block")}>
+        <ul className="divide-y divide-white/8 overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] md:divide-y-0 md:border-0 md:bg-transparent md:p-0">
+          {GROUPS.map((group) => {
+            const current = group.id === active.id;
+            return (
+              <li key={group.id}>
+                <Link
+                  href={`/settings?group=${group.id}`}
+                  scroll={false}
+                  aria-current={current ? "page" : undefined}
+                  className={cn(
+                    "flex min-h-14 items-center gap-3 px-4 py-3 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring md:rounded-xl md:px-3",
+                    current ? "md:bg-white/10 md:text-white" : "md:hover:bg-white/5",
+                  )}
+                >
+                  <span className={cn("flex size-9 shrink-0 items-center justify-center rounded-xl ring-1", current ? "bg-gradient-brand text-white ring-transparent" : "bg-white/5 text-accent ring-white/10")}>
+                    <group.icon className="size-[18px]" aria-hidden />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-medium text-white">{group.label}</span>
+                    <span className="block truncate text-xs text-white/60 md:hidden">{group.blurb}</span>
+                  </span>
+                  <ChevronRight className="size-4 shrink-0 text-white/50 md:hidden" aria-hidden />
+                </Link>
               </li>
-            ))}
-          </ul>
-        )}
-      </Section>
-    </div>
-  );
-}
+            );
+          })}
+        </ul>
+      </nav>
 
-function PreferenceList<K extends string>({
-  rows,
-  values,
-  onChange,
-}: {
-  rows: Array<{ key: K; label: string; description: string }>;
-  values: Record<K, boolean> | undefined;
-  onChange: (key: K, value: boolean) => void;
-}) {
-  return (
-    <ul className="divide-y divide-white/5">
-      {rows.map(({ key, label, description }) => {
-        const id = `pref-${key}`;
-        return (
-          <li key={key} className="flex items-center justify-between gap-4 py-3">
-            <label htmlFor={id} className="min-w-0 flex-1 cursor-pointer">
-              <p className="text-sm font-medium text-white">{label}</p>
-              <p className="mt-0.5 text-xs text-white/60">{description}</p>
-            </label>
-            {values ? (
-              <Switch id={id} checked={values[key]} onCheckedChange={(v) => onChange(key, v)} />
-            ) : (
-              // Until the real values arrive, show a placeholder — never a switch that claims to be "on".
-              <span aria-hidden className="h-6 w-11 shrink-0 animate-pulse rounded-full bg-white/10" />
-            )}
-          </li>
-        );
-      })}
-    </ul>
+      <div className={cn("min-w-0 md:max-w-[640px]", showList ? "hidden md:block" : "block")}>
+        {!showList && (
+          <Link href="/settings" className="mb-4 inline-flex min-h-10 items-center gap-1 rounded-md pr-2 text-sm font-medium text-accent outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring md:hidden">
+            <ChevronLeft className="size-4" aria-hidden />
+            Settings
+          </Link>
+        )}
+        <h2 ref={headingRef} tabIndex={-1} className="mb-5 font-display text-2xl font-semibold text-white outline-none">
+          {active.label}
+        </h2>
+
+        {error && (
+          <Alert variant="destructive" className="mb-5">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {active.id === "account" && <AccountGroup user={user} isSending={isSending} verifyMessage={verifyMessage} onSendVerification={() => void sendVerification()} />}
+        {active.id === "privacy" && <PrivacyGroup />}
+        {active.id === "notifications" && (
+          <NotificationsGroup
+            settings={settings}
+            savedGroup={savedGroup}
+            onToggle={(group, key, value) => void toggle(group, key, value)}
+            onSetAll={(group, value) => void setAll(group, value)}
+          />
+        )}
+        {active.id === "plan" && <PlanGroup />}
+        {active.id === "blocked" && <BlockedGroup blocks={blocks} onUnblock={(id) => void unblock(id)} />}
+        {active.id === "help" && <HelpGroup />}
+      </div>
+    </div>
   );
 }

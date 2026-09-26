@@ -320,7 +320,7 @@ await step("Notification Center: list, unread filter, mark all read", async () =
 console.log("\nSettings, referrals, safety");
 
 await step("settings: a preference toggle is saved and survives a reload", async () => {
-  await alicePage.goto(`${WEB}/settings`);
+  await alicePage.goto(`${WEB}/settings?group=notifications`);
   const likes = alicePage.locator("#pref-like");
   await likes.waitFor();
   check((await likes.getAttribute("aria-checked")) === "true", "likes should default to on");
@@ -364,7 +364,7 @@ await step("safety: block someone from Discover, see them in Settings, unblock",
   await alicePage.getByRole("menuitem", { name: new RegExp(`Block Carol${sfx}`) }).click();
   await alicePage.getByRole("button", { name: `Block Carol${sfx}` }).click();
   await alicePage.getByText(`Carol${sfx} E2E`).first().waitFor({ state: "detached" });
-  await alicePage.goto(`${WEB}/settings`);
+  await alicePage.goto(`${WEB}/settings?group=blocked`);
   await alicePage.getByText(`Carol${sfx} E2E`).waitFor();
   await alicePage.getByRole("button", { name: "Unblock" }).click();
   await alicePage.getByText("You haven't blocked anyone.").waitFor();
@@ -548,7 +548,7 @@ console.log("\nMobile layout (390 × 844)");
     ["/notifications", "Notifications"],
     ["/pricing", "Premium Plus"],
     ["/billing", "Payment history"],
-    ["/settings", "In-app notifications"],
+    ["/settings", "Privacy & AI"],
     ["/premium", "Daily likes"],
   ]) {
     await step(`no horizontal overflow on ${path}`, async () => {

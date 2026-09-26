@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FormField } from "@/components/auth/form-field";
+import { OnboardingWizard } from "@/components/onboarding/onboarding-wizard";
 import { PhotoUploader } from "@/components/profile/photo-uploader";
 import { getInitials } from "@/lib/format";
 import { useRequireAuth } from "@/hooks/use-require-auth";
@@ -141,6 +142,10 @@ export function OnboardingForm() {
         <Loader2 className="size-6 animate-spin text-white/50" />
       </div>
     );
+  }
+
+  if (mode === "create" && user) {
+    return <OnboardingWizard userId={user.id} fullName={user.fullName} />;
   }
 
   return (

@@ -43,11 +43,23 @@ export function AppPage({ title, description, actions, width = "default", childr
   );
 }
 
-export function Section({ title, description, children, className }: { title?: string; description?: string; children: ReactNode; className?: string }) {
-  return (
-    <section className={cn("glass flex h-full flex-col rounded-3xl p-5 sm:p-6", className)}>
+export function Section({ title, description, actions, children, className }: { title?: string; description?: string; actions?: ReactNode; children: ReactNode; className?: string }) {
+  const heading = (
+    <>
       {title && <h2 className="font-display text-lg font-semibold text-white">{title}</h2>}
       {description && <p className="mt-1 text-sm text-white/50">{description}</p>}
+    </>
+  );
+  return (
+    <section className={cn("glass flex h-full flex-col rounded-3xl p-5 sm:p-6", className)}>
+      {actions ? (
+        <div className="flex items-start justify-between gap-3">
+          <div>{heading}</div>
+          {actions}
+        </div>
+      ) : (
+        heading
+      )}
       <div className={cn("flex-1", (title || description) && "mt-4")}>{children}</div>
     </section>
   );
