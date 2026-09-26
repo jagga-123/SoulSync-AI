@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Heart, Loader2 } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { MatchCard } from "@/components/matches/match-card";
 import { EmptyState } from "@/components/shared/empty-state";
+import { MatchesSkeleton } from "@/components/shared/skeletons";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { getMatches } from "@/lib/api/matches";
 import { ApiClientError } from "@/lib/api-client";
@@ -17,9 +19,10 @@ export function MatchesView() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!user) return;
+  const loadMatches = useCallback(() => {
     let active = true;
+    setIsLoading(true);
+    setError(null);
 
     getMatches()
       .then((res) => {
@@ -39,7 +42,12 @@ export function MatchesView() {
     return () => {
       active = false;
     };
-  }, [user]);
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    return loadMatches();
+  }, [user, loadMatches]);
 
   if (isAuthLoading) {
     return (
@@ -62,16 +70,19 @@ export function MatchesView() {
 
       {error && (
         <Alert variant="destructive" className="mx-auto mt-6 max-w-2xl">
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+            <span>{error}</span>
+            <Button type="button" size="sm" variant="outline" onClick={() => loadMatches()} className="rounded-full border-white/20 bg-transparent text-white hover:bg-white/10">
+              Try again
+            </Button>
+          </AlertDescription>
         </Alert>
       )}
 
       <div className="mt-10">
         {isLoading ? (
-          <div className="flex justify-center py-20">
-            <Loader2 className="size-6 animate-spin text-white/60" />
-          </div>
-        ) : matches.length === 0 ? (
+          <MatchesSkeleton />
+        ) : matches.length === 0 && !error ? (
           <EmptyState
             icon={Heart}
             title="No matches yet"

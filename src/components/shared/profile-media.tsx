@@ -12,6 +12,8 @@ interface ProfileMediaProps {
   className?: string;
   /** Small avatar use: load the photo's square thumbnail instead of the full image. */
   thumb?: boolean;
+  /** For large placements (cards, sheets): say "No photo yet" under the initial when there is no photo. */
+  noPhotoNote?: boolean;
 }
 
 /**
@@ -27,6 +29,7 @@ export function ProfileMedia({
   gradient = "from-primary to-secondary",
   className,
   thumb = false,
+  noPhotoNote = false,
 }: ProfileMediaProps) {
   const [failed, setFailed] = useState(false);
   const [useFull, setUseFull] = useState(false);
@@ -64,6 +67,11 @@ export function ProfileMedia({
         <>
           <span className="drop-shadow-sm">{initials}</span>
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.35),transparent_55%)]" />
+          {noPhotoNote && (
+            <span className="absolute inset-x-0 top-[62%] text-center font-sans text-xs font-medium text-primary-foreground/80">
+              No photo yet
+            </span>
+          )}
         </>
       )}
     </div>

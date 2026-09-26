@@ -20,12 +20,14 @@ interface WhyPanelProps {
   state: AICompatibilityState;
   firstName: string;
   onRetry: () => void;
+  /** No outer margins — for use inside a sheet or other padded container. */
+  flush?: boolean;
 }
 
 const DIMENSION_ORDER: CompatibilityDimension[] = ["values", "interests", "communication", "lifestyle", "relationshipGoals", "personality"];
 
-function Shell({ children }: { children: React.ReactNode }) {
-  return <div className="mx-6 mb-5 rounded-2xl border border-white/10 bg-white/[0.03] p-4">{children}</div>;
+function Shell({ children, flush = false }: { children: React.ReactNode; flush?: boolean }) {
+  return <div className={`${flush ? "" : "mx-6 mb-5 "}rounded-2xl border border-white/10 bg-white/[0.03] p-4`}>{children}</div>;
 }
 
 function ChipRow({ label, items }: { label: string; items: string[] }) {
@@ -64,7 +66,7 @@ function OverlapNote({ id }: { id: string }) {
   );
 }
 
-function ReadyPanel({ data, firstName, fromCache }: { data: AICompatibilityDetail; firstName: string; fromCache: boolean }) {
+function ReadyPanel({ data, firstName, fromCache, flush }: { data: AICompatibilityDetail; firstName: string; fromCache: boolean; flush: boolean }) {
   const [showMeters, setShowMeters] = useState(false);
   const [showHow, setShowHow] = useState(false);
   const metersId = useId();
@@ -79,7 +81,7 @@ function ReadyPanel({ data, firstName, fromCache }: { data: AICompatibilityDetai
     data.shared.interests.length + data.shared.values.length + data.shared.lifestyleTraits.length + sameGoals.length > 0;
 
   return (
-    <Shell>
+    <Shell flush={flush}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="inline-flex items-center gap-1.5 font-display text-base font-semibold text-white">
           <Heart className="size-4 fill-primary text-primary" aria-hidden />
@@ -181,10 +183,10 @@ function ReadyPanel({ data, firstName, fromCache }: { data: AICompatibilityDetai
  * "Why you two match" — the story behind a match: reasons first, what you share, the AI's explanation
  * (labelled), and the six areas as hearts on request. Handles every state the lookup can be in.
  */
-export function WhyPanel({ state, firstName, onRetry }: WhyPanelProps) {
+export function WhyPanel({ state, firstName, onRetry, flush = false }: WhyPanelProps) {
   if (state.status === "idle" || state.status === "loading") {
     return (
-      <Shell>
+      <Shell flush={flush}>
         <div className="flex items-center gap-2 text-xs text-white/70" role="status" aria-live="polite">
           <TypingHearts label="Sol is putting your explanation together" />
           Sol is putting your explanation together…
@@ -197,7 +199,7 @@ export function WhyPanel({ state, firstName, onRetry }: WhyPanelProps) {
 
   if (state.status === "unavailable") {
     return (
-      <Shell>
+      <Shell flush={flush}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="flex items-start gap-2 text-xs leading-relaxed text-white/70">
             <Heart className="mt-0.5 size-3.5 shrink-0 fill-primary text-primary" aria-hidden />
@@ -219,7 +221,7 @@ export function WhyPanel({ state, firstName, onRetry }: WhyPanelProps) {
 
   if (state.status === "error") {
     return (
-      <Shell>
+      <Shell flush={flush}>
         <div className="flex items-center justify-between gap-3 text-xs text-white/70">
           <span>Couldn&apos;t load the &ldquo;why&rdquo; right now.</span>
           <button
@@ -235,5 +237,5 @@ export function WhyPanel({ state, firstName, onRetry }: WhyPanelProps) {
     );
   }
 
-  return <ReadyPanel data={state.data} firstName={firstName} fromCache={state.fromCache} />;
+  return <ReadyPanel data={state.data} firstName={firstName} fromCache={state.fromCache} flush={flush} />;
 }

@@ -229,6 +229,16 @@
   50% { opacity: 0; }
 }
 
+/* Loading placeholders: a slow opacity pulse (cheaper and calmer than a moving shimmer); static under reduced motion. */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+.skeleton-pulse {
+  animation: skeleton-pulse 1.8s ease-in-out infinite;
+}
+
 /* The Finish button's one slow glow when the report unlocks (15 answers), then it rests. */
 @keyframes finish-glow {
   0% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--accent) 60%, transparent); }

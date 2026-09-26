@@ -6,8 +6,10 @@ import { AnimatePresence } from "framer-motion";
 import { Heart, Inbox, Loader2, Send } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { LikeCard } from "@/components/likes/like-card";
 import { EmptyState } from "@/components/shared/empty-state";
+import { LikesSkeleton } from "@/components/shared/skeletons";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { acceptLike, getIncomingLikes, getOutgoingLikes, rejectLike } from "@/lib/api/likes";
 import { ApiClientError } from "@/lib/api-client";
@@ -128,26 +130,29 @@ export function LikesView() {
 
       {error && (
         <Alert variant="destructive" className="mx-auto mt-6">
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+            <span>{error}</span>
+            <Button type="button" size="sm" variant="outline" onClick={loadLikes} className="rounded-full border-white/20 bg-transparent text-white hover:bg-white/10">
+              Try again
+            </Button>
+          </AlertDescription>
         </Alert>
       )}
 
       <div className="mt-8 space-y-4">
         {isLoading ? (
-          <div className="flex justify-center py-20">
-            <Loader2 className="size-6 animate-spin text-white/60" />
-          </div>
+          <LikesSkeleton />
         ) : items.length === 0 ? (
           <EmptyState
             icon={Heart}
-            title={tab === "incoming" ? "No likes yet" : "You haven't liked anyone yet"}
+            title={tab === "incoming" ? "No likes yet." : "You haven't liked anyone yet"}
             description={
               tab === "incoming"
-                ? "When someone likes your profile, they'll show up here."
+                ? "Adding a photo and a few interests usually helps."
                 : "Head to Discover to find people worth a like."
             }
-            actionLabel={tab === "outgoing" ? "Discover people" : undefined}
-            actionHref={tab === "outgoing" ? "/discover" : undefined}
+            actionLabel={tab === "incoming" ? "Improve my profile" : "Discover people"}
+            actionHref={tab === "incoming" ? "/onboarding" : "/discover"}
           />
         ) : (
           <AnimatePresence mode="popLayout">

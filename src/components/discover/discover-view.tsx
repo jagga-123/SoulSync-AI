@@ -16,14 +16,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ProfileCard } from "@/components/discover/profile-card";
+import { ProfileSheet } from "@/components/discover/profile-sheet";
 import { AdvancedFilters, type AdvancedFilterValues } from "@/components/discover/advanced-filters";
 import { usePlatform } from "@/components/platform/platform-provider";
 import { UpgradeNotice } from "@/components/platform/upgrade-notice";
 import { EmptyState } from "@/components/shared/empty-state";
+import { PROFILE_GRID, ProfileGridSkeleton } from "@/components/shared/skeletons";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { getDiscoverUsers } from "@/lib/api/discover";
 import { getRecommendations } from "@/lib/api/ai";
 import { sendLike } from "@/lib/api/likes";
+import { getMyProfile } from "@/lib/api/profile";
 import { RELATIONSHIP_GOAL_LABELS } from "@/lib/format";
 import { ApiClientError } from "@/lib/api-client";
 import { gateOf, type Gate } from "@/lib/gate";
@@ -66,6 +69,11 @@ export function DiscoverView() {
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const [likingId, setLikingId] = useState<string | null>(null);
 
+  // The card's detail sheet, the viewer's own interests (for "N in common"), and a retry counter for the AI list.
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [myInterests, setMyInterests] = useState<string[]>([]);
+  const [recsAttempt, setRecsAttempt] = useState(0);
+
   const loadUsers = useCallback(
     async (targetPage: number, append: boolean) => {
       if (append) setIsLoadingMore(true);
@@ -89,7 +97,7 @@ export function DiscoverView() {
         if (blocked) setGate(blocked);
         else
           setError(
-            err instanceof ApiClientError ? err.message : "Couldn't load profiles. Please try again.",
+            err instanceof ApiClientError ? err.message : "We couldn't load suggestions. Please try again.",
           );
       } finally {
         if (append) setIsLoadingMore(false);
@@ -107,6 +115,18 @@ export function DiscoverView() {
     // duplicate the trigger.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, city, relationshipGoal, advanced]);
+
+  // Your own interests, so each card can say what you two have in common. Best-effort: without them the cards just skip that line.
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    getMyProfile()
+      .then((res) => active && setMyInterests(res.profile.interests))
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [user]);
 
   // Pick the starting tab once we know whether AI scores exist for this viewer.
   useEffect(() => {
@@ -127,7 +147,7 @@ export function DiscoverView() {
           setError(
             err instanceof ApiClientError
               ? err.message
-              : "Couldn't load your recommendations. Please try again.",
+              : "We couldn't load suggestions. Please try again.",
           );
         }
       })
@@ -138,7 +158,7 @@ export function DiscoverView() {
     return () => {
       active = false;
     };
-  }, [user, mode]);
+  }, [user, mode, recsAttempt]);
 
   const hasFilters = Boolean(city || relationshipGoal || Object.values(advanced).some((x) => x !== undefined && x !== ""));
 
@@ -191,6 +211,22 @@ export function DiscoverView() {
   const isRecommended = mode === "recommended";
   const visibleUsers: DiscoverUser[] = isRecommended ? (recs ?? []) : users;
   const listLoading = mode === null || (isRecommended ? isLoadingRecs || recs === null : isLoading);
+  const openProfile = openId ? visibleUsers.find((u) => u.id === openId) : undefined;
+
+  function retryLoad() {
+    setError(null);
+    if (isRecommended) {
+      setRecs(null);
+      setRecsAttempt((n) => n + 1);
+    } else {
+      void loadUsers(1, false);
+    }
+  }
+
+  function removePerson(id: string) {
+    setUsers((prev) => prev.filter((u) => u.id !== id));
+    setRecs((prev) => (prev ? prev.filter((u) => u.id !== id) : prev));
+  }
 
   return (
     <div className="relative mx-auto max-w-7xl px-4 py-28 sm:px-6 lg:px-8">
@@ -315,15 +351,18 @@ export function DiscoverView() {
 
       {error && (
         <Alert variant="destructive" className="mx-auto mt-6 max-w-2xl">
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+            <span>{error}</span>
+            <Button type="button" size="sm" variant="outline" onClick={retryLoad} className="rounded-full border-white/20 bg-transparent text-white hover:bg-white/10">
+              Try again
+            </Button>
+          </AlertDescription>
         </Alert>
       )}
 
       <div className="mt-10">
-        {listLoading ? (
-          <div className="flex justify-center py-20">
-            <Loader2 className="size-6 animate-spin text-white/60" />
-          </div>
+        {error && visibleUsers.length === 0 ? null : listLoading ? (
+          <ProfileGridSkeleton />
         ) : visibleUsers.length === 0 ? (
           isRecommended ? (
             <EmptyState
@@ -350,7 +389,7 @@ export function DiscoverView() {
           )
         ) : (
           <>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className={PROFILE_GRID}>
               <AnimatePresence mode="popLayout">
                 {visibleUsers.map((profile) => (
                   <ProfileCard
@@ -360,15 +399,28 @@ export function DiscoverView() {
                     isLiking={likingId === profile.id}
                     onLike={() => handleLike(profile.id)}
                     ai={profile.ai}
-                    aiPending={aiReady === true && !isRecommended && !profile.ai}
-                    onBlocked={(id) => {
-                      setUsers((prev) => prev.filter((u) => u.id !== id));
-                      setRecs((prev) => (prev ? prev.filter((u) => u.id !== id) : prev));
-                    }}
+                    suggested={isRecommended}
+                    myInterests={myInterests}
+                    onOpen={() => setOpenId(profile.id)}
+                    onBlocked={removePerson}
                   />
                 ))}
               </AnimatePresence>
             </div>
+
+            {openProfile && (
+              <ProfileSheet
+                profile={openProfile}
+                ai={openProfile.ai}
+                suggested={isRecommended}
+                myInterests={myInterests}
+                liked={likedIds.has(openProfile.id)}
+                isLiking={likingId === openProfile.id}
+                onLike={() => handleLike(openProfile.id)}
+                onClose={() => setOpenId(null)}
+                onBlocked={removePerson}
+              />
+            )}
 
             {!isRecommended && hasMore && (
               <div className="mt-10 flex justify-center">

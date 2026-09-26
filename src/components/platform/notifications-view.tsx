@@ -9,6 +9,7 @@ import { AppPage } from "@/components/platform/app-page";
 import { NotificationRow } from "@/components/platform/notification-row";
 import { usePlatform } from "@/components/platform/platform-provider";
 import { EmptyState } from "@/components/shared/empty-state";
+import { NotificationsSkeleton } from "@/components/shared/skeletons";
 import { deleteNotification, getNotifications, markAllNotificationsRead, markNotificationRead } from "@/lib/api/platform";
 import { errorMessage } from "@/lib/gate";
 import { cn } from "@/lib/utils";
@@ -126,15 +127,27 @@ function NotificationCenter() {
 
       {error && (
         <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+            <span>{error}</span>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setIsLoading(true);
+                void load(1, "replace");
+              }}
+              className="rounded-full border-white/20 bg-transparent text-white hover:bg-white/10"
+            >
+              Try again
+            </Button>
+          </AlertDescription>
         </Alert>
       )}
 
       {isLoading ? (
-        <div className="flex justify-center py-20 text-white/60">
-          <Loader2 className="size-6 animate-spin" />
-        </div>
-      ) : items.length === 0 ? (
+        <NotificationsSkeleton />
+      ) : items.length === 0 && !error ? (
         <EmptyState
           icon={BellOff}
           title={filter === "unread" ? "No unread notifications" : "Nothing here yet"}

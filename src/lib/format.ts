@@ -7,6 +7,13 @@ export function getInitials(fullName: string): string {
     .join("");
 }
 
+/** Interests both people listed, compared ignoring case and spacing, shown the way `theirs` wrote them. */
+export function sharedInterests(mine: string[], theirs: string[]): string[] {
+  const norm = (s: string) => s.trim().toLowerCase();
+  const own = new Set(mine.map(norm));
+  return theirs.filter((interest) => own.has(norm(interest)));
+}
+
 export const RELATIONSHIP_GOAL_LABELS: Record<string, string> = {
   casual: "Casual dating",
   serious: "Serious relationship",

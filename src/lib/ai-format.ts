@@ -26,6 +26,14 @@ export const TIER_LABELS: Record<CompatibilityTier, string> = {
   exploring: "Different, in an interesting way",
 };
 
+/** Hearts (out of 5) shown beside a tier's label — from the tier, not the raw score, so the picture is never more precise than the engine is. */
+export const TIER_HEARTS: Record<CompatibilityTier, number> = {
+  exceptional: 5,
+  strong: 4,
+  promising: 3,
+  exploring: 2,
+};
+
 /** One line under the label that says what the tier means. */
 export const TIER_SUBLINES: Record<CompatibilityTier, string> = {
   exceptional: "You share what matters most.",
