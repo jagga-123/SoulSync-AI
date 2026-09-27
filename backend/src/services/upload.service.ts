@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { env } from "../config/env";
 import { ApiError } from "../utils/ApiError";
 
@@ -25,29 +25,34 @@ export function signCloudinaryParams(params: Record<string, string | number>, ap
 }
 
 /**
- * Gives the browser everything it needs to upload a profile photo straight to
- * Cloudinary — so image bytes never pass through (or burden) this API — while
- * the API secret stays server-side. Uploads are confined to a per-user folder
- * and to image formats.
+ * Uploads an already-validated, already-re-encoded image buffer to Cloudinary from the
+ * server (a signed Admin-API call, same as `deleteCloudinaryImage`). Image bytes always pass
+ * through this API first — never browser-to-Cloudinary directly — so every photo gets the same
+ * magic-byte check, decode/re-encode and EXIF/GPS stripping regardless of which driver stores it.
  */
-export function createUploadSignature(userId: string) {
-  if (!isStorageConfigured()) {
-    throw new ApiError(501, "Photo uploads aren't set up yet.", { code: "STORAGE_NOT_CONFIGURED" });
-  }
+export async function uploadToCloudinary(userId: string, buffer: Buffer): Promise<string> {
+  if (!isStorageConfigured()) throw new ApiError(501, "Photo uploads aren't set up yet.", { code: "STORAGE_NOT_CONFIGURED" });
 
   const timestamp = Math.floor(Date.now() / 1000);
   const folder = `${env.CLOUDINARY_UPLOAD_FOLDER}/${userId}`;
-  const signedParams = { allowed_formats: ALLOWED_IMAGE_FORMATS, folder, timestamp };
+  const publicId = randomBytes(12).toString("hex");
+  const signedParams = { folder, public_id: publicId, timestamp };
+  const base = (env.CLOUDINARY_API_BASE ?? "https://api.cloudinary.com").replace(/\/$/, "");
 
-  return {
-    provider: "cloudinary" as const,
-    uploadUrl: `https://api.cloudinary.com/v1_1/${env.CLOUDINARY_CLOUD_NAME}/image/upload`,
-    apiKey: env.CLOUDINARY_API_KEY as string,
-    ...signedParams,
-    signature: signCloudinaryParams(signedParams, env.CLOUDINARY_API_SECRET as string),
-    // The client must send exactly these fields plus `file` — any change breaks the signature.
-    maxBytesHint: 5 * 1024 * 1024,
-  };
+  const form = new FormData();
+  form.set("file", new Blob([buffer], { type: "image/webp" }), `${publicId}.webp`);
+  form.set("api_key", env.CLOUDINARY_API_KEY as string);
+  form.set("timestamp", String(timestamp));
+  form.set("folder", folder);
+  form.set("public_id", publicId);
+  form.set("signature", signCloudinaryParams(signedParams, env.CLOUDINARY_API_SECRET as string));
+
+  const res = await fetch(`${base}/v1_1/${env.CLOUDINARY_CLOUD_NAME}/image/upload`, { method: "POST", body: form, signal: AbortSignal.timeout(20_000) });
+  const json = (await res.json().catch(() => null)) as { secure_url?: string; error?: { message?: string } } | null;
+  if (!res.ok || !json?.secure_url) {
+    throw new ApiError(502, json?.error?.message ?? "Couldn't upload the photo. Please try again.", { code: "UPLOAD_FAILED" });
+  }
+  return json.secure_url;
 }
 
 /**

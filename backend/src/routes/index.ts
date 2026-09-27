@@ -27,7 +27,6 @@ import {
   metrics,
   publicFeatures,
   ready,
-  signUpload,
   uploadConfig,
   uploadPhoto,
   userFeatures,
@@ -64,7 +63,6 @@ router.use("/premium", premiumRoutes);
 router.use("/safety", safetyRoutes);
 router.use("/growth", growthRoutes);
 router.use("/admin", adminRoutes);
-router.post("/uploads/sign", protect, uploadSignLimiter, signUpload);
 router.get("/uploads/config", protect, uploadConfig);
 router.get("/email/health", emailHealth);
 // Raw image bytes (not multipart): authenticated first, so an anonymous request never gets to buffer a body.

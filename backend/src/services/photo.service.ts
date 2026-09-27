@@ -6,7 +6,7 @@ import { env, isProduction } from "../config/env";
 import { childLogger } from "../config/logger";
 import { Profile } from "../models/Profile.model";
 import { ApiError } from "../utils/ApiError";
-import { isStorageConfigured, deleteCloudinaryImage } from "./upload.service";
+import { isStorageConfigured, deleteCloudinaryImage, thumbnailFor, uploadToCloudinary } from "./upload.service";
 
 const log = childLogger("photos");
 
@@ -59,17 +59,21 @@ export interface StoredPhoto {
   width: number;
   height: number;
   bytes: number;
-  provider: "local";
+  provider: "local" | "cloudinary";
+}
+
+interface ProcessedPhoto {
+  full: { data: Buffer; info: { width: number; height: number } };
+  thumb: Buffer;
 }
 
 /**
- * Validates and stores a profile photo on local disk. The upload is DECODED and
- * RE-ENCODED (never copied through): that proves it really is an image, applies
- * the EXIF rotation, and drops all metadata (GPS position included) before it
- * is served to other members. Produces a full-size and a square thumbnail.
+ * Validates and re-encodes an upload, regardless of which driver ends up storing it. The upload is
+ * DECODED and RE-ENCODED (never copied through): that proves it really is an image, applies the EXIF
+ * rotation, and drops all metadata (GPS position included) before it is served to other members.
+ * Produces a full-size and a square thumbnail.
  */
-export async function storeLocalPhoto(userId: string, bytes: unknown, baseUrl: string): Promise<StoredPhoto> {
-  if (!isSafeId(userId)) throw ApiError.badRequest("Invalid user.");
+async function processPhoto(bytes: unknown): Promise<ProcessedPhoto> {
   if (!Buffer.isBuffer(bytes) || bytes.length === 0) {
     throw new ApiError(415, "Send the image as raw bytes with a Content-Type of image/jpeg, image/png or image/webp.", { code: "UNSUPPORTED_MEDIA_TYPE" });
   }
@@ -78,21 +82,26 @@ export async function storeLocalPhoto(userId: string, bytes: unknown, baseUrl: s
     throw new ApiError(422, "That file isn't a JPG, PNG or WebP image.", { code: "INVALID_IMAGE" });
   }
 
-  let full: { data: Buffer; info: { width: number; height: number } };
-  let thumb: Buffer;
   try {
     const source = () => sharp(bytes, { limitInputPixels: MAX_INPUT_PIXELS, failOn: "error" }).rotate();
     const meta = await sharp(bytes, { limitInputPixels: MAX_INPUT_PIXELS }).metadata();
     if ((meta.width ?? 0) < MIN_SIDE_PX || (meta.height ?? 0) < MIN_SIDE_PX) {
       throw new ApiError(422, `The photo is too small — use one at least ${MIN_SIDE_PX}×${MIN_SIDE_PX} pixels.`, { code: "PHOTO_TOO_SMALL" });
     }
-    full = await source().resize(FULL_MAX_SIDE_PX, FULL_MAX_SIDE_PX, { fit: "inside", withoutEnlargement: true }).webp({ quality: 82 }).toBuffer({ resolveWithObject: true });
-    thumb = await source().resize(THUMB_SIDE_PX, THUMB_SIDE_PX, { fit: "cover", position: "attention" }).webp({ quality: 78 }).toBuffer();
+    const full = await source().resize(FULL_MAX_SIDE_PX, FULL_MAX_SIDE_PX, { fit: "inside", withoutEnlargement: true }).webp({ quality: 82 }).toBuffer({ resolveWithObject: true });
+    const thumb = await source().resize(THUMB_SIDE_PX, THUMB_SIDE_PX, { fit: "cover", position: "attention" }).webp({ quality: 78 }).toBuffer();
+    return { full, thumb };
   } catch (err) {
     if (err instanceof ApiError) throw err;
     log.info({ err: err instanceof Error ? err.message : String(err) }, "rejected an undecodable upload");
     throw new ApiError(422, "That image couldn't be read — it may be corrupted or too large.", { code: "INVALID_IMAGE" });
   }
+}
+
+/** Validates and stores a profile photo on local disk. */
+export async function storeLocalPhoto(userId: string, bytes: unknown, baseUrl: string): Promise<StoredPhoto> {
+  if (!isSafeId(userId)) throw ApiError.badRequest("Invalid user.");
+  const { full, thumb } = await processPhoto(bytes);
 
   const dir = path.join(uploadRoot(), userId);
   await mkdir(dir, { recursive: true });
@@ -109,6 +118,26 @@ export async function storeLocalPhoto(userId: string, bytes: unknown, baseUrl: s
     height: full.info.height,
     bytes: full.data.length,
     provider: "local",
+  };
+}
+
+/**
+ * Validates and stores a profile photo on Cloudinary. Unlike a browser-to-Cloudinary signed direct
+ * upload, the bytes are processed by this server first (see `processPhoto`) — Cloudinary only ever
+ * receives the re-encoded, metadata-stripped image.
+ */
+export async function storeCloudinaryPhoto(userId: string, bytes: unknown): Promise<StoredPhoto> {
+  if (!isSafeId(userId)) throw ApiError.badRequest("Invalid user.");
+  const { full } = await processPhoto(bytes);
+  const url = await uploadToCloudinary(userId, full.data);
+
+  return {
+    url,
+    thumbnailUrl: thumbnailFor(url),
+    width: full.info.width,
+    height: full.info.height,
+    bytes: full.data.length,
+    provider: "cloudinary",
   };
 }
 

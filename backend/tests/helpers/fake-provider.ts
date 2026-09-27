@@ -10,6 +10,39 @@ export interface RecordedRequest {
   form: Record<string, string>;
   /** Body decoded as JSON (Razorpay, Resend, SendGrid), or undefined. */
   json: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  /** A multipart/form-data body (Cloudinary uploads): text fields decoded, and each part's raw bytes by name. */
+  multipart?: { fields: Record<string, string>; files: Record<string, Buffer> };
+}
+
+/** Splits a `multipart/form-data` body into named fields and file parts. */
+function parseMultipart(raw: Buffer, contentType: string | undefined): RecordedRequest["multipart"] {
+  const boundaryMatch = /boundary=(?:"([^"]+)"|([^;]+))/.exec(contentType ?? "");
+  const boundary = boundaryMatch?.[1] ?? boundaryMatch?.[2];
+  if (!boundary) return undefined;
+
+  const fields: Record<string, string> = {};
+  const files: Record<string, Buffer> = {};
+  const delimiter = Buffer.from(`--${boundary}`);
+  let start = raw.indexOf(delimiter);
+  while (start !== -1) {
+    const next = raw.indexOf(delimiter, start + delimiter.length);
+    if (next === -1) break;
+    const part = raw.subarray(start + delimiter.length, next);
+    const headerEnd = part.indexOf("\r\n\r\n");
+    if (headerEnd !== -1) {
+      const headerText = part.subarray(0, headerEnd).toString("utf8");
+      const nameMatch = /name="([^"]+)"/.exec(headerText);
+      const isFile = /filename="/.test(headerText);
+      let value = part.subarray(headerEnd + 4);
+      if (value.subarray(-2).toString() === "\r\n") value = value.subarray(0, -2);
+      if (nameMatch) {
+        if (isFile) files[nameMatch[1]!] = Buffer.from(value);
+        else fields[nameMatch[1]!] = value.toString("utf8");
+      }
+    }
+    start = next;
+  }
+  return { fields, files };
 }
 
 export interface FakeResponse {
@@ -31,7 +64,10 @@ export async function startFakeProvider(handler: (request: RecordedRequest) => F
     const chunks: Buffer[] = [];
     req.on("data", (chunk: Buffer) => chunks.push(chunk));
     req.on("end", () => {
-      const body = Buffer.concat(chunks).toString("utf8");
+      const raw = Buffer.concat(chunks);
+      const contentType = req.headers["content-type"];
+      const isMultipart = contentType?.startsWith("multipart/form-data") ?? false;
+      const body = isMultipart ? "" : raw.toString("utf8");
       let json: unknown;
       try {
         json = body ? JSON.parse(body) : undefined;
@@ -39,8 +75,9 @@ export async function startFakeProvider(handler: (request: RecordedRequest) => F
         json = undefined;
       }
       const form = json === undefined && body ? Object.fromEntries(new URLSearchParams(body)) : {};
+      const multipart = isMultipart ? parseMultipart(raw, contentType) : undefined;
 
-      const recorded: RecordedRequest = { method: req.method ?? "GET", path: (req.url ?? "/").split("?")[0] ?? "/", headers: req.headers, body, form, json };
+      const recorded: RecordedRequest = { method: req.method ?? "GET", path: (req.url ?? "/").split("?")[0] ?? "/", headers: req.headers, body, form, json, multipart };
       requests.push(recorded);
 
       const response = handler(recorded);

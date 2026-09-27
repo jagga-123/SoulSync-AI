@@ -12,9 +12,8 @@ import { getAllFlags, isFeatureEnabled } from "../features/feature.service";
 import { runJob } from "../platform/jobs";
 import { renderMetrics } from "../platform/metrics";
 import { getLikeAllowance } from "../services/premium.service";
-import { MAX_PHOTO_BYTES, PHOTO_FORMATS, photoDriver, removeProfilePhoto, storeLocalPhoto } from "../services/photo.service";
+import { MAX_PHOTO_BYTES, PHOTO_FORMATS, photoDriver, removeProfilePhoto, storeCloudinaryPhoto, storeLocalPhoto } from "../services/photo.service";
 import { checkEmailHealth } from "../services/email/health";
-import { createUploadSignature } from "../services/upload.service";
 import { clientErrorBody } from "../validators/platform.validator";
 
 const log = childLogger("client");
@@ -140,23 +139,14 @@ export const uploadConfig = asyncHandler(async (_req: Request, res: Response) =>
 
 export const uploadPhoto = asyncHandler(async (req: Request, res: Response) => {
   if (!req.user) throw ApiError.unauthorized();
-  if (photoDriver() !== "local") {
-    throw new ApiError(
-      photoDriver() === "cloudinary" ? 409 : 501,
-      photoDriver() === "cloudinary" ? "Photos upload directly to Cloudinary — request a signature from /uploads/sign." : "Photo uploads aren't set up yet.",
-      { code: "LOCAL_UPLOADS_UNAVAILABLE" },
-    );
-  }
-  const stored = await storeLocalPhoto(req.user.id, req.body, publicOrigin(req));
+  const driver = photoDriver();
+  if (driver === "none") throw new ApiError(501, "Photo uploads aren't set up yet.", { code: "LOCAL_UPLOADS_UNAVAILABLE" });
+
+  const stored = driver === "cloudinary" ? await storeCloudinaryPhoto(req.user.id, req.body) : await storeLocalPhoto(req.user.id, req.body, publicOrigin(req));
   res.status(201).json(new ApiResponse("Photo uploaded", stored));
 });
 
 export const deletePhoto = asyncHandler(async (req: Request, res: Response) => {
   if (!req.user) throw ApiError.unauthorized();
   res.status(200).json(new ApiResponse("Photo removed", await removeProfilePhoto(req.user.id)));
-});
-
-export const signUpload = asyncHandler(async (req: Request, res: Response) => {
-  if (!req.user) throw ApiError.unauthorized();
-  res.status(200).json(new ApiResponse("Upload signature created", createUploadSignature(req.user.id)));
 });

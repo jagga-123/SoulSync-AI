@@ -1,14 +1,13 @@
 import { API_URL } from "@/lib/env";
 import { apiFetch, ApiClientError } from "@/lib/api-client";
 import { getToken } from "@/lib/auth-storage";
-import { thumbnailUrl } from "@/lib/image-url";
 import type { ApiErrorBody, ApiSuccessBody } from "@/types/api";
 
 export const PHOTO_MAX_BYTES = 5 * 1024 * 1024;
 export const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export interface UploadConfig {
-  /** "local" = this API stores the file, "cloudinary" = direct signed upload, "none" = uploads unavailable. */
+  /** Either way the bytes go through this API first — it decides where they end up. "none" = uploads unavailable. */
   driver: "cloudinary" | "local" | "none";
   maxBytes: number;
   formats: string[];
@@ -50,8 +49,9 @@ async function networkFailure<T>(request: Promise<T>): Promise<T> {
   }
 }
 
-/** Uploads through this API (raw bytes, so no multipart parsing) — the driver used when Cloudinary isn't configured. */
-async function uploadLocal(file: File): Promise<UploadedPhoto> {
+/** Uploads through this API (raw bytes, so no multipart parsing) — it validates, re-encodes and
+ * strips metadata before storing the photo locally or on Cloudinary, whichever is configured. */
+async function uploadViaApi(file: File): Promise<UploadedPhoto> {
   const token = getToken();
   const data = await networkFailure(
     fetch(`${API_URL}/uploads/profile-photo`, {
@@ -63,38 +63,9 @@ async function uploadLocal(file: File): Promise<UploadedPhoto> {
   return { url: data.url, thumbnailUrl: data.thumbnailUrl };
 }
 
-interface CloudinarySignature {
-  uploadUrl: string;
-  apiKey: string;
-  allowed_formats: string;
-  folder: string;
-  timestamp: number;
-  signature: string;
-}
-
-/** Signed direct upload: the bytes go browser → Cloudinary, the API only signs the request. */
-async function uploadCloudinary(file: File): Promise<UploadedPhoto> {
-  const sign = await apiFetch<CloudinarySignature>("/uploads/sign", { method: "POST" });
-  const form = new FormData();
-  form.set("file", file);
-  form.set("api_key", sign.apiKey);
-  form.set("timestamp", String(sign.timestamp));
-  form.set("folder", sign.folder);
-  form.set("allowed_formats", sign.allowed_formats);
-  form.set("signature", sign.signature);
-
-  const response = await networkFailure(fetch(sign.uploadUrl, { method: "POST", body: form }));
-  const json = (await response.json().catch(() => null)) as { secure_url?: string; error?: { message?: string } } | null;
-  if (!response.ok || !json?.secure_url) {
-    throw new ApiClientError(json?.error?.message ?? "Cloudinary rejected the upload.", response.status);
-  }
-  return { url: json.secure_url, thumbnailUrl: thumbnailUrl(json.secure_url) ?? json.secure_url };
-}
-
 export function uploadProfilePhoto(file: File, driver: UploadConfig["driver"]): Promise<UploadedPhoto> {
-  if (driver === "cloudinary") return uploadCloudinary(file);
-  if (driver === "local") return uploadLocal(file);
-  throw new ApiClientError("Photo uploads aren't set up yet.", 501);
+  if (driver === "none") throw new ApiClientError("Photo uploads aren't set up yet.", 501);
+  return uploadViaApi(file);
 }
 
 /** Removes the member's photo from storage and from their profile. */

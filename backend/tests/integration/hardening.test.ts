@@ -199,43 +199,8 @@ describe("production hardening", () => {
   });
 
   describe("photo uploads (Cloudinary)", () => {
-    it("require a login", async () => {
-      assert.equal((await h.api.post("/uploads/sign")).status, 401);
-    });
-
-    it("hand the browser a signed, per-user, images-only upload ticket — never the secret", async () => {
-      const res = await h.api.post("/uploads/sign", undefined, { token: member.token });
-      assert.equal(res.status, 200);
-      const ticket = res.body.data;
-      assert.equal(ticket.uploadUrl, "https://api.cloudinary.com/v1_1/demo-cloud/image/upload");
-      assert.equal(ticket.apiKey, "123456789");
-      assert.equal(ticket.folder, `soulsync/profiles/${member.id}`);
-      assert.equal(ticket.allowed_formats, "jpg,jpeg,png,webp");
-      assert.ok(Math.abs(ticket.timestamp - Date.now() / 1000) < 60);
-      assert.ok(!JSON.stringify(ticket).includes("cloudinary-secret-for-tests"));
-
-      const { signCloudinaryParams } = await h.load("../../src/services/upload.service");
-      assert.equal(ticket.signature, signCloudinaryParams({ allowed_formats: ticket.allowed_formats, folder: ticket.folder, timestamp: ticket.timestamp }, "cloudinary-secret-for-tests"));
-    });
-
-    it("confine each user to their own folder", async () => {
-      const other = await h.createUser({ name: "Other Olu" });
-      const [a, b] = await Promise.all([member, other].map(async (u) => (await h.api.post("/uploads/sign", undefined, { token: u.token })).body.data));
-      assert.notEqual(a.folder, b.folder);
-      assert.notEqual(a.signature, b.signature);
-    });
-
-    it("say so plainly when storage isn't configured", async () => {
-      const { env } = await h.load("../../src/config/env");
-      const saved = env.CLOUDINARY_API_SECRET;
-      env.CLOUDINARY_API_SECRET = undefined;
-      try {
-        const res = await h.api.post("/uploads/sign", undefined, { token: member.token });
-        assert.equal(res.status, 501);
-        assert.equal(res.body.error.code, "STORAGE_NOT_CONFIGURED");
-      } finally {
-        env.CLOUDINARY_API_SECRET = saved;
-      }
+    it("require a login, even before any image bytes are read", async () => {
+      assert.equal((await h.api.post("/uploads/profile-photo")).status, 401);
     });
   });
 
