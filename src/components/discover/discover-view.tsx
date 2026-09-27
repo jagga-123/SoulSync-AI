@@ -361,6 +361,8 @@ export function DiscoverView() {
       )}
 
       <div className="mt-10">
+        {/* Keeps heading levels unbroken (h1 above, h3 per card below) for anyone navigating by heading. */}
+        <h2 className="sr-only">{isRecommended ? "Suggested for you" : "Everyone"}</h2>
         {error && visibleUsers.length === 0 ? null : listLoading ? (
           <ProfileGridSkeleton />
         ) : visibleUsers.length === 0 ? (

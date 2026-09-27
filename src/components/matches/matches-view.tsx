@@ -80,6 +80,8 @@ export function MatchesView() {
       )}
 
       <div className="mt-10">
+        {/* Keeps heading levels unbroken (h1 above, WhyPanel's h3 below) for anyone navigating by heading. */}
+        <h2 className="sr-only">Your matches</h2>
         {isLoading ? (
           <MatchesSkeleton />
         ) : matches.length === 0 && !error ? (
