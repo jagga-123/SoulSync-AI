@@ -17,6 +17,7 @@ import { Subscription } from "../models/Subscription.model";
 import { User } from "../models/User.model";
 import { UserSettings } from "../models/UserSettings.model";
 import { events } from "../platform/events";
+import { deleteStoredPhoto } from "./photo.service";
 import { disconnectUser } from "../socket";
 import { ApiError } from "../utils/ApiError";
 
@@ -67,9 +68,9 @@ export async function deleteUserCascade(userId: string): Promise<{ deletedMessag
   const conversationIds = conversations.map((c) => c._id);
   const messages = await Message.deleteMany({ conversationId: { $in: conversationIds } });
 
-  await Promise.all([
+  const [profile] = await Promise.all([
+    Profile.findOneAndDelete({ userId: id }),
     Conversation.deleteMany({ _id: { $in: conversationIds } }),
-    Profile.deleteOne({ userId: id }),
     AIProfile.deleteOne({ userId: id }),
     InterviewSession.deleteOne({ userId: id }),
     DeepAnalysis.deleteOne({ userId: id }),
@@ -87,6 +88,7 @@ export async function deleteUserCascade(userId: string): Promise<{ deletedMessag
     EmailLog.deleteMany({ userId: id }),
   ]);
 
+  await deleteStoredPhoto(userId, profile?.profileImage);
   disconnectUser(userId);
   await user.deleteOne();
   log.info({ userId }, "user deleted");

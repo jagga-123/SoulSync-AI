@@ -12,6 +12,7 @@ import {
 } from "../models/UserSettings.model";
 import { ApiError } from "../utils/ApiError";
 import { sendTemplateEmail, verifyUnsubscribeToken, type UnsubscribeScope } from "./email/email.service";
+import { deleteUserCascade } from "./moderation.service";
 
 const VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
 const PASSWORD_RESET_TTL_MS = 60 * 60 * 1000;
@@ -171,6 +172,18 @@ export async function changePassword(userId: string, currentPassword: string, ne
  * including, deliberately, the one used to make this request. The caller signs out locally too. */
 export async function revokeSessions(userId: string): Promise<void> {
   await User.updateOne({ _id: userId }, { $inc: { tokenVersion: 1 } });
+}
+
+/** Self-service account deletion: verifies the member's own password, then runs the
+ * same permanent cascade delete used by admin moderation (profile, matches, messages,
+ * photos, and everything else tied to the account). */
+export async function deleteAccount(userId: string, password: string): Promise<void> {
+  const user = await User.findById(userId).select("+password");
+  if (!user) throw ApiError.notFound("User not found");
+  if (!(await user.comparePassword(password))) {
+    throw ApiError.badRequest("That isn't your password.");
+  }
+  await deleteUserCascade(userId);
 }
 
 // ---------------------------------------------------------------------------

@@ -3,7 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BadgeCheck, Check, ExternalLink, KeyRound, Loader2, LogOut, MailWarning, Monitor, UserX } from "lucide-react";
+import { AlertTriangle, BadgeCheck, Check, ExternalLink, KeyRound, Loader2, LogOut, MailWarning, Monitor, Trash2, UserX } from "lucide-react";
 import { z } from "zod";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -15,7 +15,7 @@ import { FormField } from "@/components/auth/form-field";
 import { Section } from "@/components/platform/app-page";
 import { usePlatform } from "@/components/platform/platform-provider";
 import { ProfileMedia } from "@/components/shared/profile-media";
-import { changePassword as changePasswordRequest, getBillingOverview, revokeSessions } from "@/lib/api/platform";
+import { changePassword as changePasswordRequest, deleteAccount as deleteAccountRequest, getBillingOverview, revokeSessions } from "@/lib/api/platform";
 import { setToken } from "@/lib/auth-storage";
 import { SOURCE_CODE_URL } from "@/lib/data";
 import { errorMessage } from "@/lib/gate";
@@ -28,6 +28,11 @@ import type { BillingOverview, BlockedUser, EmailPrefs, NotificationPrefs, UserS
 const changePasswordFormSchema = z
   .object({ currentPassword: z.string().min(1, "Your current password is required"), newPassword: passwordField, confirm: z.string() })
   .refine((v) => v.newPassword === v.confirm, { message: "Passwords don't match.", path: ["confirm"] });
+
+const deleteAccountFormSchema = z.object({
+  password: z.string().min(1, "Your password is required"),
+  confirm: z.literal("DELETE", { errorMap: () => ({ message: 'Type "DELETE" to confirm' }) }),
+});
 
 /* ------------------------------------------------------------------ account */
 
@@ -94,6 +99,8 @@ export function AccountGroup({ user, isSending, verifyMessage, onSendVerificatio
           </Button>
         </div>
       </Section>
+
+      <DeleteAccountSection />
     </div>
   );
 }
@@ -240,6 +247,96 @@ function SignOutEverywhereSection() {
         )}
       </div>
       {error && <p role="alert" className="mt-3 text-sm text-destructive">{error}</p>}
+    </Section>
+  );
+}
+
+/** Permanent account deletion. Requires the current password and typing "DELETE" — the same
+ * two-factor confirmation pattern used for other irreversible actions in the industry. */
+function DeleteAccountSection() {
+  const router = useRouter();
+  const { signOut } = usePlatform();
+  const [open, setOpen] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [formError, setFormError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  function reset() {
+    setOpen(false);
+    setPassword("");
+    setConfirm("");
+    setFieldErrors({});
+    setFormError(null);
+  }
+
+  async function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+    setFormError(null);
+    const result = deleteAccountFormSchema.safeParse({ password, confirm });
+    if (!result.success) {
+      setFieldErrors(fieldErrorsFromZod(result.error));
+      return;
+    }
+    setFieldErrors({});
+    setIsSubmitting(true);
+    try {
+      await deleteAccountRequest(result.data.password);
+      signOut();
+      router.push("/login");
+    } catch (err) {
+      setFormError(errorMessage(err, "Couldn't delete your account."));
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <Section className="border-destructive/30 bg-destructive/[0.04]">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="flex items-center gap-1.5 font-medium text-white">
+            <AlertTriangle className="size-4 text-destructive" aria-hidden />
+            Delete account
+          </p>
+          <p className="mt-0.5 text-sm text-white/70">This permanently deletes your profile, matches, messages and photos. It can&apos;t be undone.</p>
+        </div>
+        {!open && (
+          <Button
+            variant="outline"
+            onClick={() => setOpen(true)}
+            className="h-10 gap-2 rounded-full border-destructive/40 bg-transparent text-destructive hover:bg-destructive/10"
+          >
+            <Trash2 className="size-4" aria-hidden />
+            Delete account
+          </Button>
+        )}
+      </div>
+
+      {open && (
+        <form onSubmit={handleSubmit} noValidate className="mt-5 space-y-4 border-t border-white/8 pt-5">
+          {formError && (
+            <Alert variant="destructive">
+              <AlertDescription>{formError}</AlertDescription>
+            </Alert>
+          )}
+          <FormField label="Your password" htmlFor="delete-password" error={fieldErrors.password}>
+            <Input id="delete-password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
+          </FormField>
+          <FormField label='Type "DELETE" to confirm' htmlFor="delete-confirm" error={fieldErrors.confirm}>
+            <Input id="delete-confirm" autoComplete="off" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+          </FormField>
+          <div className="flex gap-3">
+            <Button type="submit" disabled={isSubmitting} className="h-10 gap-2 rounded-full bg-destructive text-white hover:bg-destructive/90">
+              {isSubmitting && <Loader2 className="size-3.5 animate-spin" aria-hidden />}
+              Permanently delete my account
+            </Button>
+            <Button type="button" variant="ghost" onClick={reset} disabled={isSubmitting} className="h-10 rounded-full text-white/70 hover:bg-white/10 hover:text-white">
+              Cancel
+            </Button>
+          </div>
+        </form>
+      )}
     </Section>
   );
 }

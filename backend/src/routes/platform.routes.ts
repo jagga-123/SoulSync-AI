@@ -36,6 +36,7 @@ accountRoutes.post("/unsubscribe", authLimiter, accountController.unsubscribe);
 accountRoutes.post("/resend-verification", protect, verificationEmailLimiter, accountController.resendVerification);
 accountRoutes.put("/password", protect, accountSecurityLimiter, accountController.changePassword);
 accountRoutes.post("/sessions/revoke", protect, accountSecurityLimiter, accountController.revokeSessions);
+accountRoutes.post("/delete", protect, accountSecurityLimiter, accountController.deleteAccount);
 accountRoutes.get("/settings", protect, accountController.getSettings);
 accountRoutes.put("/settings", protect, accountController.updateSettings);
 
