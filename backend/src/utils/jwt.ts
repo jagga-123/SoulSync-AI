@@ -4,6 +4,10 @@ import { env } from "../config/env";
 export interface JwtPayload {
   id: string;
   role: string;
+  /** The user's `tokenVersion` at the moment this token was issued (see `protect`). Absent on
+   * tokens signed before this field existed — those are treated as version 0, so shipping this
+   * doesn't sign anyone out. */
+  tv?: number;
 }
 
 export function signToken(payload: JwtPayload): string {

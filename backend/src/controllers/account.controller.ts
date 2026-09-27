@@ -3,7 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler";
 import { ApiResponse } from "../utils/ApiResponse";
 import { ApiError } from "../utils/ApiError";
 import { parseOrThrow } from "../utils/parse";
-import { settingsBody, tokenBody } from "../validators/platform.validator";
+import { changePasswordBody, settingsBody, tokenBody } from "../validators/platform.validator";
 import * as account from "../services/account.service";
 
 function userId(req: Request): string {
@@ -22,6 +22,17 @@ export const resendVerification = asyncHandler(async (req: Request, res: Respons
   res
     .status(200)
     .json(new ApiResponse(result.alreadyVerified ? "Your email is already verified" : "Verification email sent", result));
+});
+
+export const changePassword = asyncHandler(async (req: Request, res: Response) => {
+  const { currentPassword, newPassword } = parseOrThrow(changePasswordBody, req.body);
+  const { token } = await account.changePassword(userId(req), currentPassword, newPassword);
+  res.status(200).json(new ApiResponse("Password updated. You've been signed out on your other devices.", { token }));
+});
+
+export const revokeSessions = asyncHandler(async (req: Request, res: Response) => {
+  await account.revokeSessions(userId(req));
+  res.status(200).json(new ApiResponse("Signed out on every device.", { ok: true }));
 });
 
 export const getSettings = asyncHandler(async (req: Request, res: Response) => {

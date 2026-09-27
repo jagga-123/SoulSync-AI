@@ -34,3 +34,21 @@ export function loginUser(payload: LoginPayload) {
 export function getCurrentUser() {
   return apiFetch<{ user: AuthUser }>("/auth/me");
 }
+
+/** Always resolves the same way, whether or not the address has an account — the server
+ * deliberately never reveals which emails are registered. */
+export function forgotPassword(email: string) {
+  return apiFetch<{ ok: true }>("/auth/forgot-password", {
+    method: "POST",
+    body: { email },
+    auth: false,
+  });
+}
+
+export function resetPassword(token: string, password: string) {
+  return apiFetch<{ ok: true }>("/auth/reset-password", {
+    method: "POST",
+    body: { token, password },
+    auth: false,
+  });
+}

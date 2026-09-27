@@ -112,6 +112,11 @@ export function LoginForm() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
           />
+          <p className="pt-1 text-right">
+            <Link href="/forgot-password" className="text-xs font-medium text-white/60 hover:text-accent">
+              Forgot password?
+            </Link>
+          </p>
         </FormField>
 
         <Button

@@ -118,7 +118,7 @@ describe("npm run check:email (against a local stand-in for Brevo's API)", () =>
       const before = api.matching("POST", "/v3/smtp/email").length;
       const { code, out } = await run(["--send-test", "--to", "inbox@example.test", "--all-templates"], base());
       assert.equal(code, 0, out);
-      assert.equal(api.matching("POST", "/v3/smtp/email").length - before, 11);
+      assert.equal(api.matching("POST", "/v3/smtp/email").length - before, 13);
     });
 
     it("works even while .env still says EMAIL_PROVIDER=log (it tests the real chain, not the log)", async () => {

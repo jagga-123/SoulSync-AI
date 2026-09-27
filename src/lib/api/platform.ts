@@ -34,6 +34,12 @@ export const getSettings = () => apiFetch<{ settings: UserSettings }>("/account/
 export const updateSettings = (patch: { notifications?: Partial<UserSettings["notifications"]>; email?: Partial<UserSettings["email"]> }) =>
   apiFetch<{ settings: UserSettings }>("/account/settings", { method: "PUT", body: patch });
 export const unsubscribe = (token: string) => apiFetch<{ scope: string }>("/account/unsubscribe", { method: "POST", body: { token }, auth: false });
+/** Bumps every other session's token version and returns a fresh token for this device, so the
+ * caller stays signed in here while every other device is signed out. */
+export const changePassword = (currentPassword: string, newPassword: string) =>
+  apiFetch<{ token: string }>("/account/password", { method: "PUT", body: { currentPassword, newPassword } });
+/** Signs this device out too — the caller should clear the local token and redirect right after. */
+export const revokeSessions = () => post<{ ok: true }>("/account/sessions/revoke");
 
 // ---- billing -----------------------------------------------------------------
 export const getPlans = () => apiFetch<PlanCatalog>("/billing/plans", { auth: false });

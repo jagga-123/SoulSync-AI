@@ -50,6 +50,12 @@ describe("rate limiting (enabled, one proxy in front)", () => {
       const res = await h.api.post("/auth/register", { fullName: "Spam Bot", email, password: "Passw0rd!23" }, { headers: { "X-Forwarded-For": "10.0.0.3" } });
       assert.equal(res.status, 429);
     });
+
+    it("also protects forgot-password, so it can't be used to spam an inbox or enumerate accounts", async () => {
+      const forgot = () => h.api.post("/auth/forgot-password", { email: "whoever@test.local" }, { headers: { "X-Forwarded-For": "10.0.0.4" } });
+      for (let i = 1; i <= 5; i++) assert.equal((await forgot()).status, 200, `attempt ${i}`);
+      assert.equal((await forgot()).status, 429);
+    });
   });
 
   describe("per-user limits on abuse-prone actions", () => {

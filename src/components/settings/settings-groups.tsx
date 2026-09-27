@@ -1,22 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BadgeCheck, Check, ExternalLink, Loader2, LogOut, MailWarning, UserX } from "lucide-react";
+import { BadgeCheck, Check, ExternalLink, KeyRound, Loader2, LogOut, MailWarning, Monitor, UserX } from "lucide-react";
+import { z } from "zod";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
+import { FormField } from "@/components/auth/form-field";
 import { Section } from "@/components/platform/app-page";
 import { usePlatform } from "@/components/platform/platform-provider";
 import { ProfileMedia } from "@/components/shared/profile-media";
-import { getBillingOverview } from "@/lib/api/platform";
+import { changePassword as changePasswordRequest, getBillingOverview, revokeSessions } from "@/lib/api/platform";
+import { setToken } from "@/lib/auth-storage";
 import { SOURCE_CODE_URL } from "@/lib/data";
 import { errorMessage } from "@/lib/gate";
+import { fieldErrorsFromZod } from "@/lib/zod-errors";
 import { getInitials } from "@/lib/format";
+import { passwordField } from "@/lib/validators/auth";
 import type { AuthUser } from "@/types/api";
 import type { BillingOverview, BlockedUser, EmailPrefs, NotificationPrefs, UserSettings } from "@/types/platform";
+
+const changePasswordFormSchema = z
+  .object({ currentPassword: z.string().min(1, "Your current password is required"), newPassword: passwordField, confirm: z.string() })
+  .refine((v) => v.newPassword === v.confirm, { message: "Passwords don't match.", path: ["confirm"] });
 
 /* ------------------------------------------------------------------ account */
 
@@ -33,6 +44,8 @@ export function AccountGroup({ user, isSending, verifyMessage, onSendVerificatio
 
   return (
     <div className="space-y-5">
+      <ChangePasswordSection />
+      <SignOutEverywhereSection />
       <Section>
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
           <div className="min-w-0">
@@ -65,7 +78,7 @@ export function AccountGroup({ user, isSending, verifyMessage, onSendVerificatio
       <Section>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="font-medium text-white">Sign out</p>
+            <p className="font-medium text-white">Sign out of this device</p>
             <p className="mt-0.5 text-sm text-white/70">You&apos;ll need to sign in again on this device.</p>
           </div>
           <Button
@@ -82,6 +95,152 @@ export function AccountGroup({ user, isSending, verifyMessage, onSendVerificatio
         </div>
       </Section>
     </div>
+  );
+}
+
+/** A collapsed "Change password" prompt that opens into a small form. Success re-issues a token
+ * for this device (Settings keeps working) while every other device is signed out. */
+function ChangePasswordSection() {
+  const [open, setOpen] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [formError, setFormError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [done, setDone] = useState(false);
+
+  function reset() {
+    setOpen(false);
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirm("");
+    setFieldErrors({});
+    setFormError(null);
+    setDone(false);
+  }
+
+  async function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+    setFormError(null);
+    const result = changePasswordFormSchema.safeParse({ currentPassword, newPassword, confirm });
+    if (!result.success) {
+      setFieldErrors(fieldErrorsFromZod(result.error));
+      return;
+    }
+    setFieldErrors({});
+    setIsSubmitting(true);
+    try {
+      const { token } = await changePasswordRequest(result.data.currentPassword, result.data.newPassword);
+      setToken(token); // this device stays signed in with the new session
+      setDone(true);
+    } catch (err) {
+      setFormError(errorMessage(err, "Couldn't change your password."));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <Section>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="font-medium text-white">Password</p>
+          <p className="mt-0.5 text-sm text-white/70">{done ? "Your password was changed." : "Change your password any time."}</p>
+        </div>
+        {!open && !done && (
+          <Button variant="outline" onClick={() => setOpen(true)} className="h-10 gap-2 rounded-full border-white/15 bg-white/[0.03] text-white hover:bg-white/[0.08]">
+            <KeyRound className="size-4" aria-hidden />
+            Change password
+          </Button>
+        )}
+        {done && (
+          <Button variant="outline" onClick={reset} className="h-9 rounded-full border-white/15 bg-white/[0.03] text-white hover:bg-white/[0.08]">
+            Done
+          </Button>
+        )}
+      </div>
+
+      {open && !done && (
+        <form onSubmit={handleSubmit} noValidate className="mt-5 space-y-4 border-t border-white/8 pt-5">
+          {formError && (
+            <Alert variant="destructive">
+              <AlertDescription>{formError}</AlertDescription>
+            </Alert>
+          )}
+          <FormField label="Current password" htmlFor="current-password" error={fieldErrors.currentPassword}>
+            <Input id="current-password" type="password" autoComplete="current-password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
+          </FormField>
+          <FormField label="New password" htmlFor="new-password" error={fieldErrors.newPassword}>
+            <Input id="new-password" type="password" autoComplete="new-password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+          </FormField>
+          <FormField label="Confirm new password" htmlFor="confirm-password" error={fieldErrors.confirm}>
+            <Input id="confirm-password" type="password" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+          </FormField>
+          <div className="flex gap-3">
+            <Button type="submit" disabled={isSubmitting} className="h-10 gap-2 rounded-full bg-gradient-brand text-white hover:opacity-90">
+              {isSubmitting && <Loader2 className="size-3.5 animate-spin" aria-hidden />}
+              Save new password
+            </Button>
+            <Button type="button" variant="ghost" onClick={reset} disabled={isSubmitting} className="h-10 rounded-full text-white/70 hover:bg-white/10 hover:text-white">
+              Cancel
+            </Button>
+          </div>
+        </form>
+      )}
+    </Section>
+  );
+}
+
+/** "Sign out everywhere": a two-step confirm, since it also signs out the device making the request. */
+function SignOutEverywhereSection() {
+  const router = useRouter();
+  const { signOut } = usePlatform();
+  const [confirming, setConfirming] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleConfirm() {
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      await revokeSessions();
+      signOut();
+      router.push("/login");
+    } catch (err) {
+      setError(errorMessage(err, "Couldn't sign out your other devices."));
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <Section>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="font-medium text-white">Sign out of all devices</p>
+          <p className="mt-0.5 text-sm text-white/70">
+            {confirming ? "This signs you out here too — you'll need to sign in again." : "If a device is lost, stolen, or you just want a clean slate."}
+          </p>
+        </div>
+        {confirming ? (
+          <div className="flex shrink-0 items-center gap-2">
+            <Button onClick={handleConfirm} disabled={isSubmitting} className="h-10 gap-2 rounded-full bg-destructive text-white hover:bg-destructive/90">
+              {isSubmitting && <Loader2 className="size-3.5 animate-spin" aria-hidden />}
+              Sign out everywhere
+            </Button>
+            <Button variant="ghost" onClick={() => setConfirming(false)} disabled={isSubmitting} className="h-10 rounded-full text-white/70 hover:bg-white/10 hover:text-white">
+              Cancel
+            </Button>
+          </div>
+        ) : (
+          <Button variant="outline" onClick={() => setConfirming(true)} className="h-10 gap-2 rounded-full border-white/15 bg-white/[0.03] text-white hover:bg-white/[0.08]">
+            <Monitor className="size-4" aria-hidden />
+            Sign out everywhere
+          </Button>
+        )}
+      </div>
+      {error && <p role="alert" className="mt-3 text-sm text-destructive">{error}</p>}
+    </Section>
   );
 }
 

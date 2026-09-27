@@ -9,6 +9,8 @@ const HOSTILE = `<script>alert("x")</script> & <img src=x onerror=alert(1)>`;
 const SAMPLE: { [K in TemplateName]: TemplateData[K] } = {
   welcome: { name: "Ada Lovelace" },
   "verify-email": { name: "Ada Lovelace", verifyUrl: "http://localhost:3000/verify-email?token=abc.def" },
+  "reset-password": { name: "Ada Lovelace", resetUrl: "http://localhost:3000/reset-password?token=abc.def" },
+  "password-changed": { name: "Ada Lovelace" },
   match: { name: "Ada Lovelace", matchName: "Grace Hopper", score: 91 },
   "new-message": { name: "Ada Lovelace", senderName: "Grace Hopper", preview: "See you at 8?", count: 1 },
   "weekly-report": {
@@ -27,6 +29,8 @@ const SAMPLE: { [K in TemplateName]: TemplateData[K] } = {
 const HOSTILE_DATA: { [K in TemplateName]: TemplateData[K] } = {
   welcome: { name: HOSTILE },
   "verify-email": { name: HOSTILE, verifyUrl: `http://localhost:3000/verify-email?token="><script>x</script>` },
+  "reset-password": { name: HOSTILE, resetUrl: `http://localhost:3000/reset-password?token="><script>x</script>` },
+  "password-changed": { name: HOSTILE },
   match: { name: HOSTILE, matchName: HOSTILE, score: 90 },
   "new-message": { name: HOSTILE, senderName: HOSTILE, preview: HOSTILE, count: 2 },
   "weekly-report": {
@@ -47,8 +51,9 @@ const render = <K extends TemplateName>(name: K, data: TemplateData[K], unsub?: 
 describe("email templates", () => {
   it("has a template for every kind of email the platform sends", () => {
     assert.deepEqual([...names].sort(), [
-      "account-suspended", "invite", "match", "new-message", "subscription-canceled", "subscription-started",
-      "verify-email", "waitlist-confirmation", "waitlist-invite", "weekly-report", "welcome",
+      "account-suspended", "invite", "match", "new-message", "password-changed", "reset-password",
+      "subscription-canceled", "subscription-started", "verify-email", "waitlist-confirmation", "waitlist-invite",
+      "weekly-report", "welcome",
     ]);
   });
 
@@ -87,7 +92,7 @@ describe("email templates", () => {
     const url = "http://localhost:3000/unsubscribe?token=t";
     assert.ok(render("match", SAMPLE.match, url).html.includes(`href="${url}"`));
     assert.ok(!render("match", SAMPLE.match).html.includes("Unsubscribe"));
-    for (const transactional of ["welcome", "verify-email", "waitlist-invite", "account-suspended"] as const) {
+    for (const transactional of ["welcome", "verify-email", "reset-password", "password-changed", "waitlist-invite", "account-suspended"] as const) {
       assert.ok(!render(transactional, SAMPLE[transactional] as never).html.includes("Unsubscribe"), transactional);
     }
   });

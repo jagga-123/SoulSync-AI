@@ -16,6 +16,11 @@ export interface IUser extends Document {
   suspendedReason?: string;
   emailVerified: boolean;
   emailVerification?: { tokenHash: string; expiresAt: Date };
+  // --- Phase C: session invalidation + password reset (optional/defaulted, so existing accounts are unaffected) ---
+  /** Bumped on password change, password reset, and "sign out everywhere" — a token signed
+   * with an older value is refused by `protect`, without needing a token blocklist. */
+  tokenVersion: number;
+  passwordReset?: { tokenHash: string; expiresAt: Date };
   referralCode?: string;
   referredBy?: Types.ObjectId;
   lastActiveAt?: Date;
@@ -62,6 +67,11 @@ const userSchema = new Schema<IUser>(
       type: new Schema({ tokenHash: String, expiresAt: Date }, { _id: false }),
       select: false,
     },
+    tokenVersion: { type: Number, default: 0 },
+    passwordReset: {
+      type: new Schema({ tokenHash: String, expiresAt: Date }, { _id: false }),
+      select: false,
+    },
     referralCode: { type: String, unique: true, sparse: true, uppercase: true, trim: true },
     referredBy: { type: Schema.Types.ObjectId, ref: "User" },
     lastActiveAt: { type: Date },
@@ -73,6 +83,7 @@ const userSchema = new Schema<IUser>(
       transform(_doc, ret: Record<string, unknown>) {
         delete ret.password;
         delete ret.emailVerification;
+        delete ret.passwordReset;
         delete ret.__v;
         delete ret._id;
         return ret;

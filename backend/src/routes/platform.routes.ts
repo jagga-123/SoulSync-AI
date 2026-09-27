@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { protect, requireAdmin } from "../middleware/auth.middleware";
 import {
+  accountSecurityLimiter,
   billingLimiter,
   aiGenerationLimiter,
   inviteLimiter,
@@ -33,6 +34,8 @@ export const accountRoutes = Router();
 accountRoutes.post("/verify-email", authLimiter, accountController.verifyEmail);
 accountRoutes.post("/unsubscribe", authLimiter, accountController.unsubscribe);
 accountRoutes.post("/resend-verification", protect, verificationEmailLimiter, accountController.resendVerification);
+accountRoutes.put("/password", protect, accountSecurityLimiter, accountController.changePassword);
+accountRoutes.post("/sessions/revoke", protect, accountSecurityLimiter, accountController.revokeSessions);
 accountRoutes.get("/settings", protect, accountController.getSettings);
 accountRoutes.put("/settings", protect, accountController.updateSettings);
 

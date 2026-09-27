@@ -59,7 +59,7 @@ export async function loginUser(input: LoginInput) {
     });
   }
 
-  const token = signToken({ id: user.id, role: user.role });
+  const token = signToken({ id: user.id, role: user.role, tv: user.tokenVersion ?? 0 });
 
   return { user: user.toJSON(), token };
 }

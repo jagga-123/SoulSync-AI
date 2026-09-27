@@ -69,6 +69,8 @@ const firstName = (name: string) => name.trim().split(/\s+/)[0] || "there";
 export interface TemplateData {
   welcome: { name: string };
   "verify-email": { name: string; verifyUrl: string };
+  "reset-password": { name: string; resetUrl: string };
+  "password-changed": { name: string };
   match: { name: string; matchName: string; score?: number };
   "new-message": { name: string; senderName: string; preview: string; count: number };
   "weekly-report": {
@@ -112,6 +114,30 @@ export const TEMPLATES: { [K in TemplateName]: Renderer<K> } = {
       cta: { label: "Verify email", url: verifyUrl },
     }),
     text: `Hi ${firstName(name)},\n\nConfirm your email address (link valid for 24 hours):\n${verifyUrl}\n\nIf you didn't create an account, ignore this email.\n`,
+  }),
+
+  "reset-password": ({ name, resetUrl }) => ({
+    subject: "Reset your SoulSync AI password",
+    html: layout({
+      preheader: "Use this link to choose a new password. It works for 1 hour.",
+      heading: "Reset your password",
+      bodyHtml: `<p style="margin:0 0 12px">Hi ${escapeHtml(firstName(name))}, we got a request to reset your password. This link works for 1 hour and can only be used once.</p>
+        <p style="margin:0;color:#8b93ad;font-size:13px">If you didn't ask for this, you can ignore this email — your password won't change.</p>`,
+      cta: { label: "Reset password", url: resetUrl },
+    }),
+    text: `Hi ${firstName(name)},\n\nReset your password (link valid for 1 hour, one use only):\n${resetUrl}\n\nIf you didn't ask for this, ignore this email — your password won't change.\n`,
+  }),
+
+  "password-changed": ({ name }) => ({
+    subject: "Your SoulSync AI password was changed",
+    html: layout({
+      preheader: "Your password was just changed.",
+      heading: "Your password was changed",
+      bodyHtml: `<p style="margin:0 0 12px">Hi ${escapeHtml(firstName(name))}, this confirms your SoulSync AI password was just changed. You've been signed out on your other devices — sign in again with your new password.</p>
+        <p style="margin:0;color:#8b93ad;font-size:13px">If this wasn't you, reset your password immediately and contact support.</p>`,
+      cta: { label: "Sign in", url: `${appUrl}/login` },
+    }),
+    text: `Hi ${firstName(name)},\n\nYour password was just changed. You've been signed out on your other devices.\n\nIf this wasn't you, reset your password immediately and contact support.\n\nSign in: ${appUrl}/login\n`,
   }),
 
   match: ({ name, matchName, score }, unsubscribeUrl) => ({

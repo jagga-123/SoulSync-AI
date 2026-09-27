@@ -239,6 +239,8 @@ const SAMPLE: { [K in TemplateName]: TemplateData[K] } = {
   "subscription-started": { name: "Asha Verma", planName: "Premium", expiry: "20 Oct 2026" },
   "subscription-canceled": { name: "Asha Verma", planName: "Premium", expiry: "20 Oct 2026" },
   "account-suspended": { name: "Asha Verma", reason: "Repeated reports from other members" },
+  "reset-password": { name: "Asha Verma", resetUrl: `${appUrl}/reset-password?token=0123456789abcdef01234567.${"ab".repeat(32)}` },
+  "password-changed": { name: "Asha Verma" },
 };
 const NOTIFICATION_TEMPLATES: TemplateName[] = ["match", "new-message", "weekly-report"];
 

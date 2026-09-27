@@ -3,6 +3,7 @@ import { BILLING_INTERVALS, PAID_PLAN_IDS, PLAN_IDS } from "../features/plans";
 import { isFeatureKey } from "../features/registry";
 import { REPORT_REASONS } from "../models/Report.model";
 import { TIMESERIES_METRICS } from "../services/analytics.service";
+import { passwordField } from "./auth.validator";
 
 const objectId = z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid id");
 const page = z.coerce.number().int().min(1).default(1);
@@ -37,6 +38,16 @@ export const settingsBody = z
   .strict();
 
 export const tokenBody = z.object({ token: z.string().min(10).max(600) });
+
+export const changePasswordBody = z.object({
+  currentPassword: z.string({ required_error: "Your current password is required" }).min(1, "Your current password is required"),
+  newPassword: passwordField,
+});
+
+export const deleteAccountBody = z.object({
+  password: z.string({ required_error: "Your password is required" }).min(1, "Your password is required"),
+  confirm: z.literal("DELETE", { errorMap: () => ({ message: 'Type "DELETE" to confirm' }) }),
+});
 
 // ---- billing --------------------------------------------------------------
 

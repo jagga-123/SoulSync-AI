@@ -105,6 +105,14 @@ export const clientErrorLimiter = buildLimiter({
   message: "Too many error reports.",
 });
 
+/** Change password, sign out everywhere, delete account — sensitive enough to cap even for a
+ * signed-in user, so a leaked token or a buggy script can't hammer them. */
+export const accountSecurityLimiter = buildLimiter({
+  windowMs: HOUR,
+  limit: 10,
+  message: "Too many attempts. Please wait a while and try again.",
+});
+
 export const uploadSignLimiter = buildLimiter({
   windowMs: HOUR,
   limit: 30,

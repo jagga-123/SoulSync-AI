@@ -8,6 +8,15 @@ import { asyncHandler } from "../utils/asyncHandler";
 // active-user metrics without a database write on every request.
 const ACTIVITY_WRITE_INTERVAL_MS = 5 * 60 * 1000;
 
+/** What every downstream handler gets as `req.user` — freshly read from the database on this
+ * request, not decoded from the token, so a role change, verification, or suspension is seen
+ * immediately rather than waiting for the token to expire. */
+export interface AuthenticatedUser {
+  id: string;
+  role: string;
+  emailVerified: boolean;
+}
+
 /**
  * Verifies the `Authorization: Bearer <token>` header and attaches the
  * authenticated user to `req.user`. Re-checks the user still exists in the
@@ -43,6 +52,12 @@ export const protect = asyncHandler(
         code: "ACCOUNT_SUSPENDED",
       });
     }
+    // A token signed before the user's most recent password change, reset, or "sign out
+    // everywhere" carries an older (or absent) `tv` and is refused — the one mechanism that
+    // makes those actions actually take effect on every other device.
+    if ((payload.tv ?? 0) !== (user.tokenVersion ?? 0)) {
+      throw ApiError.unauthorized("Your session has ended. Please sign in again.");
+    }
 
     const stale =
       !user.lastActiveAt || Date.now() - user.lastActiveAt.getTime() > ACTIVITY_WRITE_INTERVAL_MS;
@@ -51,7 +66,7 @@ export const protect = asyncHandler(
       void User.updateOne({ _id: user._id }, { $set: { lastActiveAt: new Date() } }).catch(() => undefined);
     }
 
-    req.user = { id: user.id, role: user.role };
+    req.user = { id: user.id, role: user.role, emailVerified: user.emailVerified };
     next();
   },
 );
