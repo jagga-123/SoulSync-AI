@@ -93,7 +93,7 @@ describe("email over SMTP: flows, health endpoint and graceful failure", () => {
     let ben: TestUser;
 
     before(async () => {
-      vera = await h.createUser({ name: "Vera Verify" });
+      vera = await h.createUser({ name: "Vera Verify", verified: false });
       ada = await h.createUser({ name: "Ada Lovelace", profile: true, verified: true });
       ben = await h.createUser({ name: "Ben Franklin", profile: true, verified: true });
       const { matchId } = await h.makeMatch(ada, ben);
@@ -131,7 +131,7 @@ describe("email over SMTP: flows, health endpoint and graceful failure", () => {
     }
 
     it("the link inside the verification email verifies the account (register → email → verify, end to end)", async () => {
-      const user = await h.createUser({ name: "Link Lena" });
+      const user = await h.createUser({ name: "Link Lena", verified: false });
       const mail = only(to(user.email, /verify your email/i));
       const link = /https?:\/\/[^\s"'<>]*verify-email\?token=[0-9a-f]{24}\.[0-9a-f]{64}/.exec(decodeQp(mail.body))?.[0];
       assert.ok(link, "the emailed link survives the SMTP encoding intact");
@@ -301,7 +301,7 @@ describe("email over SMTP: flows, health endpoint and graceful failure", () => {
     });
 
     it("recovers by itself once SMTP is back", async () => {
-      const user = await h.createUser({ name: "Back Bea" });
+      const user = await h.createUser({ name: "Back Bea", verified: false });
       await h.settle();
       assert.equal(only(to(user.email, /verify your email/i)).user, LOGIN);
     });

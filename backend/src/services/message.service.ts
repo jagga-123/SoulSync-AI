@@ -1,4 +1,5 @@
 import { Message, type IMessage } from "../models/Message.model";
+import { User } from "../models/User.model";
 import { ApiError } from "../utils/ApiError";
 import { events } from "../platform/events";
 import { assertNotBlocked } from "./block.service";
@@ -26,6 +27,13 @@ export async function sendMessage(
   senderId: string,
   input: SendMessageParams,
 ): Promise<SerializedMessage> {
+  // Checked here, not just at the route: this is also reachable straight from a socket
+  // ("send_message"), which never passes through the REST middleware chain.
+  const sender = await User.findById(senderId).select("emailVerified");
+  if (!sender?.emailVerified) {
+    throw new ApiError(403, "Please verify your email before doing that.", { code: "EMAIL_NOT_VERIFIED" });
+  }
+
   const conversation = await assertParticipant(input.conversationId, senderId);
 
   const receiverId = conversation.participants.find((p) => p.toString() !== senderId);

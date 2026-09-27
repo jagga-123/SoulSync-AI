@@ -80,3 +80,14 @@ export function requireAdmin(req: Request, _res: Response, next: NextFunction): 
   }
   next();
 }
+
+/** Must run after `protect`. Gates the actions that actually reach another member —
+ * liking, starting a conversation, sending a message — behind a verified email, so an
+ * unverified signup can't be used to contact people. */
+export function requireVerified(req: Request, _res: Response, next: NextFunction): void {
+  if (!req.user?.emailVerified) {
+    next(new ApiError(403, "Please verify your email before doing that.", { code: "EMAIL_NOT_VERIFIED" }));
+    return;
+  }
+  next();
+}

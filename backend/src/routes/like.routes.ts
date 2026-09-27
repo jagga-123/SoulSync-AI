@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { protect } from "../middleware/auth.middleware";
+import { protect, requireVerified } from "../middleware/auth.middleware";
 import {
   acceptLike,
   getIncoming,
@@ -12,7 +12,7 @@ const router = Router();
 
 router.use(protect);
 
-router.post("/send/:userId", sendLike);
+router.post("/send/:userId", requireVerified, sendLike);
 router.get("/incoming", getIncoming);
 router.get("/outgoing", getOutgoing);
 router.post("/accept/:likeId", acceptLike);

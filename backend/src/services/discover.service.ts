@@ -39,20 +39,21 @@ export async function discoverUsers(
 ): Promise<DiscoverResult> {
   const currentUserObjectId = new Types.ObjectId(currentUserId);
 
-  const [matches, sentLikes, blockedIds, suspended] = await Promise.all([
+  const [matches, sentLikes, blockedIds, hidden] = await Promise.all([
     Match.find({
       $or: [{ userOne: currentUserObjectId }, { userTwo: currentUserObjectId }],
     }).select("userOne userTwo"),
     Like.find({ senderId: currentUserObjectId }).select("receiverId"),
     getBlockedUserIds(currentUserId),
-    User.find({ status: "suspended" }).select("_id"),
+    User.find({ $or: [{ status: "suspended" }, { emailVerified: false }] }).select("_id"),
   ]);
 
   // Discover excludes: myself, anyone I've already matched with, and anyone
   // I've already sent a like to (any status) — re-showing someone I've
   // already acted on isn't useful in a discovery feed. Since Phase 6 it also
-  // hides blocked users (in either direction) and suspended accounts.
-  const excludedIds = new Set<string>([currentUserId, ...blockedIds, ...suspended.map((u) => u.id)]);
+  // hides blocked users (in either direction), suspended accounts, and
+  // unverified accounts (nobody should be discoverable before proving their email).
+  const excludedIds = new Set<string>([currentUserId, ...blockedIds, ...hidden.map((u) => u.id)]);
   for (const match of matches) {
     excludedIds.add(
       match.userOne.equals(currentUserObjectId)

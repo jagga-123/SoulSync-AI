@@ -43,7 +43,7 @@ describe("email: verification, delivery rules, unsubscribe and the weekly report
     });
 
     it("verifies with the emailed link (idempotently), and rejects anything else", async () => {
-      const user = await h.createUser({ name: "Link Lena" });
+      const user = await h.createUser({ name: "Link Lena", verified: false });
       const token = tokenFrom(mailsTo(user.email, /verify/i)[0]!.html, "verify-email")!;
       const [id, raw] = token.split(".") as [string, string];
 
@@ -62,7 +62,7 @@ describe("email: verification, delivery rules, unsubscribe and the weekly report
     });
 
     it("rejects an expired link and lets the user request a fresh one, which supersedes the old", async () => {
-      const user = await h.createUser({ name: "Late Lou" });
+      const user = await h.createUser({ name: "Late Lou", verified: false });
       const oldToken = tokenFrom(mailsTo(user.email, /verify/i)[0]!.html, "verify-email")!;
       const { User } = await h.load("../../src/models/User.model");
       await User.updateOne({ _id: user.id }, { $set: { "emailVerification.expiresAt": new Date(Date.now() - 1000) } });
@@ -87,7 +87,7 @@ describe("email: verification, delivery rules, unsubscribe and the weekly report
 
   describe("who gets notification emails", () => {
     it("never mails an unverified address (we don't know it's theirs), then does once verified", async () => {
-      const receiver = await h.createUser({ name: "Unverified Uri", profile: true });
+      const receiver = await h.createUser({ name: "Unverified Uri", profile: true, verified: false });
       const suitor = await h.createUser({ name: "Suitor Sal", profile: true });
       await h.makeMatch(suitor, receiver);
       assert.equal(mailsTo(receiver.email, /match/i).length, 0);
@@ -275,7 +275,7 @@ describe("email: verification, delivery rules, unsubscribe and the weekly report
       const [subscriber, optedOut, unverified] = [
         await h.createUser({ name: "Weekly Wes", profile: true, verified: true }),
         await h.createUser({ name: "Nope Nat", profile: true, verified: true }),
-        await h.createUser({ name: "Unverified Ula", profile: true }),
+        await h.createUser({ name: "Unverified Ula", profile: true, verified: false }),
       ];
       await h.api.put("/account/settings", { email: { weeklyReport: false } }, { token: optedOut.token });
       await h.completeInterview(subscriber);

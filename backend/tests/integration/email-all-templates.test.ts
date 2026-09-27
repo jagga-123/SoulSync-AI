@@ -96,7 +96,7 @@ describe("every email the app sends, through the real flows", () => {
   });
 
   it("the token in the verification link verifies the account and lands on a page that exists", async () => {
-    const user = await h.createUser({ name: "Link Lena" });
+    const user = await h.createUser({ name: "Link Lena", verified: false });
     const mail = only(to(user.email, /verify your email/i));
     const link = /href="([^"]*verify-email\?token=[^"]+)"/.exec(mail.html)![1]!;
     assert.match(link, /^http:\/\/localhost:3000\/verify-email\?token=/, "the link points at the frontend's /verify-email page");

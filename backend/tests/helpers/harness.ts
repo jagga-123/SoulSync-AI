@@ -143,7 +143,10 @@ export async function startHarness(options: { env?: Record<string, string> } = {
       );
       if (created.status !== 201) throw new Error(`profile failed: ${JSON.stringify(created.body)}`);
     }
-    if (opts.verified) {
+    // Verified by default — most tests exercise an ordinary, fully-onboarded member,
+    // and this API now gates likes/messages/discoverability behind a verified email
+    // (see requireVerified). Pass `verified: false` for a test that cares about that state.
+    if (opts.verified ?? true) {
       const { User } = await import("../../src/models/User.model");
       await User.updateOne({ _id: user.id }, { $set: { emailVerified: true } });
     }
@@ -179,7 +182,7 @@ export async function startHarness(options: { env?: Record<string, string> } = {
       fullName: `${opts.prefix ?? "Seed"} ${base + i + 1}`,
       email: `seed${base + i + 1}.${runId}@test.local`,
       password: "seeded-password-not-for-login",
-      emailVerified: opts.verified ?? false,
+      emailVerified: opts.verified ?? true,
     }));
     const created = await User.insertMany(docs);
 

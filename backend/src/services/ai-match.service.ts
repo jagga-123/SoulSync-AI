@@ -4,6 +4,7 @@ import { Like } from "../models/Like.model";
 import { Match } from "../models/Match.model";
 import { MatchInsight } from "../models/MatchInsight.model";
 import { Profile } from "../models/Profile.model";
+import { User } from "../models/User.model";
 import {
   buildCompatibilityProfile,
   buildTemplateExplanation,
@@ -76,17 +77,19 @@ function toCompatibilityProfile({ ai, basic }: Participant): CompatibilityProfil
   return buildCompatibilityProfile(ai, basic);
 }
 
-/** Everyone the viewer shouldn't be recommended: themselves, current matches,
- * and anyone they've already liked — the same exclusions Discover applies. */
+/** Everyone the viewer shouldn't be recommended: themselves, current matches, anyone
+ * they've already liked, and anyone suspended or not yet email-verified — the same
+ * exclusions Discover applies. */
 async function getExcludedUserIds(viewerId: string): Promise<Types.ObjectId[]> {
   const viewer = new Types.ObjectId(viewerId);
-  const [matches, sentLikes, blocked] = await Promise.all([
+  const [matches, sentLikes, blocked, hidden] = await Promise.all([
     Match.find({ $or: [{ userOne: viewer }, { userTwo: viewer }] }).select("userOne userTwo"),
     Like.find({ senderId: viewer }).select("receiverId"),
     getBlockedUserIds(viewerId),
+    User.find({ $or: [{ status: "suspended" }, { emailVerified: false }] }).select("_id"),
   ]);
 
-  const excluded = new Set<string>([viewerId, ...blocked]);
+  const excluded = new Set<string>([viewerId, ...blocked, ...hidden.map((u) => u.id)]);
   for (const match of matches) {
     excluded.add(match.userOne.equals(viewer) ? match.userTwo.toString() : match.userOne.toString());
   }
