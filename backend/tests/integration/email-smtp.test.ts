@@ -101,6 +101,8 @@ describe("email over SMTP: flows, health endpoint and graceful failure", () => {
       await h.api.post("/messages/send", { conversationId, content: "Hello Ben, lovely to match with you!" }, { token: ada.token });
       const { runWeeklyReports } = await h.load("../../src/services/weekly-report.service");
       await runWeeklyReports({ force: true });
+      await h.api.post("/auth/forgot-password", { email: vera.email });
+      await h.api.put("/account/password", { currentPassword: "Passw0rd!23", newPassword: "NewPassw0rd!99" }, { token: ben.token });
       await h.settle();
     });
 
@@ -110,6 +112,8 @@ describe("email over SMTP: flows, health endpoint and graceful failure", () => {
       ["match notification", () => only(to(ada.email, /match with Ben/i)), true],
       ["message notification", () => only(to(ben.email, /new message from Ada/i)), true],
       ["weekly report", () => only(to(ada.email, /week/i)), true],
+      ["password reset", () => only(to(vera.email, /reset your.*password/i)), false],
+      ["password changed", () => only(to(ben.email, /password.*changed/i)), false],
     ];
 
     for (const [label, find, isNotification] of flows) {

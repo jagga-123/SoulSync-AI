@@ -53,7 +53,9 @@ describe("self-service account deletion (local storage)", () => {
     const ada = await h.createUser({ name: "Ada Deletes", profile: true });
     const bea = await h.createUser({ name: "Bea Stays", profile: true });
     const { matchId } = await h.makeMatch(ada, bea);
-    void matchId;
+    const conversationId = (await h.api.post(`/conversations/start/${matchId}`, undefined, { token: ada.token })).body.data.conversation.id;
+    const sent = await h.api.post("/messages/send", { conversationId, content: "hi Bea" }, { token: ada.token });
+    assert.equal(sent.status, 201);
 
     const upload = await h.api.post("/uploads/profile-photo", undefined, { token: ada.token, raw: await jpeg(300, 300), headers: { "Content-Type": "image/jpeg" } });
     assert.equal(upload.status, 201);
@@ -70,16 +72,20 @@ describe("self-service account deletion (local storage)", () => {
     // The photo is gone from disk...
     assert.equal((await filesOf(ada)).length, 0);
     // ...and so is everything the cascade is responsible for.
-    const [{ User }, { Profile }, { Match }] = await Promise.all([
+    const [{ User }, { Profile }, { Match }, { Conversation }, { Message }] = await Promise.all([
       h.load("../../src/models/User.model"),
       h.load("../../src/models/Profile.model"),
       h.load("../../src/models/Match.model"),
+      h.load("../../src/models/Conversation.model"),
+      h.load("../../src/models/Message.model"),
     ]);
     assert.equal(await User.findById(ada.id), null);
     assert.equal(await Profile.findOne({ userId: ada.id }), null);
     assert.equal(await Match.findOne({ $or: [{ userOne: ada.id }, { userTwo: ada.id }] }), null);
+    assert.equal(await Conversation.findById(conversationId), null, "the conversation is gone");
+    assert.equal(await Message.findOne({ conversationId }), null, "its messages are gone too");
 
-    // Bea is untouched.
+    // Bea is untouched — still a real, signed-in account.
     assert.equal((await h.api.get("/auth/me", { token: bea.token })).status, 200);
   });
 });

@@ -89,6 +89,22 @@ describe("password reset, change, and session invalidation", () => {
       assert.equal(again.status, 400);
     });
 
+    it("rejects an expired token, but a freshly requested one still works", async () => {
+      const user = await h.createUser({ name: "Reset Emma" });
+      const token = await requestReset(h, user);
+      const { User } = await h.load("../../src/models/User.model");
+      await User.updateOne({ _id: user.id }, { $set: { "passwordReset.expiresAt": new Date(Date.now() - 1000) } });
+
+      const expired = await h.api.post("/auth/reset-password", { token, password: "NewPassw0rd!99" });
+      assert.equal(expired.status, 400);
+      assert.match(expired.body.message, /expired/i);
+      assert.equal((await h.api.post("/auth/login", { email: user.email, password: "Passw0rd!23" })).status, 200, "the old password still works — nothing changed");
+
+      const freshToken = await requestReset(h, user);
+      assert.notEqual(freshToken, token);
+      assert.equal((await h.api.post("/auth/reset-password", { token: freshToken, password: "NewPassw0rd!99" })).status, 200);
+    });
+
     it("refuses an invalid, malformed, or unknown-user token without leaking which", async () => {
       const malformed = await h.api.post("/auth/reset-password", { token: "not-a-real-token-at-all", password: "NewPassw0rd!99" });
       assert.equal(malformed.status, 400);

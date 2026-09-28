@@ -179,9 +179,10 @@ Repeat with live keys, live webhook endpoint and live price IDs, do one real pur
 ## 7. Photo storage (Cloudinary)
 
 Set `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` for production. The profile form's **Upload photo**
-button then asks `POST /api/uploads/sign` for a short-lived **signed** ticket confined to the member's own folder and to image
-formats, and uploads straight to Cloudinary — the API secret never leaves the server and image bytes never pass through the API.
-Replacing or removing a photo deletes the old one from Cloudinary.
+button then sends the file to `POST /api/uploads/profile-photo` — the same endpoint the local driver uses. The server validates
+it, decodes and re-encodes it (stripping all metadata, including GPS), and only then uploads the clean bytes to Cloudinary with a
+signed Admin API call; the API secret never leaves the server, but the image bytes always pass through the API first, on either
+driver. Replacing or removing a photo deletes the old one from Cloudinary.
 
 Without Cloudinary, development uses the free local fallback (`LOCAL_UPLOADS=auto`: files under `backend/uploads/`, validated,
 re-encoded to WebP with EXIF stripped, 256 px thumbnail). It is **off in production** by default because the disk is ephemeral on
