@@ -15,13 +15,19 @@ const FOOTER_LINKS = {
     { label: "Create account", href: "/register" },
     { label: "Settings", href: "/settings" },
   ],
+  Legal: [
+    { label: "Privacy Policy", href: "/privacy" },
+    { label: "Terms of Service", href: "/terms" },
+    { label: "Safety Guidelines", href: "/safety" },
+    { label: "Contact", href: "/contact" },
+  ],
 };
 
 export function Footer() {
   return (
     <footer className="relative z-10 border-t border-white/10 bg-background/60">
       <div className="mx-auto max-w-8xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-10 md:grid-cols-5">
           <div className="col-span-2">
             <Link href="/" aria-label="SoulSync home" className="inline-flex rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring">
               <Logo />

@@ -29,6 +29,10 @@ import type {
 /** The project's public source code (the repository is public). */
 export const SOURCE_CODE_URL = "https://github.com/jagga-123/SoulSync-AI";
 
+/** The one inbox for support, privacy, and safety requests. Update this once a
+ * verified sending domain exists — everything that mentions "contact us" reads from here. */
+export const SUPPORT_EMAIL = "support@soulsync.app";
+
 export const NAV_LINKS: NavLink[] = [
   { label: "How it works", href: "/#how-it-works" },
   { label: "Why it works", href: "/#matchmaking" },

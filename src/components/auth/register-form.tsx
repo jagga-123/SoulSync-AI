@@ -179,7 +179,15 @@ export function RegisterForm() {
           {isSubmitting ? "Creating account..." : "Create account"}
         </Button>
         <p className="text-center text-xs leading-relaxed text-white/60">
-          SoulSync is for adults. By creating an account you confirm you&apos;re 18 or older.
+          SoulSync is for adults. By creating an account you confirm you&apos;re 18 or older, and agree to our{" "}
+          <Link href="/terms" className="text-white/75 underline underline-offset-2 hover:text-white">
+            Terms
+          </Link>{" "}
+          and{" "}
+          <Link href="/privacy" className="text-white/75 underline underline-offset-2 hover:text-white">
+            Privacy Policy
+          </Link>
+          .
         </p>
       </form>
     </AuthCard>
