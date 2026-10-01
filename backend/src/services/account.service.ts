@@ -6,9 +6,11 @@ import { User } from "../models/User.model";
 import {
   DEFAULT_EMAIL_PREFS,
   DEFAULT_NOTIFICATION_PREFS,
+  DEFAULT_PRIVACY_PREFS,
   UserSettings,
   type EmailPrefs,
   type NotificationPrefs,
+  type PrivacyPrefs,
 } from "../models/UserSettings.model";
 import { ApiError } from "../utils/ApiError";
 import { sendTemplateEmail, verifyUnsubscribeToken, type UnsubscribeScope } from "./email/email.service";
@@ -193,6 +195,7 @@ export async function deleteAccount(userId: string, password: string): Promise<v
 export interface SettingsView {
   notifications: NotificationPrefs;
   email: EmailPrefs;
+  privacy: PrivacyPrefs;
 }
 
 export async function getSettings(userId: string): Promise<SettingsView> {
@@ -200,16 +203,18 @@ export async function getSettings(userId: string): Promise<SettingsView> {
   return {
     notifications: { ...DEFAULT_NOTIFICATION_PREFS, ...(settings?.notifications ?? {}) },
     email: { ...DEFAULT_EMAIL_PREFS, ...(settings?.email ?? {}) },
+    privacy: { ...DEFAULT_PRIVACY_PREFS, ...(settings?.privacy ?? {}) },
   };
 }
 
 export async function updateSettings(
   userId: string,
-  patch: { notifications?: Partial<NotificationPrefs>; email?: Partial<EmailPrefs> },
+  patch: { notifications?: Partial<NotificationPrefs>; email?: Partial<EmailPrefs>; privacy?: Partial<PrivacyPrefs> },
 ): Promise<SettingsView> {
   const set: Record<string, boolean> = {};
   for (const [key, value] of Object.entries(patch.notifications ?? {})) set[`notifications.${key}`] = value;
   for (const [key, value] of Object.entries(patch.email ?? {})) set[`email.${key}`] = value;
+  for (const [key, value] of Object.entries(patch.privacy ?? {})) set[`privacy.${key}`] = value;
 
   if (Object.keys(set).length > 0) {
     await UserSettings.findOneAndUpdate(

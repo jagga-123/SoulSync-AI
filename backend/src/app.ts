@@ -41,7 +41,9 @@ app.use(compression());
 app.use(
   cors({
     origin: allowedOrigins,
-    exposedHeaders: ["x-request-id", "ratelimit", "ratelimit-policy", "retry-after"],
+    // content-disposition: the data-export download reads its filename from this header —
+    // like any response header, it's invisible to cross-origin JS unless explicitly exposed.
+    exposedHeaders: ["x-request-id", "ratelimit", "ratelimit-policy", "retry-after", "content-disposition"],
   }),
 );
 

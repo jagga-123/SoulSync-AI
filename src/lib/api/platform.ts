@@ -1,4 +1,6 @@
-import { apiFetch } from "@/lib/api-client";
+import { apiFetch, ApiClientError } from "@/lib/api-client";
+import { API_URL } from "@/lib/env";
+import { getToken } from "@/lib/auth-storage";
 import type {
   AdminOverview, AdminRates, AdminReportDetail, AdminReportList, AdminRevenue, AdminUserDetail, AdminUserRow,
   AppNotification, AuditEntry, BillingInterval, BillingOverview, BlockedUser, BoostStatus, DeepAnalysisResponse,
@@ -31,8 +33,11 @@ export const deleteNotification = (id: string) => apiFetch<null>(`/notifications
 export const verifyEmail = (token: string) => apiFetch<{ verified: boolean }>("/account/verify-email", { method: "POST", body: { token }, auth: false });
 export const resendVerification = () => post<{ alreadyVerified: boolean }>("/account/resend-verification");
 export const getSettings = () => apiFetch<{ settings: UserSettings }>("/account/settings");
-export const updateSettings = (patch: { notifications?: Partial<UserSettings["notifications"]>; email?: Partial<UserSettings["email"]> }) =>
-  apiFetch<{ settings: UserSettings }>("/account/settings", { method: "PUT", body: patch });
+export const updateSettings = (patch: {
+  notifications?: Partial<UserSettings["notifications"]>;
+  email?: Partial<UserSettings["email"]>;
+  privacy?: Partial<UserSettings["privacy"]>;
+}) => apiFetch<{ settings: UserSettings }>("/account/settings", { method: "PUT", body: patch });
 export const unsubscribe = (token: string) => apiFetch<{ scope: string }>("/account/unsubscribe", { method: "POST", body: { token }, auth: false });
 /** Bumps every other session's token version and returns a fresh token for this device, so the
  * caller stays signed in here while every other device is signed out. */
@@ -42,6 +47,32 @@ export const changePassword = (currentPassword: string, newPassword: string) =>
 export const revokeSessions = () => post<{ ok: true }>("/account/sessions/revoke");
 /** Permanently deletes the account. The caller should clear the local token and redirect right after. */
 export const deleteAccount = (password: string) => post<{ ok: true }>("/account/delete", { password, confirm: "DELETE" });
+
+/** Downloads the member's full data export and saves it as a file. The endpoint returns a raw
+ * JSON file (not the standard response envelope), and needs the auth header a plain link can't
+ * carry — so this fetches it directly and triggers a save via a throwaway object URL. */
+export async function downloadMyData(): Promise<void> {
+  const token = getToken();
+  const response = await fetch(`${API_URL}/account/export`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  }).catch(() => {
+    throw new ApiClientError("Couldn't reach the server to download your data. Please try again.", 0);
+  });
+  if (!response.ok) {
+    const body = (await response.json().catch(() => null)) as { message?: string } | null;
+    throw new ApiClientError(body?.message ?? `Export failed with status ${response.status}`, response.status);
+  }
+  const blob = await response.blob();
+  const filename = /filename="([^"]+)"/.exec(response.headers.get("content-disposition") ?? "")?.[1] ?? "soulsync-data-export.json";
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
 
 // ---- billing -----------------------------------------------------------------
 export const getPlans = () => apiFetch<PlanCatalog>("/billing/plans", { auth: false });

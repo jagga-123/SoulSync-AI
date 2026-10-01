@@ -5,6 +5,7 @@ import { ApiError } from "../utils/ApiError";
 import { parseOrThrow } from "../utils/parse";
 import { changePasswordBody, deleteAccountBody, settingsBody, tokenBody } from "../validators/platform.validator";
 import * as account from "../services/account.service";
+import { exportUserData } from "../services/data-export.service";
 
 function userId(req: Request): string {
   if (!req.user) throw ApiError.unauthorized();
@@ -39,6 +40,17 @@ export const deleteAccount = asyncHandler(async (req: Request, res: Response) =>
   const { password } = parseOrThrow(deleteAccountBody, req.body);
   await account.deleteAccount(userId(req), password);
   res.status(200).json(new ApiResponse("Your account has been deleted.", { ok: true }));
+});
+
+/** Downloads everything this member owns as one JSON file. Not wrapped in the standard
+ * response envelope — this is a file download, not an API payload to be parsed by the app. */
+export const exportData = asyncHandler(async (req: Request, res: Response) => {
+  const data = await exportUserData(userId(req));
+  res
+    .status(200)
+    .setHeader("Content-Type", "application/json")
+    .setHeader("Content-Disposition", `attachment; filename="soulsync-data-export-${new Date().toISOString().slice(0, 10)}.json"`)
+    .json(data);
 });
 
 export const getSettings = asyncHandler(async (req: Request, res: Response) => {

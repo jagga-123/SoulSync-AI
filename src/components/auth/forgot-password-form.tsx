@@ -9,9 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AuthCard } from "@/components/auth/auth-card";
 import { FormField } from "@/components/auth/form-field";
+import { TurnstileWidget } from "@/components/auth/turnstile";
 import { forgotPasswordFormSchema } from "@/lib/validators/auth";
 import { fieldErrorsFromZod } from "@/lib/zod-errors";
 import { forgotPassword } from "@/lib/api/auth";
+import { ApiClientError } from "@/lib/api-client";
+import { TURNSTILE_SITE_KEY } from "@/lib/env";
 
 /**
  * Always shows the same success message, whatever the email — the API deliberately never reveals
@@ -23,6 +26,7 @@ export function ForgotPasswordForm() {
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | undefined>(undefined);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -37,11 +41,14 @@ export function ForgotPasswordForm() {
     setIsSubmitting(true);
 
     try {
-      await forgotPassword(result.data.email);
+      await forgotPassword(result.data.email, captchaToken);
       setSent(true);
-    } catch {
-      // A network/server error is the one case worth naming — everything else stays silent by design.
-      setFormError("Something went wrong. Please try again.");
+    } catch (err) {
+      // The verification challenge is the one failure worth naming specifically — it reveals
+      // nothing about whether the address has an account. Everything else stays silent by design.
+      const isCaptchaFailure = err instanceof ApiClientError && (err.details as { code?: string } | undefined)?.code === "CAPTCHA_FAILED";
+      setFormError(isCaptchaFailure ? (err as ApiClientError).message : "Something went wrong. Please try again.");
+      setCaptchaToken(undefined);
     } finally {
       setIsSubmitting(false);
     }
@@ -110,9 +117,11 @@ export function ForgotPasswordForm() {
           />
         </FormField>
 
+        <TurnstileWidget onVerify={setCaptchaToken} onExpire={() => setCaptchaToken(undefined)} />
+
         <Button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || (!!TURNSTILE_SITE_KEY && !captchaToken)}
           className="w-full gap-2 bg-gradient-brand text-white shadow-lg shadow-primary/25 hover:opacity-90"
         >
           {isSubmitting && <Loader2 className="size-4 animate-spin" aria-hidden />}

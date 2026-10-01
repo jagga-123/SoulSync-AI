@@ -3,7 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AlertTriangle, BadgeCheck, Check, ExternalLink, KeyRound, Loader2, LogOut, MailWarning, Monitor, Trash2, UserX } from "lucide-react";
+import { AlertTriangle, BadgeCheck, Check, Download, ExternalLink, KeyRound, Loader2, LogOut, MailWarning, Monitor, Trash2, UserX } from "lucide-react";
 import { z } from "zod";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -15,7 +15,7 @@ import { FormField } from "@/components/auth/form-field";
 import { Section } from "@/components/platform/app-page";
 import { usePlatform } from "@/components/platform/platform-provider";
 import { ProfileMedia } from "@/components/shared/profile-media";
-import { changePassword as changePasswordRequest, deleteAccount as deleteAccountRequest, getBillingOverview, revokeSessions } from "@/lib/api/platform";
+import { changePassword as changePasswordRequest, deleteAccount as deleteAccountRequest, downloadMyData, getBillingOverview, revokeSessions } from "@/lib/api/platform";
 import { setToken } from "@/lib/auth-storage";
 import { SOURCE_CODE_URL } from "@/lib/data";
 import { errorMessage } from "@/lib/gate";
@@ -23,7 +23,7 @@ import { fieldErrorsFromZod } from "@/lib/zod-errors";
 import { getInitials } from "@/lib/format";
 import { passwordField } from "@/lib/validators/auth";
 import type { AuthUser } from "@/types/api";
-import type { BillingOverview, BlockedUser, EmailPrefs, NotificationPrefs, UserSettings } from "@/types/platform";
+import type { BillingOverview, BlockedUser, EmailPrefs, NotificationPrefs, PrivacyPrefs, UserSettings } from "@/types/platform";
 
 const changePasswordFormSchema = z
   .object({ currentPassword: z.string().min(1, "Your current password is required"), newPassword: passwordField, confirm: z.string() })
@@ -353,9 +353,43 @@ const VISIBILITY: Array<{ what: string; who: string }> = [
   { what: "Your messages", who: "You and the person you're talking to" },
 ];
 
-export function PrivacyGroup() {
+interface PrivacyGroupProps {
+  settings: UserSettings | null;
+  savedGroup: "notifications" | "email" | "privacy" | null;
+  onToggle: (key: keyof PrivacyPrefs, value: boolean) => void;
+}
+
+export function PrivacyGroup({ settings, savedGroup, onToggle }: PrivacyGroupProps) {
+  const discoverable = settings?.privacy.discoverable ?? true;
   return (
     <div className="space-y-5">
+      <Section title="Visibility">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="min-w-0 pr-2">
+            <p className="font-medium text-white">Show my profile</p>
+            <p className="mt-0.5 text-sm text-white/70">
+              {discoverable
+                ? "You're visible in Discover and AI recommendations, and can receive new likes."
+                : "Hidden from Discover and AI recommendations — you won't receive new likes. Your existing matches and conversations keep working exactly as before."}
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            {savedGroup === "privacy" && (
+              <span role="status" className="flex items-center gap-1 text-xs text-accent">
+                <Check className="size-3.5" aria-hidden />
+                Saved
+              </span>
+            )}
+            <Switch
+              checked={discoverable}
+              disabled={!settings}
+              onCheckedChange={(checked) => onToggle("discoverable", checked)}
+              aria-label="Show my profile in Discover and AI recommendations"
+            />
+          </div>
+        </div>
+      </Section>
+
       <Section title="Who sees what" description="The short version of how your information is shared.">
         <dl className="divide-y divide-white/5">
           {VISIBILITY.map((row) => (
@@ -370,6 +404,8 @@ export function PrivacyGroup() {
           <li>If someone reports a conversation, our moderators can see it to review the report.</li>
         </ul>
       </Section>
+
+      <DataExportSection />
 
       <Section title="Your AI report">
         <ul className="divide-y divide-white/5">
@@ -391,6 +427,52 @@ export function PrivacyGroup() {
         </ul>
       </Section>
     </div>
+  );
+}
+
+/** A plain "download everything" button — the file comes straight from the browser's fetch
+ * response, so there's no server state to track here beyond loading/error. */
+function DataExportSection() {
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
+
+  async function handleDownload() {
+    setIsDownloading(true);
+    setError(null);
+    try {
+      await downloadMyData();
+      setDone(true);
+    } catch (err) {
+      setError(errorMessage(err, "Couldn't download your data."));
+    } finally {
+      setIsDownloading(false);
+    }
+  }
+
+  return (
+    <Section title="Your data">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0 pr-2">
+          <p className="font-medium text-white">Download my data</p>
+          <p className="mt-0.5 text-sm text-white/70">
+            {done
+              ? "Your download should have started. Didn't see it? Try again."
+              : "A JSON file with your profile, personality report, matches, and conversations."}
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          onClick={() => void handleDownload()}
+          disabled={isDownloading}
+          className="h-10 shrink-0 gap-2 rounded-full border-white/15 bg-white/[0.03] text-white hover:bg-white/[0.08]"
+        >
+          {isDownloading ? <Loader2 className="size-3.5 animate-spin" aria-hidden /> : <Download className="size-4" aria-hidden />}
+          {done ? "Download again" : "Download my data"}
+        </Button>
+      </div>
+      {error && <p role="alert" className="mt-3 text-sm text-destructive">{error}</p>}
+    </Section>
   );
 }
 

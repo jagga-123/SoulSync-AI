@@ -98,10 +98,12 @@ describe("production hardening", () => {
       assert.equal(res.headers.get("access-control-allow-origin"), null, "but the browser is not permitted to read it");
     });
 
-    it("lets the frontend read the request id and rate-limit headers", async () => {
+    it("lets the frontend read the request id, rate-limit, and download-filename headers", async () => {
       const res = await raw("/api/health", { headers: { Origin: "http://localhost:3000" } });
       const exposed = (res.headers.get("access-control-expose-headers") ?? "").toLowerCase();
-      for (const header of ["x-request-id", "retry-after", "ratelimit"]) assert.ok(exposed.includes(header), header);
+      // content-disposition: the data-export download reads its filename from this cross-origin —
+      // without it being exposed, the browser can't read it and silently falls back to a generic name.
+      for (const header of ["x-request-id", "retry-after", "ratelimit", "content-disposition"]) assert.ok(exposed.includes(header), header);
     });
   });
 

@@ -133,6 +133,11 @@ const envSchema = z
     // Free fallback when Cloudinary isn't configured: photos are re-encoded and stored on this
     // server's disk. "auto" = on outside production only (a production disk is usually ephemeral).
     LOCAL_UPLOADS: z.enum(["auto", "on", "off"]).default("auto"),
+
+    // --- CAPTCHA (Cloudflare Turnstile) --- optional: unset means register/forgot-password work
+    // exactly as they do today, with no widget and no server-side check.
+    TURNSTILE_SECRET_KEY: optionalString,
+    TURNSTILE_VERIFY_URL: optionalString, // test doubles only
     UPLOAD_DIR: optionalString,
   })
   .superRefine((data, ctx) => {

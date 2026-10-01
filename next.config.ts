@@ -16,6 +16,9 @@ function origin(value: string | undefined, fallback: string): string {
 const apiOrigin = origin(process.env.NEXT_PUBLIC_API_URL, "http://localhost:5000/api");
 const socketOrigin = origin(process.env.NEXT_PUBLIC_SOCKET_URL, apiOrigin);
 const websocketOrigins = [apiOrigin, socketOrigin].map((o) => o.replace(/^http/, "ws"));
+// Only relaxed when the CAPTCHA feature is actually configured — unset, the CSP stays exactly
+// as strict as before this feature existed.
+const turnstileOrigin = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ? "https://challenges.cloudflare.com" : undefined;
 
 /**
  * Content-Security-Policy. Next.js bootstraps with inline scripts and styles,
@@ -26,11 +29,14 @@ const websocketOrigins = [apiOrigin, socketOrigin].map((o) => o.replace(/^http/,
  */
 const csp = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
+  `script-src 'self' 'unsafe-inline'${turnstileOrigin ? ` ${turnstileOrigin}` : ""}`,
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob: https: ${apiOrigin}`,
   "font-src 'self' data:",
-  `connect-src 'self' ${[...new Set([apiOrigin, socketOrigin, ...websocketOrigins])].join(" ")}`,
+  `connect-src 'self' ${[...new Set([apiOrigin, socketOrigin, ...websocketOrigins, ...(turnstileOrigin ? [turnstileOrigin] : [])])].join(" ")}`,
+  // The Turnstile challenge itself renders in an iframe from Cloudflare; without CAPTCHA
+  // configured this stays 'none', same as before.
+  `frame-src ${turnstileOrigin ?? "'none'"}`,
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",

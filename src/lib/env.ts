@@ -13,3 +13,6 @@ export const API_URL = apiBase(process.env.NEXT_PUBLIC_API_URL);
 // Socket.IO connects to the bare origin, not the "/api" REST prefix.
 export const SOCKET_URL =
   process.env.NEXT_PUBLIC_SOCKET_URL?.trim().replace(/\/+$/, "") || API_URL.replace(/\/api$/i, "");
+
+/** Unset means CAPTCHA is off — register/forgot-password render with no widget, same as today. */
+export const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() || undefined;

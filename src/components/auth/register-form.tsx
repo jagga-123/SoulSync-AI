@@ -11,11 +11,13 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AuthCard } from "@/components/auth/auth-card";
 import { FormField } from "@/components/auth/form-field";
+import { TurnstileWidget } from "@/components/auth/turnstile";
 import { registerFormSchema } from "@/lib/validators/auth";
 import { fieldErrorsFromApi, fieldErrorsFromZod } from "@/lib/zod-errors";
 import { registerUser } from "@/lib/api/auth";
 import { ApiClientError } from "@/lib/api-client";
 import { gateOf } from "@/lib/gate";
+import { TURNSTILE_SITE_KEY } from "@/lib/env";
 
 const registerWithConfirmSchema = registerFormSchema
   .extend({
@@ -43,6 +45,7 @@ export function RegisterForm() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | undefined>(undefined);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -69,6 +72,7 @@ export function RegisterForm() {
         password: result.data.password,
         referralCode,
         inviteCode,
+        captchaToken,
       });
       router.push("/login?registered=1");
     } catch (err) {
@@ -79,6 +83,7 @@ export function RegisterForm() {
       } else {
         setFormError("Something went wrong. Please try again.");
       }
+      setCaptchaToken(undefined); // a Turnstile token is single-use; the widget issues a new one
       setIsSubmitting(false);
     }
   }
@@ -170,9 +175,11 @@ export function RegisterForm() {
           />
         </FormField>
 
+        <TurnstileWidget onVerify={setCaptchaToken} onExpire={() => setCaptchaToken(undefined)} />
+
         <Button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || (!!TURNSTILE_SITE_KEY && !captchaToken)}
           className="w-full gap-2 bg-gradient-brand text-white shadow-lg shadow-primary/25 hover:opacity-90"
         >
           {isSubmitting && <Loader2 className="size-4 animate-spin" />}

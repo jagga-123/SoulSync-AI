@@ -3,6 +3,7 @@ import { Profile, type IProfile } from "../models/Profile.model";
 import { Like } from "../models/Like.model";
 import { Match } from "../models/Match.model";
 import { User, type IUser } from "../models/User.model";
+import { UserSettings } from "../models/UserSettings.model";
 import type { PublicProfile } from "../types/publicProfile";
 import { getBlockedUserIds } from "./block.service";
 
@@ -39,21 +40,28 @@ export async function discoverUsers(
 ): Promise<DiscoverResult> {
   const currentUserObjectId = new Types.ObjectId(currentUserId);
 
-  const [matches, sentLikes, blockedIds, hidden] = await Promise.all([
+  const [matches, sentLikes, blockedIds, hidden, hiddenByChoice] = await Promise.all([
     Match.find({
       $or: [{ userOne: currentUserObjectId }, { userTwo: currentUserObjectId }],
     }).select("userOne userTwo"),
     Like.find({ senderId: currentUserObjectId }).select("receiverId"),
     getBlockedUserIds(currentUserId),
     User.find({ $or: [{ status: "suspended" }, { emailVerified: false }] }).select("_id"),
+    UserSettings.find({ "privacy.discoverable": false }).select("userId"),
   ]);
 
   // Discover excludes: myself, anyone I've already matched with, and anyone
   // I've already sent a like to (any status) — re-showing someone I've
   // already acted on isn't useful in a discovery feed. Since Phase 6 it also
   // hides blocked users (in either direction), suspended accounts, and
-  // unverified accounts (nobody should be discoverable before proving their email).
-  const excludedIds = new Set<string>([currentUserId, ...blockedIds, ...hidden.map((u) => u.id)]);
+  // unverified accounts (nobody should be discoverable before proving their email) —
+  // and, since Phase C Sprint 2, anyone who's turned their own discoverability off.
+  const excludedIds = new Set<string>([
+    currentUserId,
+    ...blockedIds,
+    ...hidden.map((u) => u.id),
+    ...hiddenByChoice.map((s) => s.userId.toString()),
+  ]);
   for (const match of matches) {
     excludedIds.add(
       match.userOne.equals(currentUserObjectId)

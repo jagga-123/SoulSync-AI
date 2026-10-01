@@ -8,6 +8,8 @@ export interface RegisterPayload {
   /** Phase 6 (optional): a friend's referral code, or a waitlist invite code. */
   referralCode?: string;
   inviteCode?: string;
+  /** Only meaningful when CAPTCHA is configured; harmless/ignored otherwise. */
+  captchaToken?: string;
 }
 
 export interface LoginPayload {
@@ -37,10 +39,10 @@ export function getCurrentUser() {
 
 /** Always resolves the same way, whether or not the address has an account — the server
  * deliberately never reveals which emails are registered. */
-export function forgotPassword(email: string) {
+export function forgotPassword(email: string, captchaToken?: string) {
   return apiFetch<{ ok: true }>("/auth/forgot-password", {
     method: "POST",
-    body: { email },
+    body: { email, captchaToken },
     auth: false,
   });
 }

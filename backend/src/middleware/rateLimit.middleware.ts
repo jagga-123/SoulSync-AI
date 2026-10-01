@@ -118,3 +118,11 @@ export const uploadSignLimiter = buildLimiter({
   limit: 30,
   message: "Too many upload requests. Please try again later.",
 });
+
+/** A full data export is a heavy read (every match, conversation and message) — capped
+ * well below anything a legitimate "let me download my data" use needs. */
+export const dataExportLimiter = buildLimiter({
+  windowMs: 24 * HOUR,
+  limit: 5,
+  message: "Too many export requests. Please try again tomorrow.",
+});

@@ -4,6 +4,7 @@ import {
   accountSecurityLimiter,
   billingLimiter,
   aiGenerationLimiter,
+  dataExportLimiter,
   inviteLimiter,
   reportLimiter,
   verificationEmailLimiter,
@@ -37,6 +38,7 @@ accountRoutes.post("/resend-verification", protect, verificationEmailLimiter, ac
 accountRoutes.put("/password", protect, accountSecurityLimiter, accountController.changePassword);
 accountRoutes.post("/sessions/revoke", protect, accountSecurityLimiter, accountController.revokeSessions);
 accountRoutes.post("/delete", protect, accountSecurityLimiter, accountController.deleteAccount);
+accountRoutes.get("/export", protect, dataExportLimiter, accountController.exportData);
 accountRoutes.get("/settings", protect, accountController.getSettings);
 accountRoutes.put("/settings", protect, accountController.updateSettings);
 

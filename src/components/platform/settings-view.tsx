@@ -58,7 +58,7 @@ function Settings({ initialUser }: { initialUser: AuthUser }) {
   const [error, setError] = useState<string | null>(null);
   const [verifyMessage, setVerifyMessage] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
-  const [savedGroup, setSavedGroup] = useState<"notifications" | "email" | null>(null);
+  const [savedGroup, setSavedGroup] = useState<"notifications" | "email" | "privacy" | null>(null);
   const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -90,13 +90,13 @@ function Settings({ initialUser }: { initialUser: AuthUser }) {
     void load();
   }, [load]);
 
-  function flashSaved(group: "notifications" | "email") {
+  function flashSaved(group: "notifications" | "email" | "privacy") {
     setSavedGroup(group);
     if (savedTimer.current) clearTimeout(savedTimer.current);
     savedTimer.current = setTimeout(() => setSavedGroup(null), 1600);
   }
 
-  async function toggle<G extends "notifications" | "email">(group: G, key: keyof UserSettings[G], value: boolean) {
+  async function toggle<G extends "notifications" | "email" | "privacy">(group: G, key: keyof UserSettings[G], value: boolean) {
     if (!settings) return;
     const previous = settings;
     setSettings({ ...settings, [group]: { ...settings[group], [key]: value } });
@@ -197,11 +197,13 @@ function Settings({ initialUser }: { initialUser: AuthUser }) {
         )}
 
         {active.id === "account" && <AccountGroup user={user} isSending={isSending} verifyMessage={verifyMessage} onSendVerification={() => void sendVerification()} />}
-        {active.id === "privacy" && <PrivacyGroup />}
+        {active.id === "privacy" && (
+          <PrivacyGroup settings={settings} savedGroup={savedGroup} onToggle={(key, value) => void toggle("privacy", key, value)} />
+        )}
         {active.id === "notifications" && (
           <NotificationsGroup
             settings={settings}
-            savedGroup={savedGroup}
+            savedGroup={savedGroup === "privacy" ? null : savedGroup}
             onToggle={(group, key, value) => void toggle(group, key, value)}
             onSetAll={(group, value) => void setAll(group, value)}
           />

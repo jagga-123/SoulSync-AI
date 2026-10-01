@@ -189,9 +189,14 @@ export interface EmailPrefs {
   referrals: boolean;
 }
 
+export interface PrivacyPrefs {
+  discoverable: boolean;
+}
+
 export interface UserSettings {
   notifications: NotificationPrefs;
   email: EmailPrefs;
+  privacy: PrivacyPrefs;
 }
 
 // ---- safety -----------------------------------------------------------------------

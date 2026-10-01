@@ -28,7 +28,7 @@ const REASON_LABELS: Record<string, string> = {
 
 const ACTIONS: Array<{ value: ResolveAction; label: string; help: string; danger?: boolean }> = [
   { value: "dismiss", label: "Dismiss", help: "No violation found. Nothing happens to the reported member." },
-  { value: "warn", label: "Warn", help: "Send the member a warning notification." },
+  { value: "warn", label: "Warn", help: "Internal note only — the member isn't notified." },
   { value: "hide_message", label: "Hide the reported message", help: "Replaces the message with “removed by moderators” for both people." },
   { value: "suspend", label: "Suspend the account", help: "Signs them out and blocks login. Reversible.", danger: true },
   { value: "delete_user", label: "Delete the account", help: "Permanently removes the account and all its data.", danger: true },

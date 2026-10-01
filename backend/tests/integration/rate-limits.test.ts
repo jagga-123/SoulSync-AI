@@ -69,6 +69,13 @@ describe("rate limiting (enabled, one proxy in front)", () => {
       assert.equal((await resend(bystander!.token)).status, 200, "same IP, different account: separate budget");
     });
 
+    it("caps data exports per account (5/day)", async () => {
+      const [exporter] = await h.seedUsers(1);
+      const download = () => h.api.get("/account/export", { token: exporter!.token, headers: { "X-Forwarded-For": "10.0.1.6" } });
+      for (let i = 0; i < 5; i++) assert.equal((await download()).status, 200, `attempt ${i}`);
+      assert.equal((await download()).status, 429);
+    });
+
     it("caps reports per account (10/hour)", async () => {
       const [reporter, ...targets] = await h.seedUsers(12);
       let last = 0;

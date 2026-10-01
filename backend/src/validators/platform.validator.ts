@@ -34,6 +34,7 @@ export const settingsBody = z
       .object({ matches: z.boolean(), messages: z.boolean(), weeklyReport: z.boolean(), referrals: z.boolean() })
       .partial()
       .optional(),
+    privacy: z.object({ discoverable: z.boolean() }).partial().optional(),
   })
   .strict();
 

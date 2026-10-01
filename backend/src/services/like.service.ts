@@ -2,6 +2,7 @@ import { Like } from "../models/Like.model";
 import { Match } from "../models/Match.model";
 import { Profile } from "../models/Profile.model";
 import { User } from "../models/User.model";
+import { UserSettings } from "../models/UserSettings.model";
 import { ApiError } from "../utils/ApiError";
 import { calculateCompatibility } from "../utils/compatibility";
 import { orderUserIds } from "../utils/objectId";
@@ -18,6 +19,12 @@ export async function sendLike(senderId: string, receiverId: string) {
 
   const receiver = await User.findById(receiverId);
   if (!receiver || receiver.status === "suspended") {
+    throw ApiError.notFound("User not found");
+  }
+  // Same "not found" response as a suspended/nonexistent account — a hidden member's
+  // existence isn't revealed to someone who can't discover them normally either.
+  const receiverSettings = await UserSettings.findOne({ userId: receiverId }).select("privacy");
+  if (receiverSettings?.privacy?.discoverable === false) {
     throw ApiError.notFound("User not found");
   }
   await assertNotBlocked(senderId, receiverId, "You can't like this user.");
